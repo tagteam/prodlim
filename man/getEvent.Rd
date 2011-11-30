@@ -1,0 +1,60 @@
+\name{getEvent}
+\alias{getEvent}
+\alias{getStates}
+\title{
+Extract a column from an event history object.
+}
+\description{
+Extract a column from an event history object, as obtained with
+the function \code{\link{Hist}}.
+}
+\usage{
+getEvent(object, mode = "factor", column = "event")
+getStates(object)
+}
+%- maybe also 'usage' for other objects documented here.
+\arguments{
+  \item{object}{
+Object of class \code{"Hist"}.
+  }
+  \item{mode}{
+    Return mode. One of  \code{"numeric"}, \code{"character"}, or
+    \code{"factor"}.
+  }
+  \item{column}{
+   Name of the column to extract from the object. 
+  }
+}
+\details{
+Since objects of class \code{"Hist"} are also matrices, all columns are
+numeric or integer valued.
+To extract a correctly labeled version,
+the attribute \code{states} of the object is used to generate factor
+levels.
+}
+% \value{
+% }
+% \references{
+% %% ~put references to the literature/web site here ~
+% }
+\author{
+Thomas Alexander Gerds <tag@biostat.ku.dk> 
+}
+% \note{
+% %%  ~~further notes~~
+% }
+
+\seealso{
+  \code{\link{Hist}}
+}
+\examples{
+  dat= data.frame(time=1:5,event=letters[1:5])
+  x=with(dat,Hist(time,event))
+  ## inside integer
+  unclass(x)
+  ## extract event (the extra level "unknown" is for censored data)
+  getEvent(x)
+}
+% Add one or more standard keywords, see file 'KEYWORDS' in the
+% R documentation directory.
+\keyword{survival}

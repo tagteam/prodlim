@@ -1,0 +1,174 @@
+\name{plot.Hist}
+\alias{plot.Hist}
+\title{
+Box-arrow diagrams for multi-state models.
+}
+\description{
+  Automated plotting of the states and transitions that characterize a
+  multi states model. 
+}
+
+\usage{
+
+\method{plot}{Hist}(x,
+          nrow,
+          ncol,
+          stateLabels,
+          arrowLabels,
+          arrowLabelStyle="symbolic",
+          arrowLabelSymbol="lambda",
+          tagBoxes=FALSE,
+          startCountZero=TRUE,
+          oneFitsAll,
+          margin,
+	  cex,
+	  verbose=FALSE,
+	  ...)
+}
+
+\arguments{
+  \item{x}{
+    An object of class \code{Hist}.
+  }
+  \item{nrow}{
+    the number of graphic rows
+  }
+  \item{ncol}{
+    the number of graphic columns
+  }
+  \item{stateLabels}{
+    Vector of names to appear in the boxes (states).
+    Defaults to attr(x,"state.names").
+    The boxes can also be individually labeled by smart
+    arguments of the form \code{box3.label="diseased"}, see examples.
+  }
+  \item{arrowLabels}{
+    Vector of labels to appear in the boxes (states). One for each arrow.
+    The arrows can also be individually labeled by smart
+    arguments of the form \code{arrow1.label=paste(expression(eta(s,u)))}, see examples.
+ }
+ 
+ \item{arrowLabelStyle}{
+   Either "symbolic" for automated symbolic arrow labels, or "count" for
+   arrow labels that reflect the number of transitions in the data.
+ }
+ \item{arrowLabelSymbol}{
+   Symbol for automated symbolic arrow labels. Defaults to "lambda".
+ }
+ \item{tagBoxes}{
+   Logical. If TRUE the boxes are numbered in the upper
+   left corner. The size can be controlled with smart argument
+   boxtags.cex. The default is boxtags.cex=1.28.
+ }
+ 
+ \item{startCountZero}{
+   Control states numbers for symbolic arrow labels and box tags.
+ }
+ \item{oneFitsAll}{
+   If \code{FALSE} then boxes have individual size, depending on the size
+   of the label, otherwise all boxes have the same size dependent on the
+   largest label.
+ }
+ \item{margin}{
+   Set the figure margin via \code{par(mar=margin)}. Less than 4 values
+   are repeated.
+ }
+ \item{cex}{
+   Initial cex value for the state and the arrow \code{labels}.
+ } 
+ \item{verbose}{
+   If TRUE echo various things. 
+ }
+ 
+ \item{\dots}{
+  Smart control of arguments for the subroutines text (box label), rect (box), arrows,
+  text (arrow label). Thus the three dots can be used to draw individual
+  boxes with individual labels, 
+  arrows and arrow labels. E.g. arrow2.label="any label" changes the
+  label of the second arrow. See examples.
+}
+}
+\author{
+  Thomas A Gerds \email{tag@biostat.ku.dk}
+}
+
+\note{
+  Use the functionality of 
+  the unix program `dot' http://www.graphviz.org/About.php via R package
+  Rgraphviz to
+  obtain more complex graphs.
+}
+\seealso{
+\code{\link{Hist}}\code{\link{SmartControl}}
+}
+\examples{
+
+## A simple survival model
+\dontrun{
+
+## or simply create some data
+SurvFrame <- data.frame(time=1:10,status=sample(0:1,10,TRUE))
+SurvHist <- with(SurvFrame,Hist(time,status))
+plot(SurvHist)
+plot(SurvHist,box2.col=2,box2.label="experienced\nR user")
+plot(SurvHist,box2.col=2,box1.label="newby",box2.label="experienced\nR
+user",oneFitsAll=F,arrow1.length=.5,arrow1.label="",arrow1.lwd=4)
+
+## change the cex of all box labels:
+plot(SurvHist,box2.col=2,box1.label="newby",box2.label="experienced\nR
+user",oneFitsAll=F,arrow1.length=.5,arrow1.label="",arrow1.lwd=4,label.cex=1)
+
+## change the cex of single box labels:
+plot(SurvHist,box2.col=2,box1.label="newby",box2.label="experienced\nR
+user",oneFitsAll=FALSE,arrow1.length=.5,arrow1.label="",arrow1.lwd=4,label1.cex=1,label2.cex=2)
+
+
+## The pbc data set from the survival package
+library(survival)
+data(pbc)
+plot(with(pbc,Hist(time,status)),stateLabels=c("randomized","transplant","dead"),arrowLabelStyle="count")
+
+## two competing risks
+comprisk.model <- data.frame(time=1:3,status=1:3)
+CRHist <- with(comprisk.model,Hist(time,status,cens.code=2))
+plot(CRHist)
+plot(CRHist,arrow1.label=paste(expression(eta(s,u))))
+
+plot(CRHist,box2.label="This\nis\nstate 2",arrow1.label=paste(expression(gamma[1](t))))
+plot(CRHist,box3.label="Any\nLabel",arrow2.label="any\nlabel")
+
+## change the layout
+plot(CRHist,
+     box1.label="Alive",box2.label="Dead\n cause 1",box3.label="Dead\n cause 2",
+     arrow1.label=paste(expression(gamma[1](t)),arrow2.label=paste(expression(eta[2](t)))),
+     box1.col=2,
+     box2.col=3,
+     box3.col=4,
+     nrow=2,ncol=3,box1.row=1,box1.column=2,box2.row=2,box2.column=1,box3.row=2,box3.column=3)
+
+## more competing risks
+comprisk.model2 <- data.frame(time=1:4,status=1:4)
+CRHist2 <- with(comprisk.model2,Hist(time,status,cens.code=2))
+plot(CRHist2,box1.row=2)
+
+## illness-death models
+illness.death.frame <- data.frame(time=1:4,
+				  from=c("Disease\nfree","Disease\nfree","Diseased","Disease\nfree"),
+				  to=c("0","Diseased","Dead","Dead"))
+IDHist <- with(illness.death.frame,Hist(time,event=list(from,to)))
+plot(IDHist)
+
+## illness-death with recovery
+illness.death.frame2 <- data.frame(time=1:5,from=c("Disease\nfree","Disease\nfree","Diseased","Diseased","Disease\nfree"),to=c("0","Diseased","Disease\nfree","Dead","Dead"))
+IDHist2 <- with(illness.death.frame2,Hist(time,event=list(from,to)))
+plot(IDHist2)
+
+## 4 state model
+x=data.frame(from=c(1,2,1,3,4),to=c(2,1,3,4,1),time=1:5)
+y=with(x,Hist(time=time,event=list(from=from,to=to)))
+plot(y)
+
+}
+}
+
+\keyword{survival}
