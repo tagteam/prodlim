@@ -7,7 +7,7 @@ Quantiles for Kaplan-Meier and Aalen-Johannsen estimates.
   Quantiles for Kaplan-Meier and Aalen-Johannsen estimates.
 }
 \usage{
-quantile.prodlim(x, q, ...)
+\method{quantile}{prodlim}(x, q, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

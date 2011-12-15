@@ -46,7 +46,7 @@ lifeTab.competing.risks <- function(object,times,cause,newdata,stats,intervals=F
       start <- min(min(object$time),0)-.1
       lower <- c(start,times[-length(times)])
       upper <- times
-      ## lagTimes <- c(min(min(object$time),0)-.1 , times[-length(times)])
+      lagTimes <- c(min(min(object$time),0)-.1 , times[-length(times)])
       if (is.null(object$clustervar)){
         ## only one column in n.event and n.risk 
         xxx <- .C("life_table",pred.nrisk=integer(Ntimes*Nstrata),pred.nevent=integer(Ntimes*Nstrata),pred.nlost=integer(Ntimes*Nstrata),nrisk=as.integer(object$n.risk),nevent=as.integer(object$n.event[[cc]]),nlost=as.integer(object$n.lost),as.double(lower),as.double(upper),as.double(object$time),as.integer(object$first.strata[findex]),as.integer(object$size.strata[findex]),as.integer(Nstrata),as.integer(Ntimes),NAOK=FALSE,PACKAGE="prodlim")

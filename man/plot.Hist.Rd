@@ -17,6 +17,7 @@ Box-arrow diagrams for multi-state models.
           arrowLabels,
           arrowLabelStyle="symbolic",
           arrowLabelSymbol="lambda",
+          changeArrowLabelSide,
           tagBoxes=FALSE,
           startCountZero=TRUE,
           oneFitsAll,
@@ -54,6 +55,10 @@ Box-arrow diagrams for multi-state models.
  }
  \item{arrowLabelSymbol}{
    Symbol for automated symbolic arrow labels. Defaults to "lambda".
+ }
+ \item{changeArrowLabelSide}{
+   A vector of mode logical (TRUE,FALSE) one for each arrow to change
+   the side of the arrow on which the label is placed. 
  }
  \item{tagBoxes}{
    Logical. If TRUE the boxes are numbered in the upper

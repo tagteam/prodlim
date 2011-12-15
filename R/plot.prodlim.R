@@ -34,6 +34,7 @@ plot.prodlim <- function(x,
   }
   # }}}
   # {{{  extracting a list of lines to draw
+
   cens.type <- x$cens.type    # uncensored, right or interval censored
   if (cens.type=="intervalCensored") confint <- FALSE
   if (cens.type=="intervalCensored") atrisk <- FALSE
@@ -102,7 +103,7 @@ plot.prodlim <- function(x,
   }
 
   # }}}
-  # {{{  getting arguments for plot, atrisk, axes, legend, confint, marktime
+  # {{{  getting default arguments for plot, atrisk, axes, legend, confint, marktime
 
   if (missing(ylab)) ylab <- switch(type,"surv"=ifelse(x$reverse==TRUE,"Censoring probability","Survival probability"),"cuminc"="Cumulative incidence","hazard"="Cumulative hazard")
   if (missing(xlab)) xlab <- "Time"
@@ -115,23 +116,22 @@ plot.prodlim <- function(x,
   if (length(lty) < nlines) lty <- rep(lty, nlines)
   if (length(col) < nlines) col <- rep(col, nlines)
   
-  background.DefaultArgs <- list(xlim=xlim,
-                                 ylim=ylim,
-                                 horizontal=seq(0,1,.25),
-                                 vertical=NULL,
-                                 bg="white",
-                                 fg="gray88")
+  background.DefaultArgs <- list(xlim=xlim,ylim=ylim,horizontal=seq(0,1,.25),vertical=NULL,bg="white",fg="gray88")
   axis1.DefaultArgs <- list()
   axis2.DefaultArgs <- list(at=seq(0,1,.25),side=2)
   lines.DefaultArgs <- list(type="s")
   plot.DefaultArgs <- list(x=0,y=0,type = "n",ylim = ylim,xlim = xlim,xlab = xlab,ylab = ylab)
-  marktime.DefaultArgs <- list(x=Y,
-                               nlost=lapply(sumX,function(x)x[,"n.lost"]),
-                               times=plot.times,
-                               pch="I",
-                               col=col)
+  marktime.DefaultArgs <- list(x=Y,nlost=lapply(sumX,function(x)x[,"n.lost"]),times=plot.times,pch="I",col=col)
   atrisk.DefaultArgs <- list(x=x,newdata=newdata,interspace=1,dist=.3,col=col,times=seq(0,min(x$maxtime,xlim[2]),min(x$maxtime,xlim[2])/10))
-  legend.DefaultArgs <- list(legend=names(Y),lwd=lwd,col=col,lty=lty,cex=1.5,bty="n",y.intersp=1.3,trimnames=FALSE,x="topright")
+  legend.DefaultArgs <- list(legend=names(Y),
+                             lwd=lwd,
+                             col=col,
+                             lty=lty,
+                             cex=1.5,
+                             bty="n",
+                             y.intersp=1.3,
+                             trimnames=TRUE,
+                             x="topright")
   confint.DefaultArgs <- list(x=x,newdata=newdata,type=type,citype="shadow",times=plot.times,cause=cause,density=55,col=col[1:nlines],lwd=rep(2,nlines),lty=rep(3,nlines))
 
   # }}}
@@ -160,6 +160,7 @@ plot.prodlim <- function(x,
 
 # }}}
   # {{{  setting margin parameters 
+
   if (atrisk==TRUE){
     oldmar <- par()$mar
     if (missing(automar) || automar==T){
@@ -174,6 +175,7 @@ plot.prodlim <- function(x,
       par(mar=newmar)
     }
   }
+
   # }}}
   # {{{  plot and backGround
   if (!add) {
@@ -250,6 +252,7 @@ plot.prodlim <- function(x,
 
     if (smartA$legend$trimnames==TRUE){
       smartA$legend$legend <- sapply(strsplit(names(Y),"="),function(x)x[[2]])
+      smartA$legend$title <- unique(sapply(strsplit(names(Y),"="),function(x)x[[1]]))
     }
     smartA$legend <- smartA$legend[-match("trimnames",names(smartA$legend))]
     save.xpd <- par()$xpd

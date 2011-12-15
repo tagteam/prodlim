@@ -82,8 +82,8 @@ void prodlim(double *y,
 	v2 = extra_double + *NS + *NS + *NS;
 	prodlim_comprisk(y,status,cause,NS,time,nrisk,event,lost,surv,cuminc,hazard,varhazard,cuminc_temp,cuminc_lag,v1,v2,&t,start,stop);
       }
-      else
-	Rprintf("Unknown model");
+      /* else */
+	/* Rprintf("Unknown model"); */
     start+=size[u];
     size_strata[u] = t - size_temp;
     first_strata[u] = t + 1 - size_strata[u];

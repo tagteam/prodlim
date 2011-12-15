@@ -104,25 +104,25 @@ int main( int argc, char* argv[] ) {
   m     = 10;
 
   /* Resample: neu durchmischen. Ziehen ohne Zurücklegen. */
-  printf( "Ziehen ohne Zurücklegen...\n\n" );
+  /* printf( "Ziehen ohne Zurücklegen...\n\n" ); */
 
   shake( start, stop, 0, m, &res );
 
-  for( i = 0; i < m; i++ ) {
-    printf( "%d: INDEX: %d\n", i, res[i] );
-  }
+  /* for( i = 0; i < m; i++ ) { */
+    /* printf( "%d: INDEX: %d\n", i, res[i] ); */
+  /* } */
 
   /* Wichtisch: dynamischer Speicher freigeben. */
   free( res );
 
-  printf( "\n\nZiehen mit Zurücklegen...\n\n" );
+  /* printf( "\n\nZiehen mit Zurücklegen...\n\n" ); */
 
   m = 0;   /* Keine Anzahlsbeschränkung. */
   shake( start, stop, 1, m, &res );
 
-  for( i = 0; i < ( ( m > 0 ) ? m : ( stop - start ) ); i++ ) {
-    printf( "%d: INDEX: %d\n", i, res[i] );
-  }
+  /* for( i = 0; i < ( ( m > 0 ) ? m : ( stop - start ) ); i++ ) { */
+    /* printf( "%d: INDEX: %d\n", i, res[i] ); */
+  /* } */
 
   free( res );
 }

@@ -5,6 +5,7 @@ plot.Hist <- function(x,
                       arrowLabels,
                       arrowLabelStyle="symbolic",
                       arrowLabelSymbol='lambda',
+                      changeArrowLabelSide,
                       tagBoxes=FALSE,
                       startCountZero=TRUE,                      
                       oneFitsAll,
@@ -171,7 +172,14 @@ plot.Hist <- function(x,
   arrowDefaults <- data.frame(name=paste("arrow",1:N,sep=""),code=2,lwd=1,headoffset=strwidth("ab",cex=arrowLabel.cex),length=.13,stringsAsFactors=FALSE)
   arrowDefaults <- cbind(arrowDefaults,ordered.transitions)
   ## arrowlabels
-  arrowlabelDefaults <- data.frame(name=paste("arrowlabel",1:N,sep=""),label=arrowLabelStyle,x=NA,y=NA,stringsAsFactors=FALSE,cex=arrowLabel.cex)
+  if (missing(changeArrowLabelSide))
+    changeArrowLabelSide <- rep(FALSE,N)
+  arrowlabelDefaults <- data.frame(name=paste("arrowlabel",1:N,sep=""),
+                                   label=arrowLabelStyle,
+                                   x=NA,
+                                   y=NA,
+                                   stringsAsFactors=FALSE,
+                                   cex=arrowLabel.cex)
   arrowlabelDefaults <- cbind(arrowlabelDefaults,ordered.transitions)
 
   arrowlabelDefaults$numfrom <- factor(arrowlabelDefaults$from,levels=states,labels=numstateLabels)
@@ -312,7 +320,6 @@ plot.Hist <- function(x,
                             cex=boxLabelCex)
   # }}}
   # {{{ compute arrow positions
-
   doubleArrow <- match(paste(arrowDefaults[,"to"],arrowDefaults[,"from"]),paste(arrowDefaults[,"from"],arrowDefaults[,"to"]),nomatch=0)
   arrowDefaults <- cbind(arrowDefaults,doubleArrow)
   arrowList <- for (trans in 1:N){
@@ -356,6 +363,9 @@ plot.Hist <- function(x,
     offset <- strwidth(".",cex=arrowLabel.cex)
     ArrowMid <- (to+from)/2
     ## points(x=ArrowMid[1],y=ArrowMid[2],col=3,pch=16)
+    if (changeArrowLabelSide[trans]==TRUE)
+    ArrowLabelPos <- ArrowMid - sign(PerDir) * c(offset,offset)
+    else
     ArrowLabelPos <- ArrowMid + sign(PerDir) * c(offset,offset)
     try1 <- try(mode((arrowLabels[[trans]])[2])[[1]]=="call",silent=TRUE)
     ## try2 <- try(as.character(arrowLabels[[trans]])[[1]]=="paste",silent=TRUE)
@@ -370,6 +380,9 @@ plot.Hist <- function(x,
     ## relative label width 
     labelWidth <-  strwidth(lab,cex=arrowlabelDefaults[trans,"cex"])
     ## shift further according to label height and width in perpendicular direction
+    if (changeArrowLabelSide[trans]==TRUE)
+      ArrowLabelPos <- ArrowLabelPos-sign(PerDir)*c(labelWidth/2,labelHeight/2)
+    else
     ArrowLabelPos <- ArrowLabelPos+sign(PerDir)*c(labelWidth/2,labelHeight/2)
     arrowlabelDefaults[trans,"x"] <- ArrowLabelPos[1] 
     arrowlabelDefaults[trans,"y"] <- ArrowLabelPos[2]
@@ -396,9 +409,11 @@ plot.Hist <- function(x,
 
   # }}}
   # {{{  draw the boxes
+
   for (i in 1:NS) {
     suppressWarnings(do.call("rect",smartArgs[[paste("box",i,sep="")]]))
   }
+
   # }}}
   # {{{  label the boxes
   
