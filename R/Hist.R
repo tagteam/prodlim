@@ -287,6 +287,7 @@ subset.Hist <- function(x,subset,select,drop){
     xx <- x
     class(xx) <- "matrix"
     xx <- xx[i,,drop=drop]
+    class(xx) <- "Hist"    
     attr(xx,"class") <- attr(x,"class")
     attr(xx,"states") <- attr(x,"states")
     attr(xx,"model") <- attr(x,"model")
