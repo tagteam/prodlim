@@ -16,7 +16,7 @@ confInt <- function(x,
   if (x$model=="competing.risks" && x$covariate.type>1) sumx <- sumx[[1]]
   nlines <- length(sumx)
   ci <- lapply(sumx,function(u){
-    uu <- data.frame(u[,c("time","lower","upper")])
+    uu <- data.frame(u[,c("time","lower","upper"),drop=FALSE])
     uu=uu[!is.na(uu$lower),]
     # ----------remove confidence limits before the first event----------
     est <- u[!is.na(u[,"lower"]),type]

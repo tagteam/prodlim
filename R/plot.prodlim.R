@@ -123,30 +123,21 @@ plot.prodlim <- function(x,
   plot.DefaultArgs <- list(x=0,y=0,type = "n",ylim = ylim,xlim = xlim,xlab = xlab,ylab = ylab)
   marktime.DefaultArgs <- list(x=Y,nlost=lapply(sumX,function(x)x[,"n.lost"]),times=plot.times,pch="I",col=col)
   atrisk.DefaultArgs <- list(x=x,newdata=newdata,interspace=1,dist=.3,col=col,times=seq(0,min(x$maxtime,xlim[2]),min(x$maxtime,xlim[2])/10))
-  legend.DefaultArgs <- list(legend=names(Y),
-                             lwd=lwd,
-                             col=col,
-                             lty=lty,
-                             cex=1.5,
-                             bty="n",
-                             y.intersp=1.3,
-                             trimnames=TRUE,
-                             x="topright")
+  legend.DefaultArgs <- list(legend=names(Y),lwd=lwd,col=col,lty=lty,cex=1.5,bty="n",y.intersp=1.3,trimnames=!match("legend.legend",names(allArgs),nomatch=0),x="topright")
   confint.DefaultArgs <- list(x=x,newdata=newdata,type=type,citype="shadow",times=plot.times,cause=cause,density=55,col=col[1:nlines],lwd=rep(2,nlines),lty=rep(3,nlines))
 
   # }}}
   # {{{  backward compatibility
-
-  if (match("legend.args",names(args),nomatch=FALSE)){
-    legend.DefaultArgs <- c(args[[match("legend.args",names(args),nomatch=FALSE)]],legend.DefaultArgs)
+  if (match("legend.args",names(allArgs),nomatch=FALSE)){
+    legend.DefaultArgs <- c(args[[match("legend.args",names(allArgs),nomatch=FALSE)]],legend.DefaultArgs)
     legend.DefaultArgs <- legend.DefaultArgs[!duplicated(names(legend.DefaultArgs))]
   }
-  if (match("confint.args",names(args),nomatch=FALSE)){
-    confint.DefaultArgs <- c(args[[match("confint.args",names(args),nomatch=FALSE)]],confint.DefaultArgs)
+  if (match("confint.args",names(allArgs),nomatch=FALSE)){
+    confint.DefaultArgs <- c(args[[match("confint.args",names(allArgs),nomatch=FALSE)]],confint.DefaultArgs)
     confint.DefaultArgs <- confint.DefaultArgs[!duplicated(names(confint.DefaultArgs))]
   }
-  if (match("atrisk.args",names(args),nomatch=FALSE)){
-    atrisk.DefaultArgs <- c(args[[match("atrisk.args",names(args),nomatch=FALSE)]],atrisk.DefaultArgs)
+  if (match("atrisk.args",names(allArgs),nomatch=FALSE)){
+    atrisk.DefaultArgs <- c(args[[match("atrisk.args",names(allArgs),nomatch=FALSE)]],atrisk.DefaultArgs)
     atrisk.DefaultArgs <- atrisk.DefaultArgs[!duplicated(names(atrisk.DefaultArgs))]
   }
   smartA <- SmartControl(call=  list(...),
@@ -247,11 +238,9 @@ plot.prodlim <- function(x,
   }
   # }}}
   # {{{  legend
-
   if(legend==TRUE && !add && !is.null(names(Y))){
-
     if (smartA$legend$trimnames==TRUE){
-      smartA$legend$legend <- sapply(strsplit(names(Y),"="),function(x)x[[2]])
+      smartA$legend$legend <- sapply(strsplit(smartA$legend$legend,"="),function(x)x[[2]])
       smartA$legend$title <- unique(sapply(strsplit(names(Y),"="),function(x)x[[1]]))
     }
     smartA$legend <- smartA$legend[-match("trimnames",names(smartA$legend))]

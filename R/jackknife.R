@@ -64,17 +64,27 @@ leaveOneOut.survival <- function(object,times,lag=FALSE,...){
   ##       at risk. need the position of obstime.k in time ...
   ## pos <- match(obstimes,time)
   ## if (useC==TRUE){
-  loo <- .C("loo_surv",Y = as.double(Y),D=as.double(D),time=as.double(time),obsT=as.double(obstimes),status=as.double(status),S=double(NU*N),N=as.integer(N),NT=as.integer(NU),DUP=FALSE,PACKAGE="prodlim")$S
+  loo <- .C("loo_surv",
+            Y = as.double(Y),
+            D=as.double(D),
+            time=as.double(time),
+            obsT=as.double(obstimes),
+            status=as.double(status),
+            S=double(NU*N),
+            N=as.integer(N),
+            NT=as.integer(NU),
+            DUP=FALSE,
+            PACKAGE="prodlim")$S
   out <- matrix(loo,nrow=N,ncol=NU,byrow=FALSE)
   ## }
   ## else{
-  ## pos <- sindex(jump.times=time,eval.times=obstimes)
-  ## loo <- do.call("rbind",lapply(1:N,function(k){
+  pos <- sindex(jump.times=time,eval.times=obstimes)
+  ## loo2 <- do.call("rbind",lapply(1:N,function(k){
   ## Dk <- D
   ## if (status[k]==1) Dk[pos[k]] <- Dk[pos[k]]-1
   ## Yk <- Y-c(rep(1,pos[k]),rep(0,NU-pos[k]))
-  ## cumprod(1-Dk/Yk)
-  ## }))}
+  ## cumprod(1-Dk/Yk)}))
+  ## }
   ## out <- loo
   if (!missing(times)){
     found <- sindex(jump.times=time,eval.times=times)+1
@@ -114,6 +124,7 @@ leaveOneOut.competing.risks <- function(object,times,cause,...){
   ## idea: see leaveOneOut.survival
   ## browser()
   ## if (useC==TRUE){
+  print(cbind(time=time,Y=Y,D=D))
   loo <- .C("loo_comprisk",
             Y = as.double(Y),
             D=as.double(D),

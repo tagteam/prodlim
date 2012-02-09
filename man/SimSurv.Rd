@@ -197,8 +197,28 @@ sim.dat<-SimSurv(N=500,
 		 cens.baseline=cens.base,
 		 verbose=F)
 
+## adjusting the censoring percentage
+## for a given survival setting
 
+SNP1 <- rbinom(181,2,.3)
+stage <- rbinom(181,2,.5)
+setup  <- list(N=181,surv.baseline=1/100, cova=list(a=SNP1,b=stage), surv.coef=c(1.3,1.8), cens.baseline=1/100)
+d <- do.call("SimSurv",setup)
+set30 <- prodlim:::find.baseline(x=.3,setup)
+d30 <- do.call("SimSurv",set30)
+set70 <- prodlim:::find.baseline(x=.7,setup)
+d70 <- do.call("SimSurv",set70)
 
+## to visulize the shape of the censoring 
+## distribution do this:
+
+plot(prodlim(Hist(time,status)~1,data=d30,rev=TRUE))
+plot(prodlim(Hist(time,status)~1,data=d70,rev=TRUE))
+
+## what matters is (not the mean censoring time but)
+## the support of the censoring distribution,
+## that is the time region where the probability of
+## being uncensored is different from zero
 
 
 }

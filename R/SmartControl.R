@@ -29,7 +29,7 @@ SmartControl <- function(call,
   }
   if (verbose==TRUE){
     allKeysRegexp <- paste("^",keys,split,sep="",collapse="|")
-    notIgnored <- grep(allKeysRegexp,names(SmartArgs),val=FALSE,ignore.case=TRUE)
+    notIgnored <- grep(allKeysRegexp,names(SmartArgs),value=FALSE,ignore.case=TRUE)
     Ignored <- names(SmartArgs)[-notIgnored]
     SmartArgs <- SmartArgs[notIgnored]
     if (length(Ignored)>0){
@@ -78,7 +78,7 @@ SmartControl <- function(call,
   # {{{ loop over keys
   keyArgList <- lapply(keys,function(k){
     keyRegexp <- paste("^",k,split,sep="")
-    foundArgs <- grep(keyRegexp,names(SmartArgs),val=TRUE,ignore.case=TRUE)
+    foundArgs <- grep(keyRegexp,names(SmartArgs),value=TRUE,ignore.case=TRUE)
     if (length(foundArgs)>0){
       keyArgs <- SmartArgs[foundArgs]
       if (ignore.case)

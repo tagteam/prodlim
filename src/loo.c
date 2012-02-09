@@ -18,20 +18,27 @@ void loo_surv(double *Y,
   int k, t;
   double na,pl;
   for (k=0; k<*N;k++){
+    /* Rprintf("\n"); */
     /* compute the Nelson-Aalen estimate */
     pl=1;
     for (t=0; t<*NT;t++){
       if (obsT[k]>time[t]){
-	/* decrease the number at risk */
+	/* decrease the number at risk
+	   because individual k was at risk
+	   at time[t]
+	 */
 	na = D[t]/(Y[t]-1);
       }
       else{
 	if (obsT[k]==time[t]){
 	  /*
-	    maybe decrease the number of events,
-	    but not the number at risk
+	    decrease the number of events
+	    if k was an event,
+	    and decrease the number at risk
+	    because k was in the risk set at
+	    time[t]
 	  */
-	  na = (D[t]-status[k])/Y[t];
+	  na = (D[t]-status[k])/(Y[t]-1);
 	}
 	else{
 	  /* do nothing */
@@ -41,6 +48,7 @@ void loo_surv(double *Y,
       /* compute the product-limit estimate */
       pl *= (1-na);
       S[k+(*N)*t]=pl;
+      /* Rprintf("t=%d\tk=%d\tD[t]=%1.2f\tY[t]=%1.2f\tna=%1.2f\tS[k](t)=%1.2f\n",t,k,D[t],Y[t],na,S[k+(*N)*t]); */
     }
   }
 }
@@ -61,16 +69,21 @@ void loo_comprisk(double *Y,
     aj=0;
     for (t=0; t<*NT;t++){
       if (obsT[k]>time[t]){
-	/* decrease the number at risk */
+	/* decrease the number at risk
+	   because k was in the risk set at time[t]
+	*/
 	na = D[t]/(Y[t]-1);
       }
       else{
 	if (obsT[k]==time[t]){
 	  /*
-	    maybe decrease the number of events,
-	    but not the number at risk
+	    decrease the number of events
+	    if k was an event,
+	    and decrease the number at risk
+	    because k was in the risk set at
+	    time[t]
 	  */
-	  na = (D[t]-status[k])/Y[t];
+	  na = (D[t]-status[k])/(Y[t]-1);
 	}
 	else{
 	  /* do nothing */
