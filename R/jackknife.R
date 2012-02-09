@@ -124,7 +124,7 @@ leaveOneOut.competing.risks <- function(object,times,cause,...){
   ## idea: see leaveOneOut.survival
   ## browser()
   ## if (useC==TRUE){
-  print(cbind(time=time,Y=Y,D=D))
+  ## print(cbind(time=time,Y=Y,D=D))
   loo <- .C("loo_comprisk",
             Y = as.double(Y),
             D=as.double(D),
