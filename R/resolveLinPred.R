@@ -12,7 +12,7 @@ resolveLinPred <- function(X,coef,transform,transName="f",verbose=TRUE){
         coef <- rep(coef,NP)
       }
       else{
-        stop("Number of covariates and number of regression coefficients differ.")
+        stop(paste("Number of covariates ",NP," and number of regression coefficients ",length(coef)," differ.",sep=""))
       }
     }
     LP <- colSums(coef * t(X))

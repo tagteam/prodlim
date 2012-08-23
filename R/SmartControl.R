@@ -63,7 +63,6 @@ SmartControl <- function(call,
     replaceDefaults <- rep(FALSE,length(keys))
     names(replaceDefaults) <- keys
   }
-  
   # }}}
   # {{{ forced arguments
   keyForced <- vector(mode="list",length=length(keys))

@@ -53,7 +53,7 @@ plot.Hist <- function(x,
     }
   }
   ## forcedLabels
-  thecall <- match.call(expand=TRUE)
+  thecall <- match.call(expand.dots=TRUE)
   labelhits <- match(paste("box",1:NS,".label",sep=""),names(thecall),nomatch=0)
   for (i in 1:NS){
     if (labelhits[i]!=0)

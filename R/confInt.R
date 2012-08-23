@@ -12,8 +12,9 @@ confInt <- function(x,
   ## if (citype=="shadow" && length(times)>100 && exact==FALSE)
   ## times <- seq(min(times),max(times),diff(range(times)/100))
   sumx <- summary(x,times=times,newdata=newdata,cause=cause,verbose=FALSE,surv=ifelse(type=="cuminc",FALSE,TRUE))$table
-  if (x$model=="survival" && x$covariate.type==1) sumx <- list(sumx)
   if (x$model=="competing.risks" && x$covariate.type>1) sumx <- sumx[[1]]
+  ## if (x$model=="survival" && x$covariate.type==1) sumx <- list(sumx)
+  if (!is.list(sumx)) sumx <- list(sumx)
   nlines <- length(sumx)
   ci <- lapply(sumx,function(u){
     uu <- data.frame(u[,c("time","lower","upper"),drop=FALSE])

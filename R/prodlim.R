@@ -26,7 +26,7 @@
   # }}}
   # {{{  find the data
   call <- match.call()
-  m <- match.call(expand = FALSE)
+  m <- match.call(expand.dots = FALSE)
   m <- m[match(c("","formula","data","subset","na.action"),names(m),nomatch = 0)]
   special <- c("strata", "NN","cluster","dummy")
   if (missing(data)) Terms <- terms(formula, special)

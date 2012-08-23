@@ -7,12 +7,31 @@ SimCompRisk <- function(N,
   # {{{ process arguments  
   cumincNames <- paste("cuminc",1:NC,sep="")
   default.cuminc.args <- lapply(cumincNames,function(n){
-    list(surv.model="Cox-Weibull",shape=1,baseline=1,link="exp",coef=c(1,-1),transform=NULL)
+    list(surv.model="Cox-Weibull",
+         shape=1,
+         baseline=1,
+         link="exp",
+         coef=c(1,-1),
+         transform=NULL)
   })
   names(default.cuminc.args) <- cumincNames
   default.cens.args <- list(model="Cox-exponential",baseline=1/100,link="exp",max=NULL,type="right",coef=NULL,transform=NULL)
-  default.cova.list <- list(X1=list("rnorm",mean=0,sd=2),X2=list("rbinom",size=1,prob=.5))
-  smartA <- SmartControl(call=match.call(),keys=c(cumincNames,"cens","cova"),ignore=c("N",cumincNames,"cens","cova","verbose"),defaults=c(default.cuminc.args,list("cens"=default.cens.args,"cova"=default.cova.list)),ignore.case=FALSE,replaceDefaults=c(sapply(cumincNames,function(x)FALSE),c("cens"=FALSE,"cova"=length(grep("cova\\.*",names(match.call())))>0)),verbose=TRUE)
+  if (missing(cova))
+    default.cova.args <- list(X1=list("rnorm",mean=0,sd=2),X2=list("rbinom",size=1,prob=.5))
+  else{
+    if (length(cova)>0 && is.null(names(cova))) names(cova) <- paste("X",1:length(cova))
+    default.cova.args <- cova
+  }
+  ## replaceD <- c(lapply(cumincNames,function(x)FALSE),list("cens"=FALSE,"cova"=length(grep("cova\\.*",names(match.call())))>0))
+  replaceD <- c(lapply(cumincNames,function(x)FALSE),list("cens"=FALSE,"cova"=FALSE))
+  names(replaceD)[1:length(cumincNames)] <- cumincNames
+  smartA <- SmartControl(call=match.call(expand.dots=TRUE),
+                         keys=c(cumincNames,"cens","cova"),
+                         ignore=c("N",cumincNames,"cens","cova","verbose"),
+                         defaults=c(default.cuminc.args,list("cens"=default.cens.args,"cova"=default.cova.args)),
+                         ignore.case=FALSE,
+                         replaceDefaults=replaceD,
+                         verbose=TRUE)
   cuminc1 <- smartA[[grep("^cuminc1",names(smartA))]]
   cuminc2 <- smartA[[grep("^cuminc2",names(smartA))]]
   cens <- smartA$cens
