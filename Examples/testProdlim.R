@@ -104,6 +104,7 @@ plot(d)
 
 
 #cluster
+if (!is.function("cluster")) cluster <- function(x)x
 testdat <- data.frame(time=c(1,2,2,3,7),status=c(0,1,1,0,1),patnr=c(1,2,1,3,2))
 y <- prodlim(Hist(time,status)~cluster(patnr),data=testdat)
 

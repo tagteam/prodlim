@@ -86,7 +86,7 @@ plot.Hist <- function(x,
 
   # }}}
   # {{{ default layout: arranging the boxes
-
+  
   state.types <- sumx$states
   state.types <- state.types[state.types>0]
   if (missing(nrow))
@@ -181,7 +181,7 @@ plot.Hist <- function(x,
                                    stringsAsFactors=FALSE,
                                    cex=arrowLabel.cex)
   arrowlabelDefaults <- cbind(arrowlabelDefaults,ordered.transitions)
-
+  
   arrowlabelDefaults$numfrom <- factor(arrowlabelDefaults$from,levels=states,labels=numstateLabels)
   arrowlabelDefaults$numto <- factor(arrowlabelDefaults$to,levels=states,labels=numstateLabels)
   if (missing(arrowLabels)){
@@ -387,7 +387,6 @@ plot.Hist <- function(x,
     arrowlabelDefaults[trans,"x"] <- ArrowLabelPos[1] 
     arrowlabelDefaults[trans,"y"] <- ArrowLabelPos[2]
   }
-
   # }}}
   # {{{ Smart argument control
 
@@ -406,7 +405,6 @@ plot.Hist <- function(x,
                             ignore.case=TRUE,
                             replaceDefaults=FALSE,
                             verbose=verbose)
-
   # }}}
   # {{{  draw the boxes
 

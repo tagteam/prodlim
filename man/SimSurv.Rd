@@ -102,17 +102,12 @@ Thomas Augustin and Maria Blettner, Statistics in Medicine 2005;
 % }
 \seealso{\code{\link{prodlim}}}
 \examples{
+\dontrun{
 SimSurv(10)
-
 SurvData=SimSurv(100,cens.baseline=1/10,surv.baseline=2)
-
 Hist(SurvData$time,SurvData$status)
-
 prodlim(Hist(time,status)~1,data=SurvData)
-
 plot(prodlim(Hist(time,status)~1,data=SurvData))
-
-plot(SurvData,atrisk=FALSE,legend=FALSE)
 
 SurvData=SimSurv(100,cens.baseline=1/10,surv.baseline=2,surv.coef=c(-1,-2),
          cova=list( X.exp = list(dist = "rexp", rate = 0.4),
@@ -131,10 +126,6 @@ SurvFrame <- SimSurv(N=100,
 		     keep.uncensored=TRUE,
 		     method=c("simulation"),
 		     verbose=1)
-
-\dontrun{
-
-
 
 library(survival)
 coxph(Surv(time,status==0)~X.exp+X.bernoulli,data=SurvData)

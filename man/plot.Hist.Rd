@@ -144,12 +144,22 @@ plot(CRHist,box3.label="Any\nLabel",arrow2.label="any\nlabel")
 
 ## change the layout
 plot(CRHist,
-     box1.label="Alive",box2.label="Dead\n cause 1",box3.label="Dead\n cause 2",
-     arrow1.label=paste(expression(gamma[1](t)),arrow2.label=paste(expression(eta[2](t)))),
+     box1.label="Alive",
+     box2.label="Dead\n cause 1",
+     box3.label="Dead\n cause 2",
+     arrow1.label=paste(expression(gamma[1](t))),
+     arrow2.label=paste(expression(eta[2](t))),
      box1.col=2,
      box2.col=3,
      box3.col=4,
-     nrow=2,ncol=3,box1.row=1,box1.column=2,box2.row=2,box2.column=1,box3.row=2,box3.column=3)
+     nrow=2,
+     ncol=3,
+     box1.row=1,
+     box1.column=2,
+     box2.row=2,
+     box2.column=1,
+     box3.row=2,
+     box3.column=3)
 
 ## more competing risks
 comprisk.model2 <- data.frame(time=1:4,status=1:4)
@@ -168,10 +178,16 @@ illness.death.frame2 <- data.frame(time=1:5,from=c("Disease\nfree","Disease\nfre
 IDHist2 <- with(illness.death.frame2,Hist(time,event=list(from,to)))
 plot(IDHist2)
 
-## 4 state model
+## 4 state models
 x=data.frame(from=c(1,2,1,3,4),to=c(2,1,3,4,1),time=1:5)
 y=with(x,Hist(time=time,event=list(from=from,to=to)))
 plot(y)
+
+## moving the label of some arrows
+
+d <- data.frame(time=1:5,from=c(1,1,1,2,2),to=c(2,3,4,3,4))
+h <- with(d,Hist(time,event=list(from,to)))
+plot(h,tagBoxes=TRUE,stateLabels=c("Remission\nwithout\nGvHD","Remission\nwith\nGvHD","Relapse","Death\nwithout\nrelapse"), arrowLabelSymbol='alpha',arrowlabel3.x=35,arrowlabel3.y=53,arrowlabel4.y=54,arrowlabel4.x=68)
 
 }
 }

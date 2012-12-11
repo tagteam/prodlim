@@ -64,6 +64,7 @@ a <- prodlim(Hist(time,status)~1,data=dat)
 ## c <- prodlim(Surv(time,status)~X2,data=dat,reverse=TRUE)
 d <- prodlim(Surv(time,status)~NN(X1),data=dat,reverse=TRUE)
 
+## if (!is.function("cluster")) cluster <- function(x)x
 ## class(c) <- "dynamic"
 #cluster
 ## testdat <- data.frame(time=c(1,2,2,3,7),status=c(0,1,1,0,1),patnr=c(1,2,1,3,2))

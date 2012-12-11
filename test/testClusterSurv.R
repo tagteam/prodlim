@@ -1,4 +1,5 @@
-## library(prodlim)
+library(prodlim)
+if (!is.function("cluster")) cluster <- function(x)x
 data(clusterTestData)
 ## clusterTestData <- data.frame(midtimeX=1:4,eventX=c(0,"pn","pn",0),patientid=c(1,1,2,2),AnyCrownFracture=c(1,1,2,2))
 ## clusterTestData <- data.frame(midtimeX=1:8,eventX=c(0,"pn","pn",0,0,"pn","pn",0),patientid=c(1,1,2,2,3,3,4,4),AnyCrownFracture=c(1,1,1,1,2,2,2,2))

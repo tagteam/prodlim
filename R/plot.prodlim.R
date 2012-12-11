@@ -241,6 +241,7 @@ plot.prodlim <- function(x,
   if(legend==TRUE && !add && !is.null(names(Y))){
     if (smartA$legend$trimnames==TRUE){
       smartA$legend$legend <- sapply(strsplit(smartA$legend$legend,"="),function(x)x[[2]])
+      if (is.null(smartA$legend$title))
       smartA$legend$title <- unique(sapply(strsplit(names(Y),"="),function(x)x[[1]]))
     }
     smartA$legend <- smartA$legend[-match("trimnames",names(smartA$legend))]

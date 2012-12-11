@@ -23,6 +23,7 @@ set.seed(17)
 d <- SimSurv(10)
 d$id <-  rbinom(10,6,.5)
 f <- prodlim(Hist(time,status)~X2,data=d)
+if (!is.function("cluster")) cluster <- function(x)x
 g <- prodlim(Hist(time,status)~cluster(id),data=d)
 fg <- prodlim(Hist(time,status)~X2+cluster(id),data=d)
 summary(fg)

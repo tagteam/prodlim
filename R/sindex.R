@@ -1,7 +1,4 @@
-"sindex" <- function(jump.times,
-                     eval.times,
-                     comp="smaller",
-                     strict=FALSE) {
+"sindex" <- function(jump.times,eval.times,comp="smaller",strict=FALSE) {
   stopifnot(is.numeric(jump.times))
   stopifnot(is.numeric(eval.times))
   N <- length(jump.times)

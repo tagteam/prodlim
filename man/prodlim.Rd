@@ -95,11 +95,14 @@
   The response of \code{formula} (ie the left hand side of the `~'
   operator) specifies the model.
   
-  In two-state models -- the classic survival case -- the standard
+  In two-state models -- the classical survival case -- the standard
   Kaplan-Meier method is applied.  For this the response can be
   specified as a \code{\link{Surv}} or as a \code{\link{Hist}}
-  object. Besides a
-  slight gain of computing efficiency, there are some extensions that
+  object. The \code{\link{Hist}} function allows you to change the code
+  for censored observations,
+  e.g. \code{Hist(time,status,cens.code="4")}. 
+  
+  Besides a slight gain of computing efficiency, there are some extensions that
   are not included in the current version of the survival package:
 
   (0) The Kaplan-Meier estimator for the censoring times
@@ -186,7 +189,6 @@ plot(fit)
 summary(fit)
 
 ## --------------------clustered data---------------------
-
 dat <- data.frame(time=rexp(100),status=rbinom(100,1,.3),X=rbinom(100,1,.5),Z=rnorm(100,10,3),patnr=sample(1:10,size=100,replace=TRUE))
 fit <- prodlim(Hist(time,status)~cluster(patnr),data=dat)
 print(fit)
@@ -244,6 +246,15 @@ plot(crFit)
 summary(crFit,cause=2)
 plot(crFit,cause=2)
 
+
+# Changing the cens.code:
+dat <- data.frame(time=1:10,status=c(1,2,1,2,5,5,1,1,2,2))
+fit <- prodlim(Hist(time,status)~1,data=dat)
+print(fit$model.response)
+fit <- prodlim(Hist(time,status,cens.code="2")~1,data=dat)
+print(fit$model.response)
+plot(fit)
+plot(fit,cause="5")
 }
 
 \keyword{survival}% at least one, from doc/KEYWORDS

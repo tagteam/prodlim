@@ -4,6 +4,7 @@ SimSurv <- function(N,
                     cova,
                     verbose=1,
                     ...){
+  warning("This function is obsolete and will be replaced by corresponding functionality of the lava package.")
   # {{{  argument control
   default.surv.args <- list(model="Cox-Weibull",shape=1,baseline=1/100,link="exp",coef=c(1,-1),transform=NULL)
   default.cens.args <- list(model="Cox-exponential",baseline=1/100,link="exp",max=NULL,type="right",coef=NULL,transform=NULL)

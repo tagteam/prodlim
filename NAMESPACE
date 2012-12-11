@@ -19,7 +19,7 @@ export("Hist",
        "SmartControl",
        "SimSurv",
        "plotIllnessDeathModel",
-       ## "plotCompetingRiskModel",
+       "plotCompetingRiskModel",
        "backGround",
        "PercentAxis",
        "quantile.prodlim")
