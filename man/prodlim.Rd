@@ -189,6 +189,7 @@ plot(fit)
 summary(fit)
 
 ## --------------------clustered data---------------------
+library(survival)
 dat <- data.frame(time=rexp(100),status=rbinom(100,1,.3),X=rbinom(100,1,.5),Z=rnorm(100,10,3),patnr=sample(1:10,size=100,replace=TRUE))
 fit <- prodlim(Hist(time,status)~cluster(patnr),data=dat)
 print(fit)

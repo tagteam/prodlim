@@ -8,7 +8,7 @@
 ## `Hist' do more or less the same. The attributes and the
 ## print/summary functions are different. 
 
-require(prodlim)
+library(prodlim)
 data(pbc)
 
 sH1 <- Hist(pbc$time,pbc$status)

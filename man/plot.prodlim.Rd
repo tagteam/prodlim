@@ -138,16 +138,29 @@ plot(kmfit,percent=TRUE,axis1.at=seq(0,kmfit$maxtime,365.25/2),axis1.labels=seq(
 plot(kmfit,confint.citype="shadow",col=4,background=TRUE,background.fg="yellow",background.horizontal=seq(0,1,.25/2),background.vertical=seq(0,kmfit$maxtime,1),background.bg=c("gray88"))
 plot(kmfit,confint.citype="dots",col=4,background=TRUE,background.bg=c("white","gray88"),background.fg="gray77",background.horizontal=seq(0,1,.25/2),background.vertical=seq(0,kmfit$maxtime,1),background.bg=c("gray88","gray88"))
 
+
+
 ### Kaplan-Meier in discrete strata
 kmfitX <- prodlim(Hist(time, status) ~ X, data = dat)
 plot(kmfitX)
 plot(kmfitX,legend.x="bottomleft",atRisk.cex=1.3)
+
+\dontrun{
+## add the log-rank test p-value
+library(survival)
+library(Publish) ## get it on R-forge
+lr.pval = attr(publish(survdiff(Surv(time,status)~X,data=dat),verbose=FALSE),"p-value")
+lr.pval = format.pval(lr.pval,digits=4,eps=0.0001)
+plot(kmfitX)
+legend(x="bottomleft",title="Log-rank test",legend=paste("p=",lr.pval))
+}
 
 ### Kaplan-Meier in continuous strata
 kmfitZ <- prodlim(Hist(time, status) ~ Z, data = dat)
 plot(kmfitZ,newdata=data.frame(Z=c(5,7,12)))
 
 ### Cluster-correlated data
+library(survival)
 kmfitC <- prodlim(Hist(time, status) ~ cluster(patnr), data = dat)
 plot(kmfitC,atrisk.labels=c("Units","Patients"))
 

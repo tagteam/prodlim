@@ -22,7 +22,7 @@
 \seealso{\code{\link{prodlim}}}
 \examples{
 \dontrun{
-require(survival)
+library(survival)
 data(pbc)
 prodlim(Hist(time,status)~NN(age),data=pbc)
 }

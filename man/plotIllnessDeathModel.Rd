@@ -47,9 +47,9 @@ Thomas Alexander Gerds <tag@biostat.ku.dk>
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
-% \seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
-% }
+ \seealso{
+\code{\link{plotCompetingRiskModel}}, \code{\link{plot.Hist}}
+ }
 \examples{
 plotIllnessDeathModel()
 plotIllnessDeathModel(style=2)

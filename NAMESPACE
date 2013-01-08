@@ -24,6 +24,8 @@ export("Hist",
        "PercentAxis",
        "quantile.prodlim")
 
+import(survival,KernSmooth)
+
 S3method(print,Hist)
 S3method(summary,Hist)
 S3method(plot,Hist)

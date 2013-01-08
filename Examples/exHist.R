@@ -19,8 +19,8 @@
 ## `Hist' do more or less the same. The attributes and the
 ## print/summary functions are different. 
 
-require(survival)
-require(prodlim)
+library(survival)
+library(prodlim)
 d <- SimSurv(10)
 survHistory1 <- Surv(d$time,d$status)
 survHistory2 <- Hist(d$time,d$status)
