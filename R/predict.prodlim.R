@@ -67,7 +67,6 @@
     # conditional on factors
     # --------------------------------------------------------------------
     if (missing(newdata)) stop("Argument newdata is missing.")
-    
     NX <- NROW(object$X)
     fit.X <- object$X
     ## strata.vars <- sapply(strsplit(grep("strata",names(fit.X),val=TRUE),"strata."),function(x)x[2])

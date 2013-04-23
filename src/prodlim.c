@@ -49,8 +49,7 @@ void prodlim(double *y,
     stop=start+size[u];
     if (*model==0)
       if (*independent==1) 
-	/* shake(int start, int stop, int back, int m, int **res ) */
-	  prodlim_surv(y,status,time,nrisk,event,lost,surv,hazard,varhazard,reverse,&t,start,stop);
+	prodlim_surv(y,status,time,nrisk,event,lost,surv,hazard,varhazard,reverse,&t,start,stop);
       else{
 	double *cluster_nrisk, *adj1, *adj2, *adjvarhazard;
 	int *ncluster_lost, *ncluster_with_event, *sizeof_cluster, *nevent_in_cluster, *max_nc;

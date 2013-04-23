@@ -31,7 +31,7 @@ void prodlim_surv(double *y,
   
   for (i=(1+start);i<=stop;i++){
 
-    if (y[i]==y[i-1] && i<stop){
+    if (i<stop && y[i]==y[i-1]){
       event[s] += status[i];
       loss[s]  += (1-status[i]);
     }

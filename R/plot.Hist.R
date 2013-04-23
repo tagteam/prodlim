@@ -181,7 +181,6 @@ plot.Hist <- function(x,
                                    stringsAsFactors=FALSE,
                                    cex=arrowLabel.cex)
   arrowlabelDefaults <- cbind(arrowlabelDefaults,ordered.transitions)
-  
   arrowlabelDefaults$numfrom <- factor(arrowlabelDefaults$from,levels=states,labels=numstateLabels)
   arrowlabelDefaults$numto <- factor(arrowlabelDefaults$to,levels=states,labels=numstateLabels)
   if (missing(arrowLabels)){

@@ -62,6 +62,8 @@ a <- prodlim(Hist(time,status)~1,data=pbc)
 b <- prodlim(Surv(time,status)~1,data=pbc,reverse=TRUE)
 c <- prodlim(Surv(time,status)~edema,data=pbc,reverse=TRUE)
 d <- prodlim(Surv(time,status)~NN(age),data=pbc,reverse=TRUE)
+e <- prodlim(Surv(time,status)~NN(age)+edema,data=pbc,reverse=TRUE)
+f <- prodlim(Surv(time,status)~NN(age)+edema+sex,data=pbc,reverse=TRUE)
 
 ## class(c) <- "dynamic"
 

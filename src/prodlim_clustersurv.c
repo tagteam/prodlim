@@ -68,7 +68,7 @@ void prodlim_clustersurv(double *y,
       first check if current time is equal
       to the previous time.
     */
-    if (y[i]==y[i-1] && i<stop){
+    if (i<stop && y[i]==y[i-1]){
       nevent[s] += status[i];
       lost[s] += (1 - status[i]);
       nevent_in_cluster[cluster[i]-1] += status[i];

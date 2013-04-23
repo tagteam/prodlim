@@ -60,7 +60,7 @@ void prodlim_comprisk(double* y,
   
   for (i=(1+start);i<=stop;i++){
     /* {{{ if tie then wait */
-    if (y[i]==y[i-1] && i<stop){
+    if (i<stop && y[i]==y[i-1]){
       if (status[i]>0)
 	event[s * (*NS) + cause[i]] +=1;
       else

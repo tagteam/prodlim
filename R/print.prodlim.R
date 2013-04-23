@@ -29,11 +29,15 @@
   continuous.predictors <- x$continuous.predictors
   if (!is.null(x$cluster))
     message("\nCluster-correlated data:\n\n cluster variable: ",x$cluster,"\n")
-  
   message(#"Predictor space:\n\n",
-          switch(x$covariate.type,"No covariates",c("Discrete predictor variables: ",
-                                                    paste(discrete.predictors,collapse=", ")),
-                 c("Continuous predictors: ",continuous.predictors),c("  Discrete predictor variables: ",discrete.predictors,"\nContinuous predictor variables: ",continuous.predictors)))
+          switch(x$covariate.type,
+                 "No covariates",
+                 c("Discrete predictor variables: ", paste(discrete.predictors,collapse=", ")),
+                 c("Continuous predictors: ",continuous.predictors),
+                 c("  Discrete predictor variables: ",
+                   paste(discrete.predictors,collapse=", "),
+                   "\nContinuous predictor variables: ",
+                   continuous.predictors)))
   if (match("Hist",all.names(x$formula),nomatch=FALSE))
     summary(x$model.response,verbose=TRUE)
   else{

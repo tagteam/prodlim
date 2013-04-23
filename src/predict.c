@@ -69,8 +69,7 @@ void pred_index(int *pindex,
 	}
 	else{ /* sitting between to jump times */
 	  
-	  while (Y[t] >= time[first[i]-1 + f]
-		 && f <= size[i]-1)
+	  while (f <= size[i]-1 && Y[t] >= time[first[i]-1 + f])
 	    f++;
 	  pindex[t + i * (*NT)] = first[i] -1 + f;
 	  /* do NOT reset f because the next requested time

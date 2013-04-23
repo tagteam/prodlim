@@ -8,7 +8,7 @@
 ## print/summary functions are different. 
 
 ## require(prodlim)
-## dat <- SimSurv(100)
+dat <- SimSurv(100)
 ## sH1 <- Hist(dat$time,dat$status)
 ## sH2 <- Surv(dat$time,dat$status)
 ## stopifnot(all(unclass(sH1)==unclass(sH2)))

@@ -34,13 +34,13 @@ atRisk <- function(x,
     sumx <- unlist(sumx,recursive=FALSE)
   if (all(sapply(sumx,NCOL))==1)
     nlines <- length(sumx)
-  if (missing(line))
+  if (missing(line)){
     line <- par()$mgp[2] + dist +
-      (0:(2*nlines-1)) *interspace
+      (0:(2*nlines-1)) *interspace -(nlines-1)
+  }
   if (missing(cex)) cex <- 1
   if (missing(pos)) pos <- min(times)
   if (missing(adj)) adj <- 1.5
-  
   if (missing(labels))
     if (length(names(sumx)==nlines))
       labels <- paste("[",names(sumx),"]",sep="")

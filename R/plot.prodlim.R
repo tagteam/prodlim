@@ -68,7 +68,7 @@ plot.prodlim <- function(x,
     plot.times <- plot.times[plot.times<criticalTime]
   }
   if (missing(newdata)) newdata <- x$X
-  if (NROW(newdata)>10) newdata <- newdata[c(1,round(median(1:NROW(newdata))),NROW(newdata)),,drop=FALSE]
+  ## if (NROW(newdata)>10) newdata <- newdata[c(1,round(median(1:NROW(newdata))),NROW(newdata)),,drop=FALSE]
   
   if (length(cause)!=1){
     warning("Currently only the cumulative incidence of a single cause can be plotted in one go. Use argument add=TRUE to add the lines of the other causes. For now I use the first cause")
@@ -122,13 +122,19 @@ plot.prodlim <- function(x,
   lines.DefaultArgs <- list(type="s")
   plot.DefaultArgs <- list(x=0,y=0,type = "n",ylim = ylim,xlim = xlim,xlab = xlab,ylab = ylab)
   marktime.DefaultArgs <- list(x=Y,nlost=lapply(sumX,function(x)x[,"n.lost"]),times=plot.times,pch="I",col=col)
-  atrisk.DefaultArgs <- list(x=x,newdata=newdata,interspace=1,dist=.3,col=col,times=seq(0,min(x$maxtime,xlim[2]),min(x$maxtime,xlim[2])/10))
+  atrisk.DefaultArgs <- list(x=x,
+                             newdata=newdata,
+                             interspace=1,
+                             dist=.3,
+                             col=col,
+                             times=seq(0,min(x$maxtime,xlim[2]),min(x$maxtime,xlim[2])/10))
   legend.DefaultArgs <- list(legend=names(Y),lwd=lwd,col=col,lty=lty,cex=1.5,bty="n",y.intersp=1.3,trimnames=!match("legend.legend",names(allArgs),nomatch=0),x="topright")
   if (NCOL(newdata)>1) legend.DefaultArgs$trimnames <- FALSE
   confint.DefaultArgs <- list(x=x,newdata=newdata,type=type,citype="shadow",times=plot.times,cause=cause,density=55,col=col[1:nlines],lwd=rep(2,nlines),lty=rep(3,nlines))
 
   # }}}
   # {{{  backward compatibility
+
   if (match("legend.args",names(allArgs),nomatch=FALSE)){
     legend.DefaultArgs <- c(args[[match("legend.args",names(allArgs),nomatch=FALSE)]],legend.DefaultArgs)
     legend.DefaultArgs <- legend.DefaultArgs[!duplicated(names(legend.DefaultArgs))]
@@ -155,7 +161,7 @@ plot.prodlim <- function(x,
 
   if (atrisk==TRUE){
     oldmar <- par()$mar
-    if (missing(automar) || automar==T){
+    if (missing(automar) || automar==TRUE){
       ##        bottomMargin =  margin line (in 'mex' units) for xlab
       ##                        + distance of xlab from xaxis
       ##                        + distance of atrisk numbers from xlab
@@ -254,5 +260,4 @@ plot.prodlim <- function(x,
 
 # }}}
   invisible(x)
-
 }
