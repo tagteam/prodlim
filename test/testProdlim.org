@@ -1,0 +1,85 @@
+
+#+BEGIN_SRC R  :results output raw  :exports results  :session *R* :cache no
+library(lava)
+m <- lvm(~X1+X2+X3+eventtime+censtime+Noise)
+distribution(m,"X2") <- binomial.lvm()
+distribution(m,"X3") <- binomial.lvm()
+distribution(m,"eventtime") <- coxWeibull.lvm(scale=1/100)
+distribution(m,"censtime") <- coxWeibull.lvm(scale=1/100)
+regression(m,to="eventtime",from=c("X1","X2","X3")) <- c(0.6,-0.7,0.7)
+m <- eventTime(m,time~min(eventtime=1,censtime=0),"event")
+set.seed(17)
+d <- sim(m,200)
+d$X2 <- factor(d$X2,levels=c(0,1),labels=c("low survival","high survival"))
+d$X3 <- factor(d$X3,levels=c(0,1),labels=c("high survival","low survival"))
+#+END_SRC
+
+#+RESULTS:
+
+#+BEGIN_SRC R  :results output raw  :exports results  :session *R* :cache yes 
+library(prodlim)
+f0 <- prodlim(Hist(time,event)~1,data=d)
+f1 <- prodlim(Hist(time,event)~X1,data=d)
+f2 <- prodlim(Hist(time,event)~X2,data=d)
+f23 <- prodlim(Hist(time,event)~X2+X3,data=d)
+f123 <- prodlim(Hist(time,event)~X1+X2+X3,data=d)
+f0 <- prodlim(Surv(time,event)~1,data=d)
+f1 <- prodlim(Surv(time,event)~X1,data=d)
+f2 <- prodlim(Surv(time,event)~X2,data=d)
+f23 <- prodlim(Surv(time,event)~X2+X3,data=d)
+f123 <- prodlim(Surv(time,event)~X1+X2+X3,data=d)
+u <- Hist(time,event)~X1+X2+X3
+f123 <- prodlim(u,data=d)
+#+END_SRC
+
+#+BEGIN_SRC R :results graphics  :file "~/research/SoftWare/eventhistory/pkg/prodlim/test/prodlim-plot2.pdf" :exports results :session *R* :cache yes 
+plot(prodlim(Hist(time,event)~X2,data=d))
+#+END_SRC
+
+#+RESULTS[<2013-04-28 09:17:30> e998dd25b653b4bcf54d31ca63503fd842b848bd]:
+[[file:~/research/SoftWare/eventhistory/pkg/prodlim/test/prodlim-plot2.pdf]]
+
+#+BEGIN_SRC R :results graphics  :file "~/research/SoftWare/eventhistory/pkg/prodlim/test/prodlim-plot3.pdf" :exports results :session *R* :cache yes 
+plot(prodlim(Hist(time,event)~X3,data=d))
+#+END_SRC
+
+#+RESULTS[<2013-04-28 09:19:05> e0145e89b5c1ffc413ba6dd802e03894a641c3c2]:
+[[file:~/research/SoftWare/eventhistory/pkg/prodlim/test/prodlim-plot3.pdf]]
+
+
+
+#+BEGIN_SRC R  :results output raw  :exports results  :session *R* :cache yes 
+
+getSpecial <- function(term){
+n <- nchar(term)
+if (substr(term,n,n)==")")
+
+else term
+}
+pl <- function(formula,data){
+   cf <- as.character(formula)
+   
+}
+
+gsub("(\\w*)-(a-z)", "\\2", "sadfs-sd")
+
+gsub(".*([a-z])", "\\1", "a(b(ab))")
+
+
+pl <- function(formula,data){
+model.frame(formula,data)
+
+}
+
+#+END_SRC
+
+#+BEGIN_SRC R :results graphics  :file "~/research/SoftWare/eventhistory/pkg/prodlim/test/aj.pdf" :exports results :session *R* :cache yes 
+library(riskRegression)
+data(Melanoma)
+aj <- prodlim(Hist(time,status)~thick,data=Melanoma)
+plot(aj)
+#+END_SRC
+
+#+RESULTS[<2013-04-28 09:14:42> 8d0af189a155e48de3bf70a0111c8f4e360f1b98]:
+[[file:~/research/SoftWare/eventhistory/pkg/prodlim/test/aj.pdf]]
+
