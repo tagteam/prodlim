@@ -22,6 +22,7 @@ export("Hist",
        "plotCompetingRiskModel",
        "backGround",
        "PercentAxis",
+       "readFormula",
        "quantile.prodlim")
 
 import(survival,KernSmooth)

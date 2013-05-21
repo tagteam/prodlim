@@ -13,7 +13,7 @@
   if (missing(newdata)) newdata <- eval(x$call$data)
   surv.frame <- predict(x,newdata=newdata,time=times,level.chaos=1,mode="matrix",type="surv")
   smean <- apply(surv.frame,2,mean,na.rm=TRUE)
-  marginal.fit <- prodlim(update.formula(x$formula,"~1"),data=x$data)
+  marginal.fit <- prodlim(update.formula(formula(x$formula),"~1"),data=x$data)
   out <- marginal.fit
   out$surv <- smean
   out$covariate.type <- 1

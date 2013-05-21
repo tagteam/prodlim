@@ -73,7 +73,8 @@
     ## NN.vars <- sapply(strsplit(grep("NN",names(object$X),val=TRUE),"NN."),function(x)x[2])
     strata.vars <- object$discrete.predictors
     NN.vars <- object$continuous.predictors
-    X.formula <- delete.response(terms(object$formula))
+    X.formula <- update(formula(object$formula),NULL~.)
+    ## delete.response(terms(formula(object$formula)))
     iid <- is.null(object$clustervar)
     if (!iid){
       find.clu <- match(object$clustervar,all.vars(X.formula))

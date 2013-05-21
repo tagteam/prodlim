@@ -7,15 +7,23 @@
 ## `Hist' do more or less the same. The attributes and the
 ## print/summary functions are different. 
 
-## require(prodlim)
+library(prodlim)
+library(survival)
+set.seed(17)
 dat <- SimSurv(100)
-## sH1 <- Hist(dat$time,dat$status)
-## sH2 <- Surv(dat$time,dat$status)
-## stopifnot(all(unclass(sH1)==unclass(sH2)))
+sH1 <- Hist(dat$time,dat$status)
+sH2 <- Surv(dat$time,dat$status)
+stopifnot(all(unclass(sH1)==unclass(sH2)))
+
 ## summary(sH1)
 ## summary(sH2)
+## without(formula)
+a <- 1:10
+b <- rep(0,5)
+prodlim(Surv(a,b)~1)
 
 set.seed(10)
+dat <- SimSurv(100)
 d <- SimSurv(100)
 f <- prodlim(Hist(time,status)~1,data=d)
 sum <- summary(f,times=d$time)

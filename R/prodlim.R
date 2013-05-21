@@ -12,95 +12,94 @@
                       tol=7,
                       method=c("npmle","one.step","impute.midpoint","impute.right"),
                       exact=TRUE){
-    # {{{  check if formula is a formula
-    formula.names <- try(all.names(formula),silent=TRUE)
-    if (!(formula.names[1]=="~")
-        ||
-        (match("$",formula.names,nomatch=0)+match("[",formula.names,nomatch=0)>0)){
-      stop("Invalid specification of formula. Perhaps forgotten right hand side?\nNote that any subsetting, ie data$var or data[,\"var\"], is invalid for this function.")
-    }
-    else
-      if (!(formula.names[2] %in% c("Surv","Hist"))) stop("formula is NOT a proper survival formula,\nwhich must have a `Surv' or `Hist' object as response.")
-    # }}}
-    # {{{  find the data
-    call <- match.call()
-    m <- match.call(expand.dots = FALSE)
-    m <- m[match(c("","formula","data","subset","na.action"),names(m),nomatch = 0)]
-    m <- m[match(c("","formula","data","subset","na.action"),names(m),nomatch = 0)]
-    m[[1]]  <-  as.name("model.frame")
-    ## environment(formula) <- NULL
-    formList <- readFormula(formula,specials=c("strata", "NN","cluster"),alias=list("dummy"="strata","factor"="strata"),unspecified="unspecified")
-    m$formula <- formList$allVars
-    m <- eval(m, parent.frame())
-    if (NROW(m) == 0) stop("No (non-missing) observations")
-    rownames(m) <- NULL
-    fun <- formList$Response[[2]][[1]]
-    #  FIX for people who still use `Surv' instead of `Hist' 
-    if (as.character(fun)=="Surv")
-      formList$Response[[2]][[1]] <- as.name("Hist")
-    response <- model.response(model.frame(formula=formList$Response,data=m))
+
+  # {{{  check if formula is a formula 
+  formula.names <- try(all.names(formula),silent=TRUE)
+  if (!(formula.names[1]=="~")
+      ||
+      (match("$",formula.names,nomatch=0)+match("[",formula.names,nomatch=0)>0)){
+    stop("Invalid specification of formula. Perhaps forgotten right hand side?\nNote that any subsetting, ie data$var or data[,\"var\"], is invalid for this function.")
+  }
+  else
+    if (!(formula.names[2] %in% c("Surv","Hist"))) stop("formula is NOT a proper survival formula,\nwhich must have a `Surv' or `Hist' object as response.")
+
+  # }}}
+  # {{{  find the data
+  call <- match.call()
+  m <- match.call(expand.dots = FALSE)
+  m <- m[match(c("","formula","data","subset","na.action"),names(m),nomatch = 0)]
+  special <- c("strata", "NN","cluster","dummy")
+  if (missing(data)) Terms <- terms(formula, special)
+  else Terms <- terms(formula,special,data=data)
+  m$formula <- Terms
+  m[[1]] <- as.name("model.frame")
+  m <- eval(m, parent.frame())
+  if (NROW(m) == 0) stop("No (non-missing) observations")
+  rownames(m) <- NULL
+  response <- model.extract(m, "response")
+  #  FIX for people who use `Surv' instead of `Hist' 
+  if (match("Surv",class(response),nomatch=0)!=0){
+    attr(response,"model") <- "survival"
+    attr(response,"cens.type") <- "rightCensored"
+    ## attr(response,"entry.type") <- ""
+    model.type <- 1
+  }
+  else{
     model.type <- match(attr(response,"model"),c("survival","competing.risks","multi.states"))
-    ## estimation of censoring distribution
-    if (reverse==TRUE) model.type <- 1
-    cens.type <- attr(response,"cens.type")
-    ## stop("Response must be a survival or event history object created with `Surv' or `Hist'."))
-    #  if (force.multistate==TRUE) model.type <- 3
-    event.history <- response
-    if (cens.type!="intervalCensored"){
-      event.time.order <- order(event.history[,"time"],-event.history[,"status"])
-    }
-    else{
-      event.time.order <- order(event.history[,"L"],-event.history[,"status"])
-    }
-    # }}}
-    # {{{  covariates
-    ## cotype
-    # 1 : no covariates
-    # 2 : only strata 
-    # 3 : only continuous
-    # 4 : strata AND continuous
-    if (is.null(formList$strata)){
-      discrete.matrix <- NULL
-    } else{
-      ## discrete.matrix <- modelMatrix(formula=formList$strata$formula,data=m,intercept=NULL)
-      discrete.matrix <- model.frame(formula=formList$strata$formula,data=m)
-    }
-    if (is.null(formList$NN)){
-      continuous.matrix <- NULL
-    } else{  
-      ## continuous.matrix <- modelMatrix(formula=formList$NN$formula,data=m,intercept=NULL)
-      continuous.matrix <- model.frame(formula=formList$NN$formula,data=m)
-    }
-    if (is.null(formList$cluster)){
-      cluster.matrix <- NULL
-    } else{  
-      ## cluster.matrix <- modelMatrix(formula=formList$cluster$formula,data=m,intercept=NULL)
-      cluster.matrix <- model.frame(formula=formList$cluster$formula,data=m)
-    }
-    continuous.predictors <- all.vars(formList$NN$formula)
-    discrete.p <- sapply(names(continuous.predictors),function(u){
-      x <- rest[,u,drop=TRUE]; !is.numeric(x) || !length(unique(x))>discrete.level
-    })
-    if (!is.null(formList$unspecified)){
-      ## rest <- modelMatrix(formList$unspecified$formula,data=m,intercept=NULL)
-      rest <- model.frame(formList$unspecified$formula,data=m)
-      discrete.p <- sapply(names(rest),function(u){x <- rest[,u,drop=TRUE]; !is.numeric(x) || !length(unique(x))>discrete.level})
-      if (any(!discrete.p))
-        continuous.matrix <- if (is.null(continuous.matrix)) rest[,!discrete.p,drop=FALSE] else cbind(continuous.matrix,rest[,!discrete.p,drop=FALSE])
-      if (any(discrete.p)){
-        discrete.matrix <- if (is.null(discrete.matrix)) rest[,discrete.p,drop=FALSE] else cbind(discrete.matrix,rest[,discrete.p,drop=FALSE])
-      }
-    }
-    cotype <- 1+ 1*(!is.null(discrete.matrix)) + 2* (!is.null(continuous.matrix))
-    if (NCOL(continuous.matrix)>1) stop(paste("Currently we can not compute neighborhoods in", length(names(continuous.matrix)),"continuous dimensions."))
-    discrete.predictors <- names(discrete.matrix)
-    continuous.predictors <- names(continuous.matrix)
-    # }}}
-    # {{{  disjunct strata (discrete covariates)
+  }
+  ## estimation of censoring distribution
+  if (reverse==TRUE) model.type <- 1
+  cens.type <- attr(response,"cens.type")
+  ##          stop("Response must be a survival or event history object created with `Surv' or `Hist'."))
+  #  if (force.multistate==TRUE) model.type <- 3
+  event.history <- response
+  ## print(attributes(response))
+  ## print(cens.type)
+  if (cens.type!="intervalCensored"){
+    event.time.order <- order(event.history[,"time"],-event.history[,"status"])
+  }
+  else{
+    event.time.order <- order(event.history[,"L"],-event.history[,"status"])
+  }
   
+  # }}}
+  # {{{  covariates
+  
+  covariates <- model.specials(m,special)
+  if (length(attr(Terms,"factors"))==0){
+    cotype <- 1
+  }
+  else{
+    if (length(covariates$dummy)>0)
+      if (length(covariates$strata)>0)
+        covariates$strata <- cbind(covariates$strata,covariates$dummy)
+      else covariates$strata <- covariates$dummy
+    covariates$dummy <- NULL
+    all.varnames <- all.vars(delete.response(Terms))
+    rest <- covariates$unspecified
+    covariates$unspecified <- NULL
+    discrete.p <- sapply(names(rest),function(u){x <- rest[,u,drop=TRUE]; !is.numeric(x) || !length(unique(x))>discrete.level})
+    if (any(!discrete.p))
+      covariates$NN <- if (is.null(covariates$NN)) rest[,!discrete.p,drop=FALSE] else cbind(covariates$NN,rest[,!discrete.p,drop=FALSE])
+    if (any(discrete.p)){
+      covariates$strata <- if (is.null(covariates$strata)) rest[,discrete.p,drop=FALSE] else cbind(covariates$strata,rest[,discrete.p,drop=FALSE])
+    }
+    if (NCOL(covariates$NN)>1) stop(paste("Currently we can not compute neighborhoods in", length(names(covariates$NN)),"continuous dimensions."))
+    if (NCOL(covariates$NN)>1)
+      stop(paste("Currently we can not compute neighborhoods in",length(names(covariates$NN)),"continuous dimensions."))
+    cotype <- 1 + (!is.null(covariates$strata))*1+(!is.null(covariates$NN))*2
+  }
+  ## cotype
+  # 1 : no covariates
+  # 2 : only strata 
+  # 3 : only continuous
+  # 4 : strata AND continuous
+    
+  # }}}
+  # {{{  disjunct strata (discrete covariates)
+
   if (cotype %in% c(2,4)){
-    ## S <- do.call("paste", c(discrete.matrix, sep = "\r"))
-    S <- apply(discrete.matrix,1,paste,collapse="\r")
+    S <- do.call("paste", c(covariates$strata, sep = "\r"))
     NS <- length(unique(S))
     Sfactor <- factor(S,labels=1:NS)
     if (cens.type!="intervalCensored"){
@@ -114,20 +113,21 @@
   else{
     sorted <- event.time.order
   }
+  
   response <- response[sorted,] # sort each stratum
   
-  # }}}
+# }}}
   # {{{  overlapping neighborhoods (continuous covariates)
   
   if (cotype %in% c(3,4)){
-    Z <- continuous.matrix[sorted,,drop=TRUE]
+    Z <- covariates$NN[sorted,,drop=TRUE]
     if (cotype==3){
       nbh <- neighborhood(Z,bandwidth=bandwidth) 
       nbh.list <- list(nbh)
       bandwidth <- nbh$bandwidth
       neighbors <- nbh$neighbors
     }
-    else{ # nearest neighbors within each stratum
+    else{                               # nearest neighbors within each stratum
       nbh.list <- lapply(split(Z,Sfactor),neighborhood,bandwidth=bandwidth)
       bandwidth <- sapply(nbh.list,function(nbh)nbh$bandwidth)
       tabS <- c(0,cumsum(tabulate(Sfactor))[-NS])
@@ -136,7 +136,7 @@
     }
     response <- response[neighbors,,drop=FALSE]
   }
-
+  
 # }}}
   # {{{  bound on the number of unique time points over all strata  
 
@@ -166,34 +166,37 @@
            NU <- sum(n.unique.strata)
          })
 
-  # }}}
+# }}}
   # {{{  characterizing the covariate space
+  
+  continuous.predictors <- names(covariates$NN)
+  discrete.predictors <- names(covariates$strata)
   X <- switch(cotype,
               {#type=1
                 NULL},
               { #type=2
-                X <- data.frame(unique(discrete.matrix[sorted,,drop=FALSE]))
-                ## colnames(X) <- paste("strata",names(discrete.matrix),sep=".")
-                # colnames(X) <- names(discrete.matrix)
+                X <- data.frame(unique(covariates$strata[sorted,,drop=FALSE]))
+                ## colnames(X) <- paste("strata",names(covariates$strata),sep=".")
+                # colnames(X) <- names(covariates$strata)
                 rownames(X) <- 1:NROW(X)                
                 X
               },
               { #type=3
                 X <- unlist(lapply(nbh.list,function(x)x$values),use.names=FALSE)
                 X <- data.frame(X)
-                ## colnames(X) <- paste("NN",names(continuous.matrix),sep=".")
-                colnames(X) <- names(continuous.matrix)
+                ## colnames(X) <- paste("NN",names(covariates$NN),sep=".")
+                colnames(X) <- names(covariates$NN)
                 rownames(X) <- 1:NROW(X)                
                 X
               },
               { #type=4
-                D <- data.frame(unique(discrete.matrix[sorted,,drop=FALSE]))
-                ## colnames(D) <- paste("strata",names(discrete.matrix),sep=".")
+                D <- data.frame(unique(covariates$strata[sorted,,drop=FALSE]))
+                ## colnames(D) <- paste("strata",names(covariates$strata),sep=".")
                 D <- data.frame(D[rep(1:NS,n.unique.strata),,drop=FALSE])
                 C <- data.frame(unlist(lapply(nbh.list,function(x)x$values),use.names=FALSE))
                 X <- cbind(D,C)
-                ## colnames(X) <- c(paste("strata",names(discrete.matrix),sep="."),paste("NN",names(continuous.matrix),sep="."))
-                colnames(X) <- c(names(discrete.matrix),names(continuous.matrix))
+                ## colnames(X) <- c(paste("strata",names(covariates$strata),sep="."),paste("NN",names(covariates$NN),sep="."))
+                colnames(X) <- c(names(covariates$strata),names(covariates$NN))
                 rownames(X) <- 1:NROW(X)                
                 X
               },
@@ -202,22 +205,20 @@
                 rownames(X) <- 1:NROW(X)                
                 X
               })
-  Xlist <- list(discrete.matrix,continuous.matrix,cluster.matrix)
-  Xlist <- Xlist[!sapply(Xlist,is.null)]
-  model.matrix <- do.call("cbind",Xlist)[event.time.order,,drop=FALSE]
   ##   X <- X[do.call("order",lapply(X,function(x)x)),,drop=FALSE]
-  ## model.matrix <- cbind(discrete.matrix,continuous.matrix,cluster.matrix)[event.time.order,,drop=FALSE]
-  ## do.call("cbind",covariates[!(unlist(lapply(covariates,is.null)))])[event.time.order,,drop=FALSE]
+  model.matrix <- do.call("cbind",covariates[!(unlist(lapply(covariates,is.null)))])[event.time.order,,drop=FALSE]
+  
   event.history <- event.history[event.time.order,,drop=FALSE]
+  
   # }}}
   # {{{  cluster correlated data need an adjusted variance formula
-  clustered <- (length(cluster.matrix)>0)
+  clustered <- (length(covariates$cluster)>0)
   if (clustered)
-    clustervar <- all.vars(formList$cluster$formula)
+    clustervar <- names(covariates$cluster)
   else
     clustervar <- NULL
   if (clustered){
-    cluster <- cluster.matrix[sorted,,drop=TRUE]
+    cluster <- covariates$cluster[sorted,,drop=TRUE]
     if (cotype==1){
       NC <- length(unique(cluster))
       cluster <- factor(cluster,labels=1:NC)
@@ -277,8 +278,8 @@
     }
   }
   else{
-  # }}}
-  # {{{ competing.risks model
+    # }}}
+    # {{{ competing.risks model
     if (model.type==2){
       states <- attr(response,"states")
       E <- response[,"event"]-1 # for the c routine

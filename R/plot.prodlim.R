@@ -68,8 +68,8 @@ plot.prodlim <- function(x,
     plot.times <- plot.times[plot.times<criticalTime]
   }
   if (missing(newdata)) newdata <- x$X
-  ## if (NROW(newdata)>10) newdata <- newdata[c(1,round(median(1:NROW(newdata))),NROW(newdata)),,drop=FALSE]
-  
+  if (NROW(newdata)>10) newdata <- newdata[c(1,round(median(1:NROW(newdata))),NROW(newdata)),,drop=FALSE]
+  ## print(dim(newdata))
   if (length(cause)!=1){
     warning("Currently only the cumulative incidence of a single cause can be plotted in one go. Use argument add=TRUE to add the lines of the other causes. For now I use the first cause")
     cause <- cause[1]

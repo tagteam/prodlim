@@ -38,12 +38,5 @@
                    paste(discrete.predictors,collapse=", "),
                    "\nContinuous predictor variables: ",
                    continuous.predictors)))
-  if (match("Hist",all.names(x$formula),nomatch=FALSE))
-    summary(x$model.response,verbose=TRUE)
-  else{
-    if(match("Surv",all.names(x$formula),nomatch=FALSE)){
-      Survobject <- x$model.response
-      summary(Hist(Survobject[,"time"],Survobject[,"status"]),verbose=TRUE)
-    }
-  }
+  summary(x$model.response,verbose=TRUE)
 }

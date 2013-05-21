@@ -9,12 +9,10 @@ readFormula <- function(formula,
   ff <- as.character(formula)
   # }}}
   # {{{ extract the response = lhs
-  lhs <- ff[[2]]
-  ## FIXME: cannot set environment to NULL because
-  ##        then model.frame cannot find function Hist
-  ## rForm <- formula(paste(lhs,"~1",sep=""),env=NULL)
-  rForm <- bquote(.(formula(paste(lhs,"~1",sep=""))))
-  formList <- list(Response=rForm)
+  ## lhs <- ff[[2]]
+  ## rForm <- paste(lhs,"~1",sep="")
+  ## as.character(formula(paste(lhs,"~1",sep="")))
+  formList <- list(Response=ff[[2]])
   # }}}
   # {{{ split the rhs into terms
   rhs <- ff[[3]]
@@ -130,7 +128,8 @@ readFormula <- function(formula,
   specialList <- lapply(specials,function(spec){
     found <- specialNames==spec
     if (any(found)){
-      sform <- bquote(.(formula(paste("~",paste(specialVarnames[found],collapse="+")))))
+      ## sform <- as.character(formula(paste("~",paste(specialVarnames[found],collapse="+"))))
+      sform <- paste("~",paste(specialVarnames[found],collapse="+"))
       if (length(specialArguments[found])>0){
         list(formula=sform,specialArguments=specialArgumentList[found])
       }
@@ -150,19 +149,20 @@ readFormula <- function(formula,
     rhsVars <- c(rhsVars,unSpecVars)
     if (length(formList[[unspecified]])>0){
       oldform <- formList[[unspecified]]$formula
-      formList[[unspecified]]$formula <- bquote(.(update.formula(oldform,paste("~ . + ",paste(unSpecVars,collapse="+")))))
+      ## formList[[unspecified]]$formula <- as.character(update.formula(oldform,paste("~ . + ",paste(unSpecVars,collapse="+"))))
+      formList[[unspecified]]$formula <- paste("~",paste(c(all.vars(formula(oldform)),unSpecVars),collapse="+"))
     }
     else{
-      unSpecForm <- bquote(.(formula(paste("~",paste(unSpecVars,collapse="+")))))
+      unSpecForm <- paste("~",paste(unSpecVars,collapse="+"))
       unSpecEl <- list(list(formula=unSpecForm,specialArguments=NULL))
       names(unSpecEl) <- unspecified
       formList <- c(formList[-match(unspecified,names(formList),nomatch=length(formList)+1)],unSpecEl)
     }
   }
   # }}}  
-  # {{{ collect all variables
-  allForm <- bquote(.(formula(paste("~",paste(c(all.vars(rForm),rhsVars),collapse="+")))))
-  formList <- c(formList,list(allVars=allForm))
+  # {{{ collect all rhs variables
+  rhsForm <- paste("~",paste(rhsVars,collapse="+"))
+  formList <- c(formList,list(allVars=rhsForm))
   # }}}
   formList
 }
