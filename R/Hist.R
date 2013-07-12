@@ -226,8 +226,11 @@
     
     states <- as.character(states[states!=cens.code])
     ## states <- states[match(state.order,states)]
-    if (cens.code %in% levels(from)) stop(paste("The Cens.code",cens.code," identifies censored data, but is found amoung the `from' state of some transitions")
-
+    if (cens.code %in% levels(from)){
+      stop(paste("The Cens.code",
+                 cens.code,
+                 " identifies censored data, but is found amoung the `from' state of some transitions"))
+    } 
     if (cens.type=="intervalCensored"){
       if (entry.type=="intervalCensored")
         history <- cbind(U=U,V=V,L=L,R=R,status=status,from=as.integer(factor(from,levels=c(states,cens.code))),to=as.integer(factor(to,levels=c(states,cens.code))))
