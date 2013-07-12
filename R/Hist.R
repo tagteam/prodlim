@@ -226,7 +226,7 @@
     
     states <- as.character(states[states!=cens.code])
     ## states <- states[match(state.order,states)]
-    if (cens.code %in% levels(from)) stop("Code for censored data used wrongly in argument event")
+    if (cens.code %in% levels(from)) stop(paste("The Cens.code",cens.code," identifies censored data, but is found amoung the `from' state of some transitions")
 
     if (cens.type=="intervalCensored"){
       if (entry.type=="intervalCensored")
