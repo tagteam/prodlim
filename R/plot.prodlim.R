@@ -13,6 +13,7 @@ plot.prodlim <- function(x,
                          xlab="Time",
                          ylab,
                          legend=TRUE,
+                         logrank=FALSE,
                          marktime=FALSE,
                          confint=TRUE,
                          automar,
@@ -25,7 +26,7 @@ plot.prodlim <- function(x,
                          ...){
 
   # }}}
-  # {{{  backward compatibility
+# {{{  backward compatibility
   ##   args=match.call(expand=TRUE)
   ##   args[[1]]=list
   allArgs <- match.call()
@@ -116,7 +117,12 @@ plot.prodlim <- function(x,
   if (length(lty) < nlines) lty <- rep(lty, nlines)
   if (length(col) < nlines) col <- rep(col, nlines)
   
-  background.DefaultArgs <- list(xlim=xlim,ylim=ylim,horizontal=seq(0,1,.25),vertical=NULL,bg="white",fg="gray88")
+  background.DefaultArgs <- list(xlim=xlim,
+                                 ylim=ylim,
+                                 horizontal=seq(0,1,.25),
+                                 vertical=NULL,
+                                 bg="white",
+                                 fg="gray88")
   axis1.DefaultArgs <- list()
   axis2.DefaultArgs <- list(at=seq(0,1,.25),side=2)
   lines.DefaultArgs <- list(type="s")
@@ -133,7 +139,7 @@ plot.prodlim <- function(x,
   confint.DefaultArgs <- list(x=x,newdata=newdata,type=type,citype="shadow",times=plot.times,cause=cause,density=55,col=col[1:nlines],lwd=rep(2,nlines),lty=rep(3,nlines))
 
   # }}}
-  # {{{  backward compatibility
+# {{{  backward compatibility
 
   if (match("legend.args",names(allArgs),nomatch=FALSE)){
     legend.DefaultArgs <- c(args[[match("legend.args",names(allArgs),nomatch=FALSE)]],legend.DefaultArgs)
@@ -157,7 +163,7 @@ plot.prodlim <- function(x,
                          verbose=TRUE)
 
 # }}}
-  # {{{  setting margin parameters 
+# {{{  setting margin parameters 
 
   if (atrisk==TRUE){
     oldmar <- par()$mar
@@ -175,7 +181,7 @@ plot.prodlim <- function(x,
   }
 
   # }}}
-  # {{{  plot and backGround
+# {{{  plot and backGround
   if (!add) {
     do.call("plot",smartA$plot)
     ##     if (background==TRUE && match("bg",names(smartA$background),nomatch=FALSE)){
@@ -186,7 +192,7 @@ plot.prodlim <- function(x,
     }
   }
   # }}}
-  # {{{  axes
+# {{{  axes
 
   if (!add) {
     if (axes){
@@ -200,13 +206,12 @@ plot.prodlim <- function(x,
 
   # }}}
   # {{{  pointwise confidence intervals
-  if (confint==TRUE) {
+if (confint==TRUE) {
     ## if (verbose==TRUE){print(smartA$confint)}
     do.call("confInt",smartA$confint)
-  }
-
-  # }}}
-  # {{{  adding the lines 
+}
+# }}}
+# {{{  adding the lines 
   lines.type <- smartA$lines$type
   nix <- lapply(1:nlines, function(s) {
     lines(x = plot.times,
@@ -217,7 +222,7 @@ plot.prodlim <- function(x,
           lwd = lwd[s])
   })
 # }}}
-  # {{{  marks at the censored times
+# {{{  marks at the censored times
 
   if (marktime==TRUE){
     if (model %in% c("survival","competing.risks")){
@@ -229,35 +234,59 @@ plot.prodlim <- function(x,
   }
 
 # }}}
-  # {{{  adding the no. of individuals at risk
+# {{{  adding the no. of individuals at risk
 
   if (atrisk==TRUE && !add){
-    if (hit <- match("at",names(smartA$atrisk),nomatch=FALSE)){
-      if (match("atrisk.times",names(list(...)),nomatch=FALSE)){
-        warning("Atrisk argument clash: remove either 'atrisk.at' or 'atrisk.times'.")
+      if (hit <- match("at",names(smartA$atrisk),nomatch=FALSE)){
+          if (match("atrisk.times",names(list(...)),nomatch=FALSE)){
+              warning("Atrisk argument clash: remove either 'atrisk.at' or 'atrisk.times'.")
+          }
+          else{
+              names(smartA$atrisk)[hit] <- "times"
+              smartA$atrisk <- smartA$atrisk[!duplicated(names(smartA$atrisk))]
+          }
       }
-      else{
-        names(smartA$atrisk)[hit] <- "times"
-        smartA$atrisk <- smartA$atrisk[!duplicated(names(smartA$atrisk))]
-      }
-    }
-    do.call("atRisk",smartA$atrisk)
+      do.call("atRisk",smartA$atrisk)
   }
   # }}}
   # {{{  legend
   if(legend==TRUE && !add && !is.null(names(Y))){
-    if (smartA$legend$trimnames==TRUE){
-      smartA$legend$legend <- sapply(strsplit(smartA$legend$legend,"="),function(x)x[[2]])
-      if (is.null(smartA$legend$title))
-      smartA$legend$title <- unique(sapply(strsplit(names(Y),"="),function(x)x[[1]]))
-    }
-    smartA$legend <- smartA$legend[-match("trimnames",names(smartA$legend))]
-    save.xpd <- par()$xpd
-    par(xpd=TRUE)
-    do.call("legend",smartA$legend)
-    par(xpd=save.xpd)
+      if (smartA$legend$trimnames==TRUE){
+          smartA$legend$legend <- sapply(strsplit(smartA$legend$legend,"="),function(x)x[[2]])
+          if (is.null(smartA$legend$title))
+              smartA$legend$title <- unique(sapply(strsplit(names(Y),"="),function(x)x[[1]]))
+      }
+      smartA$legend <- smartA$legend[-match("trimnames",names(smartA$legend))]
+      save.xpd <- par()$xpd
+      if (logrank && model=="survival" && length(smartA$legend$legend)>1){
+          formula.names <- try(all.names(formula),silent=TRUE)
+          lrform <- x$call$formula
+          if (lrform[[2]][[1]]==as.name("Hist"))
+              lrform[[2]][[1]] <- as.name("Surv")
+          lrtest <- survdiff(eval(lrform),data=eval(x$call$data))
+          ## from print.survdiff
+          if (length(lrtest$n) == 1) {
+              p <- 1 - pchisq(lrtest$chisq, 1)
+          } else{
+              if (is.matrix(x$obs)) {
+                  etmp <- apply(lrtest$exp, 1, sum)
+              }
+              else {
+                  etmp <- lrtest$exp
+              }
+              df <- (sum(1 * (etmp > 0))) - 1
+              p <- 1 - pchisq(lrtest$chisq, df)
+          }
+          if (length(smartA$legend$title))
+              smartA$legend$title <- paste(smartA$legend$title," Log-rank: ",format.pval(p,digits=logrank,eps=0.0001))
+          else
+              smartA$legend$title <- paste(" Log-rank: ",format.pval(p,digits=logrank,eps=0.0001))
+      }
+      par(xpd=TRUE)
+      do.call("legend",smartA$legend)
+      par(xpd=save.xpd)
   }
 
 # }}}
-  invisible(x)
+invisible(x)
 }
