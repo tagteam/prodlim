@@ -278,7 +278,7 @@ if (confint==TRUE) {
               p <- 1 - pchisq(lrtest$chisq, df)
           }
           if (length(smartA$legend$title))
-              smartA$legend$title <- paste(smartA$legend$title," Log-rank: ",format.pval(p,digits=logrank,eps=0.0001))
+              smartA$legend$title <- paste(smartA$legend$title," Log-rank: p=",format.pval(p,digits=logrank,eps=0.0001))
           else
               smartA$legend$title <- paste(" Log-rank: ",format.pval(p,digits=logrank,eps=0.0001))
       }
