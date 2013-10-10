@@ -53,117 +53,121 @@
   # no factors
   # --------------------------------------------------------------------
   if (object$covariate.type==1){
-    tindex <- sindex(jump.times=jTimes,eval.times=times)
-    tindex[times>object$maxtime] <- NA
-    if (level.chaos==2)
-      indices <- list(time=tindex[order(order.times)],strata=1)
-    else
-      indices <- list(time=tindex,strata=1)
-    dimensions <- list(time=NT,strata=1)
-    predictors <- NULL
-    names.strata <- NULL
+      tindex <- sindex(jump.times=jTimes,eval.times=times)
+      tindex[times>object$maxtime] <- NA
+      if (level.chaos==2)
+          indices <- list(time=tindex[order(order.times)],strata=1)
+      else
+          indices <- list(time=tindex,strata=1)
+      dimensions <- list(time=NT,strata=1)
+      predictors <- NULL
+      names.strata <- NULL
   }
   else {
-    # conditional on factors
-    # --------------------------------------------------------------------
-    if (missing(newdata)) stop("Argument newdata is missing.")
-    NX <- NROW(object$X)
-    fit.X <- object$X
-    ## strata.vars <- sapply(strsplit(grep("strata",names(fit.X),val=TRUE),"strata."),function(x)x[2])
-    ## NN.vars <- sapply(strsplit(grep("NN",names(object$X),val=TRUE),"NN."),function(x)x[2])
-    strata.vars <- object$discrete.predictors
-    NN.vars <- object$continuous.predictors
-    X.formula <- update(formula(object$formula),NULL~.)
-    ## delete.response(terms(formula(object$formula)))
-    iid <- is.null(object$clustervar)
-    if (!iid){
-      find.clu <- match(object$clustervar,all.vars(X.formula))
-      X.formula <- drop.terms(terms(X.formula),find.clu)
-    }
-    if (!all(match(all.vars(X.formula),names(newdata),nomatch=FALSE)))
-      stop("Arg newdata does not contain all the covariates used for fitting. \n\nrequested: ", as.character(X.formula))
-    requested.X <- newdata[,all.vars(X.formula),drop=FALSE]
-    NR <- NROW(requested.X)
-    requested.names <- extract.name.from.special(names(requested.X))
-    names(requested.X) <- requested.names
-    check.vars <- match(c(strata.vars,NN.vars),requested.names,nomatch=FALSE)
-    if (length(strata.vars)==0){
-      requested.strata <- rep(1,NR)
-      fit.strata <- rep(1,NX)
-      freq.strata <- NX
-    }
-    else{
-      # strata
+      # conditional on factors
       # --------------------------------------------------------------------
-      requested.strata <- do.call("paste",c(requested.X[,strata.vars,drop=FALSE],sep="\r"))
-      ## fit.strata <- factor(do.call("paste",c(fit.X[,paste("strata",strata.vars,sep="."),drop=FALSE],sep="\r")))
-      fit.strata <- factor(do.call("paste",c(fit.X[,strata.vars,drop=FALSE],sep="\r")))
-      ## changed Tue Sep 16 10:45:01 CEST 2008
-      ## fit.levels <- unique(fit.strata)
-      fit.levels <- as.character(unique(fit.strata))
-      ## changed Tue Sep 16 10:45:01 CEST 2008
-      if (!all(unique(requested.strata) %in% (fit.levels)))
-        stop(paste("Not all values of newdata strata variables occur in fit:\nrequested:",
-                   paste(unique(requested.strata),collapse=","),
-                   "\nfitted:",
-                   paste(fit.levels,collapse=",")))
-      NS <- length(fit.levels)
-      fit.strata <- factor(fit.strata,levels=unique(fit.strata),labels=1:NS)    
-      requested.strata <- factor(requested.strata,levels=fit.levels,labels=1:NS)
-      freq.strata <- cumsum(tabulate(fit.strata))
-    }
-    # neighborhoods
-    # --------------------------------------------------------------------
-    switch(length(NN.vars)+1,
-           {requested.NN <- NULL
-            fit.NN <- NULL
-            new.order <- order(requested.strata)},
-           {requested.NN <- requested.X[,NN.vars,drop=TRUE]
-            fit.NN <- fit.X[,NN.vars,drop=TRUE]
-            new.order <- order(requested.strata,requested.NN)
+      if (missing(newdata)) stop("Argument newdata is missing.")
+      NX <- NROW(object$X)
+      fit.X <- object$X
+      ## strata.vars <- sapply(strsplit(grep("strata",names(fit.X),val=TRUE),"strata."),function(x)x[2])
+      ## NN.vars <- sapply(strsplit(grep("NN",names(object$X),val=TRUE),"NN."),function(x)x[2])
+      strata.vars <- object$discrete.predictors
+      NN.vars <- object$continuous.predictors
+      X.formula <- update(formula(object$formula),NULL~.)
+      ## delete.response(terms(formula(object$formula)))
+      iid <- is.null(object$clustervar)
+      if (!iid){
+          find.clu <- match(object$clustervar,all.vars(X.formula))
+          X.formula <- drop.terms(terms(X.formula),find.clu)
+      }
+      if (!all(match(all.vars(X.formula),names(newdata),nomatch=FALSE)))
+          stop("Arg newdata does not contain all the covariates used for fitting. \n\nrequested: ", as.character(X.formula))
+      requested.X <- newdata[,all.vars(X.formula),drop=FALSE]
+      NR <- NROW(requested.X)
+      requested.names <- extract.name.from.special(names(requested.X))
+      names(requested.X) <- requested.names
+      check.vars <- match(c(strata.vars,NN.vars),requested.names,nomatch=FALSE)
+      if (length(strata.vars)==0){
+          requested.strata <- rep(1,NR)
+          fit.strata <- rep(1,NX)
+          freq.strata <- NX
+      }
+      else{
+          # strata
+          # --------------------------------------------------------------------
+          requested.strata <- do.call("paste",c(requested.X[,strata.vars,drop=FALSE],sep="\r"))
+          ## fit.strata <- factor(do.call("paste",c(fit.X[,paste("strata",strata.vars,sep="."),drop=FALSE],sep="\r")))
+          fit.strata <- factor(do.call("paste",c(fit.X[,strata.vars,drop=FALSE],sep="\r")))
+          ## changed Tue Sep 16 10:45:01 CEST 2008
+          ## fit.levels <- unique(fit.strata)
+          fit.levels <- as.character(unique(fit.strata))
+          ## changed Tue Sep 16 10:45:01 CEST 2008
+          if (!all(unique(requested.strata) %in% (fit.levels)))
+              stop(paste("Not all values of newdata strata variables occur in fit:\nrequested:",
+                         paste(unique(requested.strata),collapse=","),
+                         "\nfitted:",
+                         paste(fit.levels,collapse=",")))
+          NS <- length(fit.levels)
+          fit.strata <- factor(fit.strata,levels=unique(fit.strata),labels=1:NS)    
+          requested.strata <- factor(requested.strata,levels=fit.levels,labels=1:NS)
+          freq.strata <- cumsum(tabulate(fit.strata))
+      }
+      # neighborhoods
+      # --------------------------------------------------------------------
+      switch(length(NN.vars)+1,
+             {requested.NN <- NULL
+              fit.NN <- NULL
+              new.order <- order(requested.strata)},
+             {requested.NN <- requested.X[,NN.vars,drop=TRUE]
+              fit.NN <- fit.X[,NN.vars,drop=TRUE]
+              new.order <- order(requested.strata,requested.NN)
           },
-           stop("Currently only one continuous covariate allowed."),
-           stop("Currently only one continuous covariate allowed."))
-    # findex identifies the individual strata neighborhood combination 
-    # --------------------------------------------------------------------
-    findex <- .C("findex",
-                 index=integer(NR),
-                 as.integer(as.integer(length(NN.vars)>0)),
-                 as.integer(requested.strata[new.order]),
-                 as.integer(freq.strata),
-                 as.double(requested.NN[new.order]),
-                 as.double(fit.NN),
-                 as.integer(NR),
-                 as.integer(NT),
-                 NAOK=FALSE,
-                 PACKAGE="prodlim")$index
-    if (level.chaos==2) stop("Need sorted times with strata.")
-    if (level.chaos==1){# do NOT sort by factors
-      predictors <- requested.X
-      findex <- findex[order(new.order)]
-    }
-    else{
-      predictors <- requested.X[new.order,,drop=FALSE]
-    }
-    # pindex identifies the predicted probabilities
-    # --------------------------------------------------------------------
-    pindex <- .C("pred_index",
-                 index=integer(NT*NR),
-                 as.double(times),
-                 as.double(jTimes),
-                 as.integer(object$first.strata[findex]),
-                 as.integer(object$size.strata[findex]),
-                 as.integer(NR),
-                 as.integer(NT),
-                 NAOK=FALSE,
-                 PACKAGE="prodlim")$index
-    pindex[pindex==-1] <- NA
-    indices <- list(time=pindex,strata=findex)
-    dimensions <- list(time=NT,strata=NR)
-    names.strata <- apply(do.call("cbind",lapply(names(requested.X),function(n){
-      paste(n,format(requested.X[,n],digits=2),sep="=")})),1,paste,collapse=", ")
-    ##     print(names.strata)
-    predictors <- predictors
+             stop("Currently only one continuous covariate allowed."),
+             stop("Currently only one continuous covariate allowed."))
+      # findex identifies the individual strata neighborhood combination 
+      # --------------------------------------------------------------------
+      findex <- .C("findex",
+                   index=integer(NR),
+                   as.integer(as.integer(length(NN.vars)>0)),
+                   as.integer(requested.strata[new.order]),
+                   as.integer(freq.strata),
+                   as.double(requested.NN[new.order]),
+                   as.double(fit.NN),
+                   as.integer(NR),
+                   as.integer(NT),
+                   NAOK=FALSE,
+                   PACKAGE="prodlim")$index
+      if (level.chaos==2) stop("Need to sort the times if there are strata.")
+      if (level.chaos==1){# do NOT sort by factors
+          predictors <- requested.X
+          findex <- findex[order(new.order)]
+      }
+      else{
+          predictors <- requested.X[new.order,,drop=FALSE]
+      }
+      # pindex identifies the predicted probabilities
+      # --------------------------------------------------------------------
+      pindex <- .C("pred_index",
+                   index=integer(NT*NR),
+                   as.double(times),
+                   as.double(jTimes),
+                   as.integer(object$first.strata[findex]),
+                   as.integer(object$size.strata[findex]),
+                   as.integer(NR),
+                   as.integer(NT),
+                   NAOK=FALSE,
+                   PACKAGE="prodlim")$index
+      pindex[pindex==-1] <- NA
+      indices <- list(time=pindex,strata=findex)
+      dimensions <- list(time=NT,strata=NR)
+      ## bug fix (10 Oct 2013 (10:08)):
+      ##        order of names needs to
+      ##        obey level.chaos
+      names.strata <- apply(do.call("cbind",lapply(names(requested.X),function(n){
+          paste(n,format(requested.X[,n],digits=2),sep="=")})),1,paste,collapse=", ")
+      if (level.chaos==0) {names.strata <- names.strata[new.order]}
+      ##     print(names.strata)
+      predictors <- predictors
   }
   if (level.chaos==2) times <- unsorted.times
   else times <- times

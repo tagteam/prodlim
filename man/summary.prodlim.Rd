@@ -82,10 +82,23 @@
 % }
 \seealso{\code{\link{prodlim}}, \code{\link{summary.Hist}}}
 \examples{
- SurvFrame <- data.frame(time=1:10,status=rbinom(10,1,.5))
+SurvFrame <- data.frame(time=1:10,status=rbinom(10,1,.5))
  x <- prodlim(formula=Hist(time=time,status!=0)~1,data=SurvFrame)
  summary(x)
  summary(x,times=c(1,5,10,12),percent=TRUE,intervals=TRUE,digits=3)
+\dontrun{
+library(survival) 
+data(pbc)
+f <- prodlim(Hist(time,status!=1)~sex,data=pbc)
+summary(f)
+summary(f,newdata=data.frame(sex=c("m","f")))
+
+fa <- prodlim(Hist(time,status!=1)~sex+age,data=pbc)
+summary(fa)
+
+x <- summary(fa,times=1000,newdata=expand.grid(age=c(60,40,50),sex=c("m","f")))
+cbind(names(x$table),do.call("rbind",lapply(x$table,round,2)))
+
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
