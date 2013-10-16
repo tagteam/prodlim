@@ -4,19 +4,19 @@
 
 
 void prodlim_surv(double *y,
-		 int *status,
-		 double *time,
-		 double *nrisk,
-		 int *event,
-		 int *loss,
-		 double *surv,
-		 double *hazard,
-		 double *varhazard,
-		 int *reverse,
-		 int *t,
-		 int start,
-		 int stop
-		 ){
+		  int *status,
+		  double *time,
+		  double *nrisk,
+		  int *event,
+		  int *loss,
+		  double *surv,
+		  double *hazard,
+		  double *varhazard,
+		  int *reverse,
+		  int *t,
+		  int start,
+		  int stop
+		  ){
   int i,s;
   double surv_temp,hazard_temp,varhazard_temp,atrisk;
   
