@@ -66,13 +66,13 @@
     if (entry.type=="intervalCensored")
       stopifnot(all(V<L))
     else{
-      stopifnot(is.null(entry) | all(entry<=L))
+      stopifnot(is.null(entry) || all(entry<L))
     }
   else
     if (entry.type=="intervalCensored")
       stopifnot(all(V<=time))
     else
-      stopifnot(is.null(entry)| all(entry<=time))
+      stopifnot(is.null(entry) || all(entry<time))
   
   # }}}
   # {{{ resolving the argument `event' 
