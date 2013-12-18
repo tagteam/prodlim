@@ -1,3 +1,36 @@
+#' Drawing numbers of subjects at-risk of experiencing an event below
+#' Kaplan-Meier and Aalen-Johannsen plots.
+#' 
+#' This function is invoked and controlled by \code{plot.prodlim}.
+#' 
+#' This function should not be called directly. The arguments can be specified
+#' as \code{atRisk.arg} in the call to \code{plot.prodim}.
+#' 
+#' @param x an object of class `prodlim' as returned by the
+#' \code{prodlim} function.
+#' @param newdata see \code{plot.prodim}
+#' @param times Where to compute the atrisk numbers.
+#' @param line Distance of the atrisk numbers from the inner plot.
+#' @param col The color of the text.
+#' @param interspace Distance between rows of atrisk numbers.
+#' @param cex Passed on to \code{mtext} for both atrisk numbers and
+#' labels.
+#' @param labels Labels for the at-risk rows.
+#' @param title Title for the at-risk labels
+#' @param pos The value is passed on to the \code{mtext} argument
+#' \code{at} for the labels (not the atriks numbers).
+#' @param adj Passed on to \code{mtext} for the labels (not the atriks
+#' numbers).
+#' @param dist If \code{line} is missing, the distance of the upper
+#' most atrisk row from the inner plotting region: par()$mgp[2].
+#' @param adjust.labels If \code{TRUE} the labels are left adjusted.
+#' @param ... Further arguments that are passed to the function \code{mtext}.
+#' @return Nil
+#' @author Thomas Alexander Gerds <tag@@biostat.ku.dk>
+#' @seealso \code{\link{plot.prodlim}}, \code{\link{confInt}},
+#' \code{\link{markTime}}
+#' @keywords survival
+#' @export
 atRisk <- function(x,
                    newdata,
                    times,
@@ -6,6 +39,7 @@ atRisk <- function(x,
                    interspace,
                    cex,
                    labels,
+                   title="",
                    pos,
                    adj,
                    dist,
@@ -46,6 +80,19 @@ atRisk <- function(x,
       labels <- paste("[",names(sumx),"]",sep="")
     else
       labels <- c("No.   \nat-risk",rep("",nlines-1))
+  # title for no. at-risk below plot
+  # --------------------------------------------------------------------
+  if (!is.null(title))
+      mtext(title,
+            side=1,
+            at=pos,
+            col=col[1],
+            line=line[1]-1,
+            adj=adj,
+            cex=cex,
+            outer=FALSE,
+            xpd=NA,
+            ...)
   # labeling the no. at-risk below plot
   # --------------------------------------------------------------------
   if (is.null(adjust.labels) || adjust.labels==TRUE){

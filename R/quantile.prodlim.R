@@ -1,6 +1,28 @@
+#' Quantiles for Kaplan-Meier and Aalen-Johannsen estimates.
+#' 
+#' Quantiles for Kaplan-Meier and Aalen-Johannsen estimates.
+#' 
+#' 
+#' @param x Object of class \code{"prodlim"}.
+#' @param q Quantiles. Vector of values between 0 and 1.
+#' @param ... not used
+#' @author Thomas Alexander Gerds <tag@@biostat.ku.dk>
+#' @keywords survival
+#' @examples
+#' 
+#' 
+#' d=SimSurv(30)
+#' f=prodlim(Hist(time,status)~X1,data=d)
+#' # median
+#' quantile(f,.5)
+#'
+#' @import stats
+#' @method quantile prodlim
+#' @S3method quantile prodlim
 "quantile.prodlim" <- function(x,
                                q,
                                ...){
+  require(stats)
   stopifnot(x$model=="survival")
   if (missing(q)) q <- c(1,.75,0.5,.25,0)
   q <- 1-q ## since this is a survival function
@@ -23,4 +45,4 @@
   class(out) <- "quantile.prodlim"
   out
 }
-  
+

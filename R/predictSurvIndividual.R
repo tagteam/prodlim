@@ -1,3 +1,23 @@
+#' Predict individual survival probabilities
+#' 
+#' Function to extract the predicted probabilities at the individual event
+#' times that have been used for fitting a prodlim object.
+#' 
+#' 
+#' @param object A fitted object of class "prodlim".
+#' @param lag Integer. `0' means predictions at the individual times, 1 means
+#' just before the individual times, etc.
+#' @return A vector of survival probabilities.
+#' @author Thomas A. Gerds \email{tag@@biostat.ku.dk}
+#' @seealso \code{\link{predict.prodlim}},\code{\link{predictSurv}},
+#' @keywords survival
+#' @examples
+#' 
+#'  SurvFrame <- data.frame(time=1:10,status=rbinom(10,1,.5))
+#'  x <- prodlim(formula=Hist(time=time,status!=0)~1,data=SurvFrame)
+#'  predictSurvIndividual(x,lag=1)
+#' 
+#' @export
 predictSurvIndividual <- function(object,
                                   lag=1){
   obs.times <- as.numeric(object$model.response[,1])

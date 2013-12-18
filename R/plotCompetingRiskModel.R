@@ -1,3 +1,21 @@
+#' Plotting a competing-risk-model.
+#' 
+#' Plotting a competing-risk-model.
+#' 
+#' 
+#' @param stateLabels Labels for the boxes.
+#' @param horizontal The orientation of the plot.
+#' @param \dots Arguments passed to \code{\link{plot.Hist}}.
+#' @author Thomas Alexander Gerds <tag@@biostat.ku.dk>
+#' @seealso \code{\link{plotIllnessDeathModel}}, \code{\link{plot.Hist}}
+#' @keywords ~kwd1 ~kwd2
+#' @examples
+#' 
+#' plotCompetingRiskModel()
+#' plotCompetingRiskModel(labels=c("a","b"))
+#' plotCompetingRiskModel(labels=c("a","b","c"))
+#'
+#' @export
 plotCompetingRiskModel <- function(stateLabels,horizontal=TRUE,...){
   if (missing(stateLabels)) stateLabels <- c("Disease\nfree","Cause1","Cause2")
   nTrans <- length(stateLabels)-1

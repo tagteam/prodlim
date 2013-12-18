@@ -1,211 +1,158 @@
 \name{prodlim}
 \alias{prodlim}
-%- Also NEED an '\alias' for EACH other topic documented here.
-\title{product limit method }
+\title{product limit method}
+\usage{
+  prodlim(formula, data = parent.frame(), subset,
+    na.action, reverse = FALSE, conf.int = 0.95,
+    bandwidth = NULL, caseweights, discrete.level = 3,
+    maxiter = 1000, grid, tol = 7,
+    method = c("npmle", "one.step", "impute.midpoint", "impute.right"),
+    exact = TRUE)
+}
+\arguments{
+  \item{formula}{A formula whose left hand side is a
+  \code{Hist} object. In some special cases it can also be
+  a \code{Surv} response object, see the details section.
+  The right hand side is as usual a linear combination of
+  covariates which may contain at most one continuous
+  factor. Whether or not a covariate is recognized as
+  continuous or discrete depends on its class and on the
+  argument \code{discrete.level}. The right hand side may
+  also be used to specify clusters, see the details
+  section.}
+
+  \item{data}{A data.frame in which all the variables of
+  \code{formula} can be interpreted.}
+
+  \item{subset}{Expression identifying a subset of the rows
+  of the data for the fitting process.}
+
+  \item{na.action}{A missing-data filter function, applied
+  to the model.frame, after any subset argument has been
+  used.  Default is \code{options()$na.action}.}
+
+  \item{reverse}{For right censored data, if reverse=TRUE
+  then the censoring distribution is estimated.}
+
+  \item{conf.int}{The level (between 0 and 1) for two-sided
+  pointwise confidence intervals. Defaults to 0.95.}
+
+  \item{bandwidth}{Smoothing parameter for symmetric
+  nearest neighborhoods based on the values of a continuous
+  covariate. See function \code{neighborhood} for details.}
+
+  \item{caseweights}{Weights applied to the contribution of
+  each subject to change the number of events and the
+  number at risk. This can be used for bootstrap and survey
+  analysis. Should be a vector of the same length and the
+  same order as \code{data}.}
+
+  \item{discrete.level}{Numeric covariates are treated as
+  factors when their number of unique values exceeds not
+  \code{discrete.level}. Otherwise the product limit method
+  is applied, in overlapping neighborhoods according to the
+  bandwidth.}
+
+  \item{maxiter}{For interval censored data only.  Maximal
+  number of iterations to obtain the nonparametric maximum
+  likelihood estimate. Defaults to 1000.}
+
+  \item{grid}{For interval censored data only.  When
+  method=one.step grid for one-step product limit estimate.
+  Defaults to sorted list of unique left and right
+  endpoints of the observed intervals.}
+
+  \item{tol}{For interval censored data only.  Numeric
+  value whose negative exponential is used as convergence
+  criterion for finding the nonparametric maximum
+  likelihood estimate.  Defaults to 7 meaning exp(-7).}
+
+  \item{method}{For interval censored data only.  If equal
+  to \code{"npmle"} (the default) use the usual Turnbull
+  algorithm, else the product limit version of the
+  self-consistent estimate.}
+
+  \item{exact}{If TRUE the grid of time points used for
+  estimation includes all the L and R endpoints of the
+  observed intervals.}
+}
+\value{
+  Object of class "prodlim" for which there are print,
+  predict, life.table, summary and plot methods.
+}
 \description{
-  Nonparametric estimation in event history analysis. Featuring fast
-  algorithms and user friendly syntax adapted from the survival package.
-  The product limit algorithm is used for right censored data; the
+  Nonparametric estimation in event history analysis.
+  Featuring fast algorithms and user friendly syntax
+  adapted from the survival package.  The product limit
+  algorithm is used for right censored data; the
   self-consistency algorithm for interval censored data.
 }
-
-\usage{prodlim(formula,
-	       data=parent.frame(),
-	       subset,
-	       na.action,
-	       reverse=FALSE,
-	       conf.int=0.95,
-	       bandwidth=NULL,
-               caseweights,
-	       discrete.level=3,
-               maxiter=1000,
-               grid,
-               tol=7,
-               method=c("npmle","one.step","impute.midpoint","impute.right"),
-               exact=TRUE)
-     }
-%- maybe also 'usage' for other objects documented here.
-\arguments{
-  \item{formula}{A formula whose left hand side is 
-                 a \code{Hist} object. In some special cases it can also be a
-                 \code{Surv} response object, see the details section. The right hand side is as
-                 usual a linear combination of covariates which may
-                 contain at most one continuous factor. Whether or not a covariate is
-                 recognized as continuous or discrete depends on its class and on the
-                 argument \code{discrete.level}. The right hand side may also be used
-                 to specify clusters, see the details section.
-               }
-  \item{data}{
-    A data.frame in which all the variables of
-    \code{formula} can be interpreted.
-  }
-  \item{subset}{
-    Expression identifying a subset of the rows of the
-    data for the fitting process.
-  }
-  \item{na.action}{
-    A missing-data filter function, applied to the model.frame,
-    after any subset argument has been used.  Default is
-    \code{options()$na.action}.
-  }
-  \item{reverse}{
-    For right censored data, if reverse=TRUE then the censoring
-    distribution is estimated.
-  }
-  \item{conf.int}{
-    The level (between 0 and 1) for two-sided pointwise confidence
-    intervals. Defaults to 0.95.
-  }
-  \item{bandwidth}{
-    Smoothing parameter for symmetric nearest neighborhoods
-    based on the values of a continuous covariate. See function
-    \code{neighborhood} for details.
-  }
-  \item{caseweights}{Weights applied to the contribution of each subject
-	       to change the number of events and the
-	       number at risk. This can be used for bootstrap and survey
-	       analysis. Should be a vector of the same length and the
-	       same order as \code{data}.
-	     }
-  \item{discrete.level}{
-    Numeric covariates are treated as factors when their number
-    of unique values exceeds not \code{discrete.level}. Otherwise
-    the product limit method is applied, in overlapping neighborhoods
-    according to the bandwidth.
-  }
-  \item{maxiter}{
-    For interval censored data only.
-    Maximal number of iterations to obtain the nonparametric maximum likelihood estimate.
-    Defaults to 1000.
-  }
-  \item{grid}{
-    For interval censored data only.
-    When method=one.step grid for one-step product limit estimate. Defaults to
-    sorted list of unique left and right endpoints of the observed intervals.
-  }
-  \item{tol}{
-    For interval censored data only.
-    Numeric value whose negative exponential is used as convergence criterion
-    for finding the nonparametric maximum likelihood estimate.
-    Defaults to 7 meaning exp(-7).}
-  \item{method}{
-    For interval censored data only.
-    If equal to \code{"npmle"} (the default) use the usual Turnbull algorithm, else
-    the product limit version of the
-    self-consistent estimate.
-  }
-  \item{exact}{If TRUE the grid of time points used for estimation
-    includes all the L and R endpoints of the observed intervals.}
-}
 \details{
+  The response of \code{formula} (ie the left hand side of
+  the `~' operator) specifies the model.
 
-  The response of \code{formula} (ie the left hand side of the `~'
-  operator) specifies the model.
-  
-  In two-state models -- the classical survival case -- the standard
-  Kaplan-Meier method is applied.  For this the response can be
-  specified as a \code{\link{Surv}} or as a \code{\link{Hist}}
-  object. The \code{\link{Hist}} function allows you to change the code
-  for censored observations,
-  e.g. \code{Hist(time,status,cens.code="4")}. 
-  
-  Besides a slight gain of computing efficiency, there are some extensions that
-  are not included in the current version of the survival package:
+  In two-state models -- the classical survival case -- the
+  standard Kaplan-Meier method is applied.  For this the
+  response can be specified as a \code{\link{Surv}} or as a
+  \code{\link{Hist}} object. The \code{\link{Hist}}
+  function allows you to change the code for censored
+  observations, e.g.
+  \code{Hist(time,status,cens.code="4")}.
+
+  Besides a slight gain of computing efficiency, there are
+  some extensions that are not included in the current
+  version of the survival package:
 
   (0) The Kaplan-Meier estimator for the censoring times
-  \code{reverse=TRUE} is correctly
-  estimated when there are ties between event and censoring
-  times.
+  \code{reverse=TRUE} is correctly estimated when there are
+  ties between event and censoring times.
 
-  (1) A conditional version of the Kaplan-Meier estimator for at most
-  one continuous predictors using symmetrical nearest neighborhoods
-  (Beran 1981, Stute 1984, Akritas 1994).
+  (1) A conditional version of the Kaplan-Meier estimator
+  for at most one continuous predictors using symmetrical
+  nearest neighborhoods (Beran 1981, Stute 1984, Akritas
+  1994).
 
   (2) For cluster-correlated data the right hand side of
-  \code{formula} may identify a \code{\link{cluster}} variable. In that case
-  Greenwood's variance formula is replaced by the formula of Ying \& Wei
-  (1994).
+  \code{formula} may identify a \code{\link{cluster}}
+  variable. In that case Greenwood's variance formula is
+  replaced by the formula of Ying \& Wei (1994).
 
   (3) Competing risk models can be specified via
   \code{\link{Hist}} response objects in \code{formula}.
 
-  The Aalen-Johannsen estimator is applied for estimating the cumulative
-  incidence functions for all causes.
-  The advantage over the function \code{cuminc} of the cmprsk
-  package are user-friendly model specification via \code{\link{Hist}}
-  and sophisticated print, summary, predict and plot methods.
+  The Aalen-Johannsen estimator is applied for estimating
+  the cumulative incidence functions for all causes.  The
+  advantage over the function \code{cuminc} of the cmprsk
+  package are user-friendly model specification via
+  \code{\link{Hist}} and sophisticated print, summary,
+  predict and plot methods.
 
   Under construction:
 
   (U0) Interval censored event times specified via
-  \code{\link{Hist}} are used to find the nonparametric maximum
-  likelihood estimate. Currently this works only for two-state models
-  and the results should match with those from the package `Icens'.
-  
+  \code{\link{Hist}} are used to find the nonparametric
+  maximum likelihood estimate. Currently this works only
+  for two-state models and the results should match with
+  those from the package `Icens'.
+
   (U1) Extensions to more complex multi-states models
-  
-  (U2) The nonparametric maximum likelihood estimate for interval
-       censored observations of competing risks models.
-  
+
+  (U2) The nonparametric maximum likelihood estimate for
+  interval censored observations of competing risks models.
 }
-\value{
-  Object of class "prodlim" for which there are print, predict, life.table, summary and plot
-  methods.
-}
-\references{Andersen, Borgan, Gill, Keiding (1993) Springer
-  `Statistical Models Based on Counting Processes'
-
-  Akritas (1994) The Annals of Statistics 22, 1299-1327
- Nearest neighbor estimation of a bivariate distribution under random censoring.
-
-  R Beran (1981) http://anson.ucdavis.edu/~beran/paper.html
-  `Nonparametric regression with randomly censored survival data' 
-
-  Stute (1984) The Annals of Statistics 12, 917--926
-  `Asymptotic Normality of Nearest Neighbor Regression Function
-  Estimates'
-
-  Ying, Wei (1994) Journal of Multivariate Analysis 50, 17-29
-  The Kaplan-Meier estimate for dependent failure time observations
-  
-}
-
-\author{Thomas A. Gerds \email{tag@biostat.ku.dk}}
-
-%  ~Make other sections like Warning with \section{Warning }{....} ~
-
-\seealso{\code{\link{predictSurv}},
-  \code{\link{predictSurvIndividual}},
-  \code{\link{predictCuminc}},
-  \code{\link{Hist}},
-  \code{\link{neighborhood}},
-  \code{\link{Surv}},
-  \code{\link{survfit}},
-  \code{\link{strata}},
-  \code{\link{cluster}},
-  \code{\link{NN}}}
 \examples{
-
-## generate survival data
-sm <- survModel()
-addvar(sm) <- c("X1","X2")
-distribution(sm,"X2") <- binomial.lvm()
-regression(sm,to="eventtime",from=c("X1","X2")) <- c(0.7,-1.3)
-plot(sm)
-dat <- sim(sm,100)
-
 ##---------------------two-state survival model------------
-
-with(dat,plot(Hist(time,event)))
-fit <- prodlim(Hist(time,event)~1,data=dat)
+dat <- SimSurv(30)
+with(dat,plot(Hist(time,status)))
+fit <- prodlim(Hist(time,status)~1,data=dat)
 print(fit)
 plot(fit)
 summary(fit)
 
 ## --------------------clustered data---------------------
 library(survival)
-dat <- data.frame(time=rexp(100),status=rbinom(100,1,.3),X=rbinom(100,1,.5),Z=rnorm(100,10,3),patnr=sample(1:10,size=100,replace=TRUE))
-fit <- prodlim(Hist(time,status)~cluster(patnr),data=dat)
+cdat <- cbind(SimSurv(30),patnr=sample(1:5,size=30,replace=TRUE))
+fit <- prodlim(Hist(time,status)~cluster(patnr),data=cdat)
 print(fit)
 plot(fit)
 summary(fit)
@@ -213,21 +160,25 @@ summary(fit)
 
 ##-----------compare Kaplan-Meier to survival package---------
 
-dat <- SimSurv(100)
+dat <- SimSurv(30)
 pfit <- prodlim(Surv(time,status)~1,data=dat)
 pfit <- prodlim(Hist(time,status)~1,data=dat) ## same thing
 sfit <- survfit(Surv(time,status)~1,data=dat,conf.type="plain")
-##  same result for the survival distribution function 
+##  same result for the survival distribution function
 all(round(pfit$surv,12)==round(sfit$surv,12))
 summary(pfit,digits=3)
 summary(sfit,times=quantile(unique(dat$time)))
 
-##------------------censoring survival function----------------
+##-----------estimating the censoring survival function----------------
 
-rpfit <- prodlim(Hist(time,status)~1,data=dat,reverse=TRUE)
-rsfit <- survfit(Surv(time,1-status)~1,data=dat,conf.type="plain") 
-## not the same if there are ties!
-all(round(rpfit$surv,3)==round(rsfit$surv,3))
+rdat <- data.frame(time=c(1,2,3,3,3,4,5,5,6,7),status=c(1,0,0,1,0,1,0,1,1,0))
+rpfit <- prodlim(Hist(time,status)~1,data=rdat,reverse=TRUE)
+rsfit <- survfit(Surv(time,1-status)~1,data=rdat,conf.type="plain")
+## When there are ties between times at which events are observed
+## times at which subjects are right censored, then the convention
+## is that events come first. This is not obeyed by the above call to survfit,
+## and hence only prodlim delivers the correct reverse Kaplan-Meier:
+cbind("Wrong:"=rsfit$surv,"Correct:"=rpfit$surv)
 
 ##-------------------stratified Kaplan-Meier---------------------
 
@@ -274,14 +225,45 @@ plot(fit,cause="5")
 
 ##------------delayed entry----------------------
 
-## left-truncated event times with competing risk endpoint 
+## left-truncated event times with competing risk endpoint
 
 dat <- data.frame(entry=c(7,3,11,12,11,2,1,7,15,17,3),time=10:20,status=c(1,0,2,2,0,0,1,2,0,2,0))
 fitd <- prodlim(Hist(time=time,event=status,entry=entry)~1,data=dat)
 summary(fitd)
 plot(fitd)
 }
+\author{
+  Thomas A. Gerds \email{tag@biostat.ku.dk}
+}
+\references{
+  Andersen, Borgan, Gill, Keiding (1993) Springer
+  `Statistical Models Based on Counting Processes'
 
-\keyword{survival}% at least one, from doc/KEYWORDS
+  Akritas (1994) The Annals of Statistics 22, 1299-1327
+  Nearest neighbor estimation of a bivariate distribution
+  under random censoring.
+
+  R Beran (1981) http://anson.ucdavis.edu/~beran/paper.html
+  `Nonparametric regression with randomly censored survival
+  data'
+
+  Stute (1984) The Annals of Statistics 12, 917--926
+  `Asymptotic Normality of Nearest Neighbor Regression
+  Function Estimates'
+
+  Ying, Wei (1994) Journal of Multivariate Analysis 50,
+  17-29 The Kaplan-Meier estimate for dependent failure
+  time observations
+}
+\seealso{
+  \code{\link{predictSurv}},
+  \code{\link{predictSurvIndividual}},
+  \code{\link{predictCuminc}}, \code{\link{Hist}},
+  \code{\link{neighborhood}}, \code{\link{Surv}},
+  \code{\link{survfit}}, \code{\link{strata}},
+  \code{\link{cluster}}, \code{\link{NN}}
+}
+\keyword{cluster}
 \keyword{nonparametric}
-\keyword{cluster}% 
+\keyword{survival}
+

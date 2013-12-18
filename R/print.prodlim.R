@@ -1,3 +1,18 @@
+#' Print objects in the prodlim library
+#' 
+#' Pretty printing of objects created with the functionality of the `prodlim'
+#' library.
+#' 
+#' 
+#' @aliases print.prodlim print.neighborhood print.Hist
+#' @param x Object of class \code{prodlim}, \code{Hist} and
+#' \code{neighborhood}.
+#' @param \dots Not used.
+#' @author Thomas Gerds <tag@@biostat.ku.dk>
+#' @seealso \code{\link{summary.prodlim}}, \code{\link{predict.prodlim}}
+#' @keywords survival
+##' @S3method print prodlim
+##' @method print prodlim
 "print.prodlim" <- function(x,...) {
   cat("\n")
   cat("Call: ")

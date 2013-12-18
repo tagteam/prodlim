@@ -10,6 +10,8 @@ Suggests:
     lava,
     KernSmooth,
     survival
+Imports:
+    stats
 Maintainer: Thomas A. Gerds <tag@biostat.ku.dk>
 License: GPL (>= 2)
 Packaged: Wed Oct 3 20:15:28 2007; tag
@@ -49,7 +51,6 @@ Collate:
     'neighborhood.R'
     'neighbors.R'
     'plot.Hist.R'
-    'plot.SimSurv.R'
     'plot.prodlim.R'
     'plotCompetingRiskModel.R'
     'plotIllnessDeathModel.R'
@@ -70,11 +71,10 @@ Collate:
     'resolveLinPred.R'
     'resolveX.R'
     'row.match.R'
-    'shiftPosition.R'
     'sindex.R'
     'statesMethods.R'
     'summary.Hist.R'
     'summary.prodlim.R'
     'survModel.R'
     'crModel.R'
-    'prodlim-package.R'
+    'leaveOneOut.R'

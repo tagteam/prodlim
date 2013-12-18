@@ -1,3 +1,34 @@
+#' Add point-wise confidence limits to the graphs of Kaplan-Meier and
+#' Aalen-Johannsen estimates of survival and cumulative incidence.
+#' 
+#' This function is invoked and controlled by \code{plot.prodlim}.
+#' 
+#' This function should not be called directly. The arguments can be specified
+#' as \code{Confint.arg} in the call to \code{plot.prodim}.
+#' 
+#' @param x an object of class `prodlim' as returned by the \code{prodlim}
+#' function.
+#' @param times where to compute point-wise confidence limits
+#' @param newdata see \code{plot.prodim}
+#' @param type Either \code{"cuminc"} or \code{"survival"} passed to
+#' summary.prodlim as \code{surv=ifelse(type=="cuminc",FALSE,TRUE)}.
+#' @param citype If \code{"shadow"} then confidence limits are drawn as colored
+#' shadows.  Otherwise, dotted lines are used to show the upper and lower
+#' confidence limits.
+#' @param cause see \code{plot.prodim}
+#' @param col the colour of the lines.
+#' @param lty the line type of the lines.
+#' @param lwd the line thickness of the lines.
+#' @param density For \code{citype="shadow"}, the density of the shade. Default
+#' is 55 percent.
+#' @param \dots Further arguments that are passed to the function
+#' \code{segments} if \code{type=="bars"} and to \code{lines} else.
+#' @return Nil
+#' @author Thomas Alexander Gerds <tag@@biostat.ku.dk>
+#' @seealso \code{\link{plot.prodlim}}, \code{\link{atRisk}},
+#' \code{\link{markTime}}
+#' @keywords survival
+#' @export
 confInt <- function(x,
                     times,
                     newdata,

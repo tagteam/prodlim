@@ -1,32 +1,31 @@
 \name{NN}
 \alias{NN}
-%- Also NEED an '\alias' for EACH other topic documented here.
 \title{Dummy function}
-\description{
-  This is a special function used in the context of the conditional
-  product limit estimator. It is similar to the function strata and can be used in
-  a formula to force a stratified analysis in  
-   nearest neighborhoods defined by the values of a continuous predictor.
-}
 \usage{
- NN(x)
+  NN(x)
 }
-%- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{x}{A continuous predictor}
+  \item{x}{A continuous predictor variable}
 }
 \value{
   The argument is passed on as it is: NN(x)=x
 }
-\author{Thomas Gerds }
-\seealso{\code{\link{prodlim}}}
+\description{
+  This is a special function used in the context of the
+  conditional product limit estimator. It is similar to the
+  function strata and can be used in a formula to force a
+  stratified analysis in nearest neighborhoods defined by
+  the values of a continuous predictor.
+}
 \examples{
-\donttest{
-library(survival)
-data(pbc)
-prodlim(Hist(time,statusA)~NN(age),data=pbc)
+dat <- SimSurv(20)
+prodlim(Hist(time,status)~NN(X2),data=dat)
 }
+\author{
+  Thomas Gerds
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
+\seealso{
+  \code{\link{prodlim}}
+}
 \keyword{nonparametric}
+

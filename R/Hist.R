@@ -98,7 +98,7 @@
 #' 
 #' Hist(time=1:10,event=c(99,"event",99,99,99,"event",99,"event",99,99),cens.code=99)
 #' 
-#' TwoStateFrame <- data.frame(time=rlnorm(100),status=rbinom(100,1,.5))
+#' TwoStateFrame <- SimSurv(10)
 #' SurvHist <- with(TwoStateFrame,Hist(time,status))
 #' summary(SurvHist)
 #' plot(SurvHist)
@@ -132,11 +132,11 @@
 #' with(MultiStateFrame1,Hist(time,event=list(from,to)))
 #' 
 #' ## Using the longitudinal input method 
-#' % MultiStateFrame2 <- data.frame(time=rep(1,10),
-#' 			      % event=c(1,2,3,0,1,2,4,2,1,2),
-#' 			      % id=c(1,1,1,1,2,2,2,2,3,3))
-#' % with(MultiStateFrame2,Hist(time,event=event,id=id))
-#' #'
+#' MultiStateFrame2 <- data.frame(time=c(0,1,2,3,4,0,1,2,0,1),
+#' 			      event=c(1,2,3,0,1,2,4,2,1,2),
+#' 			      id=c(1,1,1,1,2,2,2,2,3,3))
+#'  with(MultiStateFrame2,Hist(time,event=event,id=id))
+#'
 #' @export
 "Hist" <- function(time,
                    event,

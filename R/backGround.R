@@ -1,3 +1,33 @@
+#' Background and grid color control.
+#' 
+#' Some users like background colors, and it may be helpful to have grid lines
+#' to read off e.g. probabilities from a Kaplan-Meier graph. Both things can be
+#' controlled with this function. However, it mainly serves
+#' \code{\link{plot.prodlim}}.
+#' 
+#' 
+#' @param xlim Limits for the xaxis, defaults to par("usr")[1:2].
+#' @param ylim Limits for the yaxis, defaults to par("usr")[3:4].
+#' @param bg Background color. Can be multiple colors which are then switched
+#' at each horizontal line.
+#' @param fg Grid line color.
+#' @param horizontal Numerical values at which horizontal grid lines are
+#' plotted.
+#' @param vertical Numerical values at which vertical grid lines are plotted.
+#' @param border The color of the border around the background.
+#' @author Thomas Alexander Gerds <tag@@biostat.ku.dk>
+#' @keywords survival
+#' @examples
+#' 
+#' 
+#' plot(0,0)
+#' backGround(bg="beige",fg="red",vertical=0,horizontal=0)
+#' 
+#' plot(0,0)
+#' backGround(bg=c("yellow","green"),fg="red",xlim=c(-1,1),ylim=c(-1,1),horizontal=seq(0,1,.1))
+#' backGround(bg=c("yellow","green"),fg="red",horizontal=seq(0,1,.1))
+#' 
+#' @export
 backGround <- function(xlim,
                        ylim,
                        bg="white",

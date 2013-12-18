@@ -1,95 +1,22 @@
-SimCompRisk <- function(N,
-                        NC=2,
-                        cens,
-                        cova,
-                        verbose=1,
-                        ...){
-  # {{{ process arguments  
-  cumincNames <- paste("cuminc",1:NC,sep="")
-  default.cuminc.args <- lapply(cumincNames,function(n){
-    list(surv.model="Cox-Weibull",
-         shape=1,
-         baseline=1,
-         link="exp",
-         coef=c(1,-1),
-         transform=NULL)
-  })
-  names(default.cuminc.args) <- cumincNames
-  default.cens.args <- list(model="Cox-exponential",baseline=1/100,link="exp",max=NULL,type="right",coef=NULL,transform=NULL)
-  if (missing(cova))
-    default.cova.args <- list(X1=list("rnorm",mean=0,sd=2),X2=list("rbinom",size=1,prob=.5))
-  else{
-    if (length(cova)>0 && is.null(names(cova))) names(cova) <- paste("X",1:length(cova))
-    default.cova.args <- cova
-  }
-  ## replaceD <- c(lapply(cumincNames,function(x)FALSE),list("cens"=FALSE,"cova"=length(grep("cova\\.*",names(match.call())))>0))
-  replaceD <- c(lapply(cumincNames,function(x)FALSE),list("cens"=FALSE,"cova"=FALSE))
-  names(replaceD)[1:length(cumincNames)] <- cumincNames
-  smartA <- SmartControl(call=match.call(expand.dots=TRUE),
-                         keys=c(cumincNames,"cens","cova"),
-                         ignore=c("N",cumincNames,"cens","cova","verbose"),
-                         defaults=c(default.cuminc.args,list("cens"=default.cens.args,"cova"=default.cova.args)),
-                         ignore.case=FALSE,
-                         replaceDefaults=replaceD,
-                         verbose=TRUE)
-  cuminc1 <- smartA[[grep("^cuminc1",names(smartA))]]
-  cuminc2 <- smartA[[grep("^cuminc2",names(smartA))]]
-  cens <- smartA$cens
-  # }}}
-  # {{{ resolving covariates
-  X.matrix <- resolveX(object=smartA$cova,N=N)
-  NP <- NCOL(X.matrix)
-  cova <- smartA$cova
-  # }}}
-  # {{{ sampling the cause and latent times
-  lp1 <- resolveLinPred(X=X.matrix,coef=cuminc1$coef)
-  lp2 <- resolveLinPred(X=X.matrix,coef=cuminc2$coef)
-  elp <- (exp(lp1)/(1+exp(lp1)))
-  cause <- do.call("rbinom",list(n=N,size=1,prob=elp))+1
-  T1 <- SimSurvInternal(N=sum(cause==1),model=cuminc1$surv.model,link=cuminc1$link,baseline=cuminc1$baseline,linpred=lp1[cause==1],shape=cuminc1$shape)
-  T2 <- SimSurvInternal(N=N-sum(cause==1),model=cuminc2$surv.model,link=cuminc2$link,baseline=cuminc2$baseline,linpred=lp2[cause==2],shape=cuminc2$shape)
-  # }}}
-  # {{{ censoring 
-  if (length(cens$type)>0)
-    censType <- match(cens$type,c("interval","right"),nomatch=0)
-  censnotwanted <- ((!missing(cens) && is.logical(cens) && cens==FALSE) || censType==0)
-  if (censnotwanted==TRUE)
-    cens.time <- rep(Inf,N)
-  else{ # special links between right censoring and covariates
-    if (length(cens$transform)>0){
-      censSpecials <- TRUE
-      cens.X <- transformX(X=X.matrix,transform=cens$transform,transName="f")
-    }
-    else{
-      censSpecials <- FALSE
-      cens.X <- X.matrix
-    }
-    linpred.cens <- resolveLinPred(X=cens.X,coef=cens$coef,verbose=verbose)
-    cens.time <- SimSurvInternal(N=N,model=cens$model,link=cens$link,baseline=cens$baseline,linpred=linpred.cens,shape=cens$shape)
-  }
-  if (is.numeric(cens$max)) cens.time <- pmin(cens.time, cens$max)
-  # }}}
-  # {{{ event time and censoring status
-
-  surv.time <- numeric(N)
-  surv.time[cause==1] <- T1
-  surv.time[cause==2] <- T2
-  status <- as.numeric(surv.time <= cens.time)
-
-  # }}}
-  # {{{ return data frame
-  out <- data.frame(cbind(time = pmin(surv.time, cens.time),status = status,cause=cause*(status>0),ucens.cause=cause,ucens.time=surv.time,cens.time=cens.time))
-  if (!is.null(X.matrix)) out <- cbind(out,X.matrix)
-  out
-  # }}}
+##' Simulate right censored competing risks data with two covariates X1 and X2. Both covariates have effect exp(1) on the hazards of event 1 and zero effect on the hazard of event 2.
+##'
+##' This function calls \code{crModel}, then adds covariates and finally calls \code{sim.lvm}.
+##' @title Simulate competing risks data
+##' @param N sample size
+##' @param ... do nothing.
+##' @return data.frame with simulated data
+##' @author Thomas Alexander Gerds
+##' @examples
+##' 
+##' SimCompRisk(10)
+##'             
+##' @export
+SimCompRisk <- function(N, ...){
+    require(lava)
+    m <- crModel()
+    regression(m,from="X1",to="eventtime1") <- 1
+    regression(m,from="X2",to="eventtime1") <- 1
+    distribution(m,"X1") <- binomial.lvm()
+    sim(m,N)
 }
-
-## lp <- c(X %*% beta)
-# lp <- c(X %*% beta)
-## cause1 <- rbinom(n,1,p1x)
-## time <- (-1)*log(1-((1-(1-u*p1x)^(exp(-lRR)))/p1))
-## if (trans=="logistic") # what model is this
-##   lRR <- c(X %*% beta); RR <- exp(lRR);
-##   cause1 <- rbinom(n,1,p1x)
-##   time <- (-1)*log(1-exp(log(u*p1x/(1-u*p1x))-lRR)*(1-p1)/p1)
  

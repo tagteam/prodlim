@@ -1,3 +1,30 @@
+#' Extract a column from an event history object.
+#' 
+#' Extract a column from an event history object, as obtained with the function
+#' \code{\link{Hist}}.
+#' 
+#' Since objects of class \code{"Hist"} are also matrices, all columns are
+#' numeric or integer valued. To extract a correctly labeled version, the
+#' attribute \code{states} of the object is used to generate factor levels.
+#' 
+#' @aliases getEvent getStates
+#' @param object Object of class \code{"Hist"}.
+#' @param mode Return mode. One of \code{"numeric"}, \code{"character"}, or
+#' \code{"factor"}.
+#' @param column Name of the column to extract from the object.
+#' @author Thomas Alexander Gerds <tag@@biostat.ku.dk>
+#' @seealso \code{\link{Hist}}
+#' @keywords survival
+#' @examples
+#' 
+#'   dat= data.frame(time=1:5,event=letters[1:5])
+#'   x=with(dat,Hist(time,event))
+#'   ## inside integer
+#'   unclass(x)
+#'   ## extract event (the extra level "unknown" is for censored data)
+#'   getEvent(x)
+#'
+#' @export
 getEvent <- function(object,mode="factor",column="event"){
   model <- attr(object,"model")
   if (model=="multi.state")

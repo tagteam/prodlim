@@ -1,14 +1,23 @@
-SimSurv <- function(N,
-                    surv,
-                    cova,
-                    cens,
-                    verbose=1,
-                    ...){
+##' Simulate right censored survival data with two covariates X1 and X2, both have effect exp(1) on the hazard of the unobserved event time.
+##'
+##' This function calls \code{survModel}, then adds  covariates and finally calls \code{sim.lvm}.
+##' @title Simulate survival data
+##' @param N sample size
+##' @param ... do nothing
+##' @return data.frame with simulated data
+##' @author Thomas Alexander Gerds
+##' @examples
+##' 
+##' SimSurv(10)
+##'
+##' @export
+SimSurv <- function(N, ...){
     require(lava)
     m <- survModel()
     regression(m,from="X1",to="eventtime") <- 1
     regression(m,from="X2",to="eventtime") <- 1
     distribution(m,"X1") <- binomial.lvm()
+    m <- eventTime(m,time~min(eventtime=1,censtime=0),"status")
     sim(m,N)
 }
 
