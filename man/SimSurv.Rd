@@ -102,7 +102,7 @@ Thomas Augustin and Maria Blettner, Statistics in Medicine 2005;
 % }
 \seealso{\code{\link{prodlim}}}
 \examples{
-\dontrun{
+\donttest{
 SimSurv(10)
 SurvData=SimSurv(100,cens.baseline=1/10,surv.baseline=2)
 Hist(SurvData$time,SurvData$status)

@@ -68,7 +68,7 @@ small samples, but much slower in large samples. See examples.
   \code{\link{prodlim}}
 }
 \examples{
-\dontrun{
+\donttest{
 
 ## pseudo-values for survival models
 

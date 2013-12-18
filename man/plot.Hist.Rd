@@ -109,7 +109,7 @@ Box-arrow diagrams for multi-state models.
 \examples{
 
 ## A simple survival model
-\dontrun{
+\donttest{
 
 ## or simply create some data
 SurvFrame <- data.frame(time=1:10,status=sample(0:1,10,TRUE))

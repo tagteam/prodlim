@@ -87,7 +87,7 @@ SurvFrame <- data.frame(time=1:10,status=rbinom(10,1,.5))
  x <- prodlim(formula=Hist(time=time,status!=0)~1,data=SurvFrame)
  summary(x)
  summary(x,times=c(1,5,10,12),percent=TRUE,intervals=TRUE,digits=3)
-\dontrun{
+\donttest{
 library(survival) 
 data(pbc)
 f <- prodlim(Hist(time,status!=1)~sex,data=pbc)

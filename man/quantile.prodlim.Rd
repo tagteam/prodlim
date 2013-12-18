@@ -47,7 +47,7 @@ Thomas Alexander Gerds <tag@biostat.ku.dk>
 % }
 \examples{
 
-\dontrun{
+\donttest{
 d=SimSurv(100)
 f=prodlim(Hist(time,status)~X2,data=d)
 # median

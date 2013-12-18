@@ -52,7 +52,7 @@ neighborhood(x, bandwidth = NULL, kernel = "box")
 ##---- Should be DIRECTLY executable !! ----
 ##-- ==>  Define data, use random,
 ##--	or do  help(data=index)  for the standard data sets.
-\dontrun{
+\donttest{
 library(survival)
 data(pbc)
 neighborhood(pbc$age)
