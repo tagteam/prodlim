@@ -100,6 +100,7 @@ x <- summary(fa,times=1000,newdata=expand.grid(age=c(60,40,50),sex=c("m","f")))
 cbind(names(x$table),do.call("rbind",lapply(x$table,round,2)))
 
 }
+}
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
 \keyword{survival}

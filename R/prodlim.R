@@ -5,6 +5,7 @@
                       reverse=FALSE,
                       conf.int=.95,
                       bandwidth=NULL,
+                      caseweights,
                       discrete.level=3,
                       # force.multistate=FALSE,
                       maxiter=1000,
@@ -12,8 +13,8 @@
                       tol=7,
                       method=c("npmle","one.step","impute.midpoint","impute.right"),
                       exact=TRUE){
-
-  # {{{  check if formula is a formula 
+    
+    # {{{  check if formula is a formula 
   formula.names <- try(all.names(formula),silent=TRUE)
   if (!(formula.names[1]=="~")
       ||
@@ -24,69 +25,81 @@
 
   # }}}
   # {{{  find the data
+
   call <- match.call()
   m <- match.call(expand.dots = FALSE)
   m <- m[match(c("","formula","data","subset","na.action"),names(m),nomatch = 0)]
-  special <- c("strata", "NN","cluster","dummy")
+  special <- c("strata","factor", "NN","cluster","dummy")
   if (missing(data)) Terms <- terms(formula, special)
   else Terms <- terms(formula,special,data=data)
   m$formula <- Terms
   m[[1]] <- as.name("model.frame")
-  m <- eval(m, parent.frame())
-  if (NROW(m) == 0) stop("No (non-missing) observations")
-  rownames(m) <- NULL
-  response <- model.extract(m, "response")
-  #  FIX for people who use `Surv' instead of `Hist' 
-  if (match("Surv",class(response),nomatch=0)!=0){
+
+m <- eval(m, parent.frame())
+if (NROW(m) == 0) stop("No (non-missing) observations")
+rownames(m) <- NULL
+response <- model.extract(m, "response")
+#  FIX for people who use `Surv' instead of `Hist' 
+if (match("Surv",class(response),nomatch=0)!=0){
     attr(response,"model") <- "survival"
     attr(response,"cens.type") <- "rightCensored"
     ## attr(response,"entry.type") <- ""
     model.type <- 1
-  }
-  else{
+}
+else{
     model.type <- match(attr(response,"model"),c("survival","competing.risks","multi.states"))
-  }
-  ## estimation of censoring distribution
-  if (reverse==TRUE) model.type <- 1
-  cens.type <- attr(response,"cens.type")
-  ##          stop("Response must be a survival or event history object created with `Surv' or `Hist'."))
-  #  if (force.multistate==TRUE) model.type <- 3
-  event.history <- response
-  ## print(attributes(response))
-  ## print(cens.type)
-  if (cens.type!="intervalCensored"){
+}
+## estimation of censoring distribution
+if (reverse==TRUE) model.type <- 1
+cens.type <- attr(response,"cens.type")
+##          stop("Response must be a survival or event history object created with `Surv' or `Hist'."))
+#  if (force.multistate==TRUE) model.type <- 3
+event.history <- response
+## print(attributes(response))
+## print(cens.type)
+if (cens.type!="intervalCensored"){
     event.time.order <- order(event.history[,"time"],-event.history[,"status"])
-  }
-  else{
+}
+else{
     event.time.order <- order(event.history[,"L"],-event.history[,"status"])
-  }
-  
+}
+
   # }}}
   # {{{  covariates
-  
+
   covariates <- model.specials(m,special)
+  
+  ##  `factor' is an alias for `strata'
+  if (!is.null(covariates$factor)){
+      if (!is.null(covariates$strata)){
+          covariates$strata <- cbind(covariates$strata,covariates$factor)
+      }else{
+          covariates$strata <- covariates$factor
+      }
+  }
+  
   if (length(attr(Terms,"factors"))==0){
-    cotype <- 1
+      cotype <- 1
   }
   else{
-    if (length(covariates$dummy)>0)
-      if (length(covariates$strata)>0)
-        covariates$strata <- cbind(covariates$strata,covariates$dummy)
-      else covariates$strata <- covariates$dummy
-    covariates$dummy <- NULL
-    all.varnames <- all.vars(delete.response(Terms))
-    rest <- covariates$unspecified
-    covariates$unspecified <- NULL
-    discrete.p <- sapply(names(rest),function(u){x <- rest[,u,drop=TRUE]; !is.numeric(x) || !length(unique(x))>discrete.level})
-    if (any(!discrete.p))
-      covariates$NN <- if (is.null(covariates$NN)) rest[,!discrete.p,drop=FALSE] else cbind(covariates$NN,rest[,!discrete.p,drop=FALSE])
-    if (any(discrete.p)){
-      covariates$strata <- if (is.null(covariates$strata)) rest[,discrete.p,drop=FALSE] else cbind(covariates$strata,rest[,discrete.p,drop=FALSE])
-    }
-    if (NCOL(covariates$NN)>1) stop(paste("Currently we can not compute neighborhoods in", length(names(covariates$NN)),"continuous dimensions."))
-    if (NCOL(covariates$NN)>1)
-      stop(paste("Currently we can not compute neighborhoods in",length(names(covariates$NN)),"continuous dimensions."))
-    cotype <- 1 + (!is.null(covariates$strata))*1+(!is.null(covariates$NN))*2
+      if (length(covariates$dummy)>0)
+          if (length(covariates$strata)>0)
+              covariates$strata <- cbind(covariates$strata,covariates$dummy)
+          else covariates$strata <- covariates$dummy
+      covariates$dummy <- NULL
+      all.varnames <- all.vars(delete.response(Terms))
+      rest <- covariates$unspecified
+      covariates$unspecified <- NULL
+      discrete.p <- sapply(names(rest),function(u){x <- rest[,u,drop=TRUE]; !is.numeric(x) || !length(unique(x))>discrete.level})
+      if (any(!discrete.p))
+          covariates$NN <- if (is.null(covariates$NN)) rest[,!discrete.p,drop=FALSE] else cbind(covariates$NN,rest[,!discrete.p,drop=FALSE])
+      if (any(discrete.p)){
+          covariates$strata <- if (is.null(covariates$strata)) rest[,discrete.p,drop=FALSE] else cbind(covariates$strata,rest[,discrete.p,drop=FALSE])
+      }
+      if (NCOL(covariates$NN)>1) stop(paste("Currently we can not compute neighborhoods in", length(names(covariates$NN)),"continuous dimensions."))
+      if (NCOL(covariates$NN)>1)
+          stop(paste("Currently we can not compute neighborhoods in",length(names(covariates$NN)),"continuous dimensions."))
+      cotype <- 1 + (!is.null(covariates$strata))*1+(!is.null(covariates$NN))*2
   }
   ## cotype
   # 1 : no covariates
@@ -138,7 +151,6 @@
   
 # }}}
   # {{{  bound on the number of unique time points over all strata  
-
   switch(cotype,
          { # type=1
            size.strata <- NROW(response)
@@ -210,25 +222,37 @@
   event.history <- event.history[event.time.order,,drop=FALSE]
   
   # }}}
+  # {{{ caseweights
+  if (missing(caseweights)) {
+      weighted <- 0
+      caseweights <- NULL
+  }
+  else {
+      weighted <- 1
+      if(length(caseweights)!=NROW(response))
+          stop(paste("The length of caseweights is: ", length(caseweights), "\nthis is not the same as the number of subjects\nwith no missing values, which is ",  NROW(response),sep=""))
+      caseweights <- caseweights[event.time.order]
+  }
+  # }}}
   # {{{  cluster correlated data need an adjusted variance formula
   clustered <- (length(covariates$cluster)>0)
   if (clustered)
-    clustervar <- names(covariates$cluster)
+      clustervar <- names(covariates$cluster)
   else
-    clustervar <- NULL
+      clustervar <- NULL
   if (clustered){
-    cluster <- covariates$cluster[sorted,,drop=TRUE]
-    if (cotype==1){
-      NC <- length(unique(cluster))
-      cluster <- factor(cluster,labels=1:NC)
-    }
-    else{
-      if (cotype==2){
-        NC <- unlist(tapply(cluster,Sfactor,function(x){length(unique(x))}))
-        cluster <- as.numeric(unlist(tapply(cluster,Sfactor,function(x){
-          factor(x,labels=1:length(unique(x)))})))
+      cluster <- covariates$cluster[sorted,,drop=TRUE]
+      if (cotype==1){
+          NC <- length(unique(cluster))
+          cluster <- factor(cluster,labels=1:NC)
       }
-    }
+      else{
+          if (cotype==2){
+              NC <- unlist(tapply(cluster,Sfactor,function(x){length(unique(x))}))
+              cluster <- as.numeric(unlist(tapply(cluster,Sfactor,function(x){
+                  factor(x,labels=1:length(unique(x)))})))
+          }
+      }
   }
   # }}}
   # {{{  find the appropriate C routine
@@ -243,99 +267,140 @@
   if (clustered && cotype %in% c(3,4)) stop("Prodlim: Cluster-correlated observations not yet handled in presence of continuous covariates") #cluster <- cluster[neighbors]
   if (cotype>1 && cens.type=="intervalCensored") stop("Prodlim: Interval censored data and covariate strata not yet handled.")
   if (model.type==1){
-    # }}}
-  # {{{  two state model
-    if (clustered){
-      fit <- .C("prodlim",as.double(response[,"time"]),as.integer(response[,"status"]),integer(0),as.integer(cluster),as.integer(N),integer(0),as.integer(NC),as.integer(NU),as.integer(size.strata),time=double(N),nrisk=double(2*N),nevent=integer(2*N),ncens=integer(2*N),surv=double(N),cuminc=double(0),hazard=double(N),var.hazard=double(N+N),extra.double=double(2 * max(NC)),extra.long=c(as.integer(max(NC)),integer(2 * max(NC))),ntimes=integer(1),ntimes.strata=integer(NU),first.strata=integer(NU),reverse=integer(0),model=as.integer(0),independent=as.integer(0),PACKAGE="prodlim")
-      NT <- fit$ntimes
-      Cout <- list("time"=fit$time[1:NT],"n.risk"=matrix(fit$nrisk,ncol=2,byrow=FALSE,dimnames=list(NULL,c("n.risk","cluster.n.risk")))[1:NT,],"n.event"=matrix(fit$nevent,ncol=2,byrow=FALSE,dimnames=list(NULL,c("n.event","cluster.n.event")))[1:NT,],"n.lost"=matrix(fit$ncens,ncol=2,byrow=FALSE,dimnames=list(NULL,c("n.lost","cluster.n.lost")))[1:NT,],"surv"=fit$surv[1:NT],"se.surv"=fit$surv[1:NT]*sqrt(fit$var.hazard[N+(1:NT)]),"naive.se.surv"=fit$surv[1:NT]*sqrt(fit$var.hazard[1:NT]),"hazard"=fit$hazard[1:NT],"first.strata"=fit$first.strata,"size.strata"=fit$ntimes.strata,"model"="survival")
-      Cout$maxtime <- max(Cout$time)
-    }
-    else{
-      if (cens.type=="intervalCensored"){
-        if (length(method)>1) method <- method[1]
-        if (length(grep("impute",method))>0){
-          naiiveMethod <- strsplit(method,"impute.")[[1]][[2]]
-          if (naiiveMethod=="midpoint"){
-            naiveResponse <- data.frame(unclass(response))
-            naiveResponse$imputedTime <- (naiveResponse$L+naiveResponse$R)/2
-            naiveResponse[naiveResponse[,"status"]==0,"imputedTime"] <- naiveResponse[naiveResponse[,"status"]==0,"L"]
-            Cout <- prodlim(Hist(imputedTime,status!=0)~1,data=naiveResponse)
-            return(Cout)
-          }
-        }
-        else{
-          Cout <- prodlimIcensSurv(response,grid,tol=tol,maxiter=maxiter,ml=ifelse(method=="one.step",FALSE,TRUE),exact=exact)
-        }
+      # }}}
+      # {{{  two state model
+      if (clustered){
+          ## right censored clustered
+          fit <- .C("prodlim",as.double(response[,"time"]),as.double(response[,"status"]),integer(0),as.double(caseweights),as.integer(cluster),as.integer(N),integer(0),as.integer(NC),as.integer(NU),as.integer(size.strata),time=double(N),nrisk=double(2*N),nevent=double(2*N),ncens=double(2*N),surv=double(N),cuminc=double(0),hazard=double(N),var.hazard=double(N+N),extra.double=double(2 * max(NC)),extra.long=c(as.integer(max(NC)),integer(2 * max(NC))),ntimes=integer(1),ntimes.strata=integer(NU),first.strata=integer(NU),reverse=integer(0),model=as.integer(0),independent=as.integer(0),weighted=as.integer(weighted),PACKAGE="prodlim")
+          NT <- fit$ntimes
+          Cout <- list("time"=fit$time[1:NT],"n.risk"=matrix(fit$nrisk,ncol=2,byrow=FALSE,dimnames=list(NULL,c("n.risk","cluster.n.risk")))[1:NT,],"n.event"=matrix(fit$nevent,ncol=2,byrow=FALSE,dimnames=list(NULL,c("n.event","cluster.n.event")))[1:NT,],"n.lost"=matrix(fit$ncens,ncol=2,byrow=FALSE,dimnames=list(NULL,c("n.lost","cluster.n.lost")))[1:NT,],"surv"=fit$surv[1:NT],"se.surv"=fit$surv[1:NT]*sqrt(pmax(0,fit$var.hazard[N+(1:NT)])),"naive.se.surv"=fit$surv[1:NT]*sqrt(pmax(0,fit$var.hazard[1:NT])),"hazard"=fit$hazard[1:NT],"first.strata"=fit$first.strata,"size.strata"=fit$ntimes.strata,"model"="survival")
+          Cout$maxtime <- max(Cout$time)
       }
       else{
-        fit <- .C("prodlim",as.double(response[,"time"]),as.integer(response[,"status"]),integer(0),integer(0),as.integer(N),integer(0),integer(0),as.integer(NU),as.integer(size.strata),time=double(N),nrisk=double(N),nevent=integer(N),ncens=integer(N),surv=double(N),double(0),hazard = double(N),var.hazard=double(N),extra.double=double(0),extra.long=integer(0),ntimes=integer(1),ntimes.strata=integer(NU),first.strata=integer(NU),as.integer(reverse),model=as.integer(0),independent=as.integer(1),PACKAGE="prodlim")
-        NT <- fit$ntimes
-        Cout <- list("time"=fit$time[1:NT],"n.risk"=fit$nrisk[1:NT],"n.event"=fit$nevent[1:NT],"n.lost"=fit$ncens[1:NT],"surv"=fit$surv[1:NT],"se.surv"=fit$surv[1:NT]*sqrt(fit$var.hazard[1:NT]),"hazard"=fit$hazard[1:NT],"first.strata"=fit$first.strata,"size.strata"=fit$ntimes.strata,"model"="survival")
-        Cout$maxtime <- max(Cout$time)
+          if (cens.type=="intervalCensored"){
+              if (length(method)>1) method <- method[1]
+              if (length(grep("impute",method))>0){
+                  naiiveMethod <- strsplit(method,"impute.")[[1]][[2]]
+                  if (naiiveMethod=="midpoint"){
+                      naiveResponse <- data.frame(unclass(response))
+                      naiveResponse$imputedTime <- (naiveResponse$L+naiveResponse$R)/2
+                      naiveResponse[naiveResponse[,"status"]==0,"imputedTime"] <- naiveResponse[naiveResponse[,"status"]==0,"L"]
+                      Cout <- prodlim(Hist(imputedTime,status!=0)~1,data=naiveResponse)
+                      return(Cout)
+                  }
+              }
+              else{
+                  Cout <- prodlimIcensSurv(response,grid,tol=tol,maxiter=maxiter,ml=ifelse(method=="one.step",FALSE,TRUE),exact=exact)
+              }
+          }
+          else{
+              ## right censored not clustered
+              fit <- .C("prodlim",as.double(response[,"time"]),as.double(response[,"status"]),integer(0),as.double(caseweights),integer(0),as.integer(N),integer(0),integer(0),as.integer(NU),as.integer(size.strata),time=double(N),nrisk=double(N),nevent=double(N),ncens=double(N),surv=double(N),double(0),hazard = double(N),var.hazard=double(N),extra.double=double(0),extra.long=integer(0),ntimes=integer(1),ntimes.strata=integer(NU),first.strata=integer(NU),as.integer(reverse),model=as.integer(0),independent=as.integer(1),weighted=as.integer(weighted),PACKAGE="prodlim")
+              NT <- fit$ntimes
+              Cout <- list("time"=fit$time[1:NT],"n.risk"=fit$nrisk[1:NT],"n.event"=fit$nevent[1:NT],"n.lost"=fit$ncens[1:NT],"surv"=fit$surv[1:NT],"se.surv"=fit$surv[1:NT]*sqrt(pmax(0,fit$var.hazard[1:NT])),"hazard"=fit$hazard[1:NT],"first.strata"=fit$first.strata,"size.strata"=fit$ntimes.strata,"model"="survival")
+              Cout$maxtime <- max(Cout$time)
+          }
       }
-    }
   }
   else{
-    # }}}
-    # {{{ competing.risks model
-    if (model.type==2){
-      states <- attr(response,"states")
-      E <- response[,"event"]-1 # for the c routine
-      D <- response[,"status"]
-      NS <- length(unique(E[D!=0])) # number of different causes
-      fit <- .C("prodlim",as.double(response[,"time"]),as.integer(D),as.integer(E),integer(0),as.integer(N),as.integer(NS),integer(0),as.integer(NU),as.integer(size.strata),time=double(N),nrisk=double(N),nevent=integer(N * NS),ncens=integer(N),surv=double(N),cuminc=double(N * NS),cause.hazard = double(N * NS),var.hazard=double(N * NS),double(4 * NS),integer(0),ntimes=integer(1),ntimes.strata=integer(NU),first.strata=integer(NU),reverse=integer(0),model=as.integer(1),independent=as.integer(1),PACKAGE="prodlim")
-      NT <- fit$ntimes
-      # changed Tue Sep 30 12:51:58 CEST 2008
-      # its easier to work with a list than with a matrix
-      #      gatherC <- function(x,dimR=fit$ntimes,dimC=NS,names=states){
-      #        matrix(x[1:(dimR*dimC)],ncol=dimC,byrow=TRUE,dimnames=list(rep("",dimR),names))
-      #      }
-      gatherC <- function(x,dimR=fit$ntimes,dimC=NS,names=states){
-        out <- split(x[1:(dimR*dimC)],rep(1:NS,dimR))
-        names(out) <- names
-        out
+      # }}}
+      # {{{ competing.risks model
+      if (model.type==2){
+          states <- attr(response,"states")
+          E <- response[,"event"]-1 # for the c routine
+          D <- response[,"status"]
+          NS <- length(unique(E[D!=0])) # number of different causes
+          fit <- .C("prodlim",
+                    as.double(response[,"time"]),
+                    as.double(D),
+                    as.integer(E),
+                    as.double(caseweights),
+                    integer(0),
+                    as.integer(N),
+                    as.integer(NS),
+                    integer(0),
+                    as.integer(NU),
+                    as.integer(size.strata),
+                    time=double(N),
+                    nrisk=double(N),
+                    nevent=double(N * NS),
+                    ncens=double(N),
+                    surv=double(N),
+                    cuminc=double(N * NS),
+                    cause.hazard = double(N * NS),
+                    var.hazard=double(N * NS),
+                    double(4 * NS),
+                    integer(0),
+                    ntimes=integer(1),
+                    ntimes.strata=integer(NU),
+                    first.strata=integer(NU),
+                    reverse=integer(0),
+                    model=as.integer(1),
+                    independent=as.integer(1),
+                    weighted=as.integer(weighted),
+                    PACKAGE="prodlim")
+          NT <- fit$ntimes
+          # changed Tue Sep 30 12:51:58 CEST 2008
+          # its easier to work with a list than with a matrix
+          #      gatherC <- function(x,dimR=fit$ntimes,dimC=NS,names=states){
+          #        matrix(x[1:(dimR*dimC)],ncol=dimC,byrow=TRUE,dimnames=list(rep("",dimR),names))
+          #      }
+          gatherC <- function(x,dimR=fit$ntimes,dimC=NS,names=states){
+              out <- split(x[1:(dimR*dimC)],rep(1:NS,dimR))
+              names(out) <- names
+              out
+          }
+          Cout <- list("time"=fit$time[1:NT],
+                       "n.risk"=fit$nrisk[1:NT],
+                       "n.event"=gatherC(fit$nevent),
+                       "n.lost"=fit$ncens[1:NT],
+                       "cuminc"=gatherC(fit$cuminc),
+                       "var.cuminc"=gatherC(fit$var.hazard),
+                       "se.cuminc"=gatherC(sqrt(pmax(0,fit$var.hazard))),
+                       "surv"=fit$surv[1:NT],
+                       "cause.hazard"=gatherC(fit$cause.hazard),
+                       "first.strata"=fit$first.strata,
+                       "size.strata"=fit$ntimes.strata,
+                       "model"="competing.risks")
+          Cout$maxtime <- max(Cout$time)
       }
-      Cout <- list("time"=fit$time[1:NT],"n.risk"=fit$nrisk[1:NT],"n.event"=gatherC(fit$nevent),"n.lost"=fit$ncens[1:NT],"cuminc"=gatherC(fit$cuminc),"var.cuminc"=gatherC(fit$var.hazard),"se.cuminc"=gatherC(sqrt(fit$var.hazard)),"surv"=fit$surv[1:NT],"cause.hazard"=gatherC(fit$cause.hazard),"first.strata"=fit$first.strata,"size.strata"=fit$ntimes.strata,"model"="competing.risks")
-      Cout$maxtime <- max(Cout$time)
-    }
-    else {
-      # multi.state model
-      # --------------------------------------------------------------------    
-      Cout <- prodlimMulti(response,size.strata,N,NU)
-      Cout$maxtime <- max(Cout$time)
-    }
+      else {
+          # multi.state model
+          # --------------------------------------------------------------------    
+          Cout <- prodlimMulti(response,size.strata,N,NU)
+          Cout$maxtime <- max(Cout$time)
+      }
   }
   if (conf.int==TRUE) conf.int <- 0.95
   # }}}
   # {{{  confidence intervals
   if (is.numeric(conf.int) && cens.type!="intervalCensored"){
-    if (model.type==1){
-      if (!(is.null(Cout$se.surv))){
-        ## pointwise confidence intervals for survival probability
-        zval <- qnorm(1- (1-conf.int)/2, 0,1)
-        lower <- pmax(Cout$surv - zval * Cout$se.surv,0)
-        lower[Cout$se.surv==0] <- 0
-        upper <- pmin(Cout$surv + zval * Cout$se.surv,1)
-        upper[Cout$se.surv==0] <- 1
-        Cout <- c(Cout,list(lower=lower,upper=upper))
+      if (model.type==1){
+          if (!(is.null(Cout$se.surv))){
+              ## pointwise confidence intervals for survival probability
+              zval <- qnorm(1- (1-conf.int)/2, 0,1)
+              lower <- pmax(Cout$surv - zval * Cout$se.surv,0)
+              lower[Cout$se.surv==0] <- 0
+              upper <- pmin(Cout$surv + zval * Cout$se.surv,1)
+              upper[Cout$se.surv==0] <- 1
+              Cout <- c(Cout,list(lower=lower,upper=upper))
+          }
       }
-    }
-    else{
-      if (is.numeric(conf.int)){
-        if (!(0<conf.int && conf.int<1)) conf.int <- 0.95
-        ## pointwise confidence intervals for cumulative incidence probabilities
-        # variance for cuminc (Korn & Dorey (1992), Stat in Med, Vol 11, page 815)
-        zval <- qnorm(1- (1-conf.int)/2, 0,1)
-        lower <- lapply(1:NS, function(state){
-          pmax(Cout$cuminc[[state]] - zval * Cout$se.cuminc[[state]],0)})
-        upper <- lapply(1:NS, function(state){
-          pmin(Cout$cuminc[[state]] + zval * Cout$se.cuminc[[state]],1)})
-        names(lower) <- states
-        names(upper) <- states
-        Cout <- c(Cout,list(lower=lower,upper=upper))
+      else{
+          if (is.numeric(conf.int)){
+              if (!(0<conf.int && conf.int<1)) conf.int <- 0.95
+              ## pointwise confidence intervals for cumulative incidence probabilities
+              # variance for cuminc (Korn & Dorey (1992), Stat in Med, Vol 11, page 815)
+              zval <- qnorm(1- (1-conf.int)/2, 0,1)
+              lower <- lapply(1:NS, function(state){
+                  pmax(Cout$cuminc[[state]] - zval * Cout$se.cuminc[[state]],0)})
+              upper <- lapply(1:NS, function(state){
+                  pmin(Cout$cuminc[[state]] + zval * Cout$se.cuminc[[state]],1)})
+              names(lower) <- states
+              names(upper) <- states
+              Cout <- c(Cout,list(lower=lower,upper=upper))
+          }
       }
-    }
   }
   # }}}
   # {{{ return object of class "prodlim"
