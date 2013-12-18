@@ -1,10 +1,14 @@
 SimSurv <- function(N,
                     surv,
-                    cens,
                     cova,
+                    cens,
                     verbose=1,
                     ...){
-  warning("This function is obsolete and will be replaced by corresponding functionality of the lava package.")
+    require(lava)
+    simmodel <- lvm(cova)
+    
+    
+  ## warning("This function is obsolete and will be replaced by corresponding functionality of the lava package.")
   # {{{  argument control
   default.surv.args <- list(model="Cox-Weibull",shape=1,baseline=1/100,link="exp",coef=c(1,-1),transform=NULL)
   default.cens.args <- list(model="Cox-exponential",baseline=1/100,link="exp",max=NULL,type="right",coef=NULL,transform=NULL)
@@ -36,12 +40,11 @@ SimSurv <- function(N,
   ## backward compatibility
   if (!is.null(surv$dist)) {warning("Argument surv.dist is depreciated. please use surv.model instead.")}
   if (!censnotwanted)
-    if (!is.null(cens$dist)) {warning("Argument surv.dist is depreciated. please use surv.model instead.")}
- # }}}
+      if (!is.null(cens$dist)) {warning("Argument surv.dist is depreciated. please use surv.model instead.")}
+  # }}}
   
   # {{{ resolving covariate design matrix
-  X.matrix <- do.call(resolveX,
-                      c(list(N=N),object=list(smartA$cova)))
+  X.matrix <- do.call(resolveX,c(list(N=N),object=list(smartA$cova)))
   NP <- NCOL(X.matrix)
   # }}}
 

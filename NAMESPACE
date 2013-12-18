@@ -26,7 +26,7 @@ export("Hist",
        "readFormula",
        "quantile.prodlim")
 
-import(survival,KernSmooth)
+## import(survival,KernSmooth)
 
 S3method(print,Hist)
 S3method(summary,Hist)

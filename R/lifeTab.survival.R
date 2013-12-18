@@ -81,10 +81,11 @@ lifeTab.survival <- function(object,times,newdata,stats,intervals=FALSE,percent=
     # {{{ percent
     if (!is.null(stats)){
         statsList <- lapply(stats,function(x){
-            if (percent==TRUE && length(grep(x[1],c("n.event","n.lost","n.risk"),value=FALSE))==0)
+            if (percent==TRUE && length(grep(x[1],c("n.event","n.lost","n.risk"),value=FALSE))==0){
                 100*as.numeric(c(x[2],object[[x[1]]])[pindex+1])
-            else
+            } else{
                 as.numeric(c(x[2],object[[x[1]]])[pindex+1])
+            }
         })
         names(statsList) <- sapply(stats,function(x)x[[1]])
         add <- do.call("cbind",statsList)

@@ -61,7 +61,8 @@
     interpretable on a percent scale.
   }
   \item{showTime}{
-    Passed to \code{lifetable}
+    If \code{TRUE} evaluation times are put into a column of the output table,
+    otherwise evaluation times are shown as rownames.
   }
   \item{\dots}{
     Further arguments that are passed to the print function.
@@ -92,6 +93,8 @@ data(pbc)
 f <- prodlim(Hist(time,status!=1)~sex,data=pbc)
 summary(f)
 summary(f,newdata=data.frame(sex=c("m","f")))
+
+summary(f,newdata=data.frame(sex=c("m","f","f","m")))
 
 fa <- prodlim(Hist(time,status!=1)~sex+age,data=pbc)
 summary(fa)

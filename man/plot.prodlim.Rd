@@ -21,6 +21,7 @@
      xlab = "Time",
      ylab,
      legend = TRUE,
+     logrank=FALSE,
      marktime = FALSE,
      confint = TRUE,
      automar,
@@ -59,6 +60,9 @@
     Optional arguments of the function \code{legend} can be given in the
     form \code{legend.x=val} where x is the name of the argument and
     val the desired value. See also Details.}
+  \item{logrank}{If TRUE, the logrank p-value will be extracted from a
+    call to \code{survdiff} and added to the legend. This works only for
+    survival models, i.e. Kaplan-Meier with discrete predictors.}
   \item{marktime}{if TRUE the curves are tick-marked at right censoring
     times by invoking the function \code{markTime}. Optional arguments of the
     function \code{markTime} can be given in the form
@@ -145,7 +149,7 @@ kmfitX <- prodlim(Hist(time, status) ~ X, data = dat)
 plot(kmfitX)
 plot(kmfitX,legend.x="bottomleft",atRisk.cex=1.3)
 
-\dontrun{
+\donttest{
 ## add the log-rank test p-value
 library(survival)
 library(Publish) ## get it on R-forge

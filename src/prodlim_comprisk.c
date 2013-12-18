@@ -175,7 +175,6 @@ void prodlimCompriskPlus(double* y,
       atrisk=(double) stop-start; /* (sub-)sample size */
     }
   }
-    
   i=0;
   e=0; /* index for delayed entry */
   if (*weighted==1){
@@ -224,6 +223,7 @@ void prodlimCompriskPlus(double* y,
 	  entered++;
 	}
 	atrisk += (double) entered;
+	/* Rprintf("D1=%d\tD2=%d\tF3=%1.2f\tF4=%1.2f\t\n",entered,e,atrisk,entrytime[e]); */
       }
       nrisk[s]=atrisk;
       d = 0;

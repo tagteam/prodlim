@@ -16,6 +16,7 @@
 	       reverse=FALSE,
 	       conf.int=0.95,
 	       bandwidth=NULL,
+               caseweights,
 	       discrete.level=3,
                maxiter=1000,
                grid,
@@ -60,6 +61,12 @@
     based on the values of a continuous covariate. See function
     \code{neighborhood} for details.
   }
+  \item{caseweights}{Weights applied to the contribution of each subject
+	       to change the number of events and the
+	       number at risk. This can be used for bootstrap and survey
+	       analysis. Should be a vector of the same length and the
+	       same order as \code{data}.
+	     }
   \item{discrete.level}{
     Numeric covariates are treated as factors when their number
     of unique values exceeds not \code{discrete.level}. Otherwise
@@ -179,11 +186,18 @@
   \code{\link{NN}}}
 \examples{
 
+## generate survival data
+sm <- survModel()
+addvar(sm) <- c("X1","X2")
+distribution(sm,"X2") <- binomial.lvm()
+regression(sm,to="eventtime",from=c("X1","X2")) <- c(0.7,-1.3)
+plot(sm)
+dat <- sim(sm,100)
+
 ##---------------------two-state survival model------------
 
-dat <- SimSurv(100)
-with(dat,plot(Hist(time,status)))
-fit <- prodlim(Hist(time,status)~1,data=dat)
+with(dat,plot(Hist(time,event)))
+fit <- prodlim(Hist(time,event)~1,data=dat)
 print(fit)
 plot(fit)
 summary(fit)
@@ -256,6 +270,16 @@ fit <- prodlim(Hist(time,status,cens.code="2")~1,data=dat)
 print(fit$model.response)
 plot(fit)
 plot(fit,cause="5")
+
+
+##------------delayed entry----------------------
+
+## left-truncated event times with competing risk endpoint 
+
+dat <- data.frame(entry=c(7,3,11,12,11,2,1,7,15,17,3),time=10:20,status=c(1,0,2,2,0,0,1,2,0,2,0))
+fitd <- prodlim(Hist(time=time,event=status,entry=entry)~1,data=dat)
+summary(fitd)
+plot(fitd)
 }
 
 \keyword{survival}% at least one, from doc/KEYWORDS

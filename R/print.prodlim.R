@@ -7,7 +7,7 @@
   ##   message("Estimation method:")
   if (!(model %in% c("survival","competing.risks"))) stop("Under construction")
   if (model=="survival")
-    if (x$cens.type=="intervalCensored"){
+    if (x$cens.type=="interval-censored"){
       message(switch(x$covariate.type,"NPMLE",
                      "Stratified NPMLE estimator",
                      "Stratified NPMLE estimator",

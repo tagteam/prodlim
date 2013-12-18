@@ -38,7 +38,7 @@ void prodlim(double *y,
 	     double *hazard,
 	     double *varhazard,
 	     double *extra_double,
-	     int *extra_int,
+	     int *max_nc,
 	     int *len,
 	     int *size_strata,
 	     int *first_strata,
@@ -65,8 +65,6 @@ void prodlim(double *y,
       else{
 	double *cluster_nrisk, *adj1, *adj2, *adjvarhazard;
 	double *ncluster_lost, *ncluster_with_event, *sizeof_cluster, *nevent_in_cluster;
-	int *max_nc;
-	max_nc = extra_int;
 	/*
 	  tag: 12 Nov 2010 (18:41)
 	  
@@ -76,14 +74,14 @@ void prodlim(double *y,
 
 	the function is thus still restricted to a single cluster variable
 	*/
-	cluster_nrisk = (int) (nrisk + *N);
-	ncluster_with_event = (int) (event + *N);
-	ncluster_lost = (int) (lost + *N);
-	adjvarhazard = (int) (varhazard + *N);
+	cluster_nrisk = nrisk + *N;
+	ncluster_with_event = event + *N;
+	ncluster_lost = lost + *N;
+	adjvarhazard = varhazard + *N;
 	adj1 = extra_double;
 	adj2 = extra_double + *max_nc;
-	nevent_in_cluster = extra_int + 1;
-	sizeof_cluster = 1 + extra_int + *max_nc;
+	nevent_in_cluster = extra_double + *max_nc + *max_nc;
+	sizeof_cluster = extra_double + *max_nc  + *max_nc + *max_nc;
 	prodlim_clustersurv(y,status,cluster,NC + u,time,nrisk,cluster_nrisk,event,lost,ncluster_with_event,ncluster_lost,sizeof_cluster,nevent_in_cluster,surv,hazard,varhazard,adj1,adj2,adjvarhazard,&t,start,stop);
       }
     }
@@ -95,7 +93,29 @@ void prodlim(double *y,
 	v1 = extra_double + *NS + *NS;
 	v2 = extra_double + *NS + *NS + *NS;
 	if (*weighted==1 || *delayed==1){
-	  prodlimCompriskPlus(y,status,cause,entrytime,caseweights,NS,time,nrisk,event,lost,surv,cuminc,hazard,varhazard,cuminc_temp,cuminc_lag,v1,v2,&t,start,stop,delayed,weighted);
+	  prodlimCompriskPlus(y,
+			      status,
+			      cause,
+			      entrytime,
+			      caseweights,
+			      NS,
+			      time,
+			      nrisk,
+			      event,
+			      lost,
+			      surv,
+			      cuminc,
+			      hazard,
+			      varhazard,
+			      cuminc_temp,
+			      cuminc_lag,
+			      v1,
+			      v2,
+			      &t,
+			      start,
+			      stop,
+			      delayed,
+			      weighted);
 	}
 	else{
 	  prodlim_comprisk(y,status,cause,NS,time,nrisk,event,lost,surv,cuminc,hazard,varhazard,cuminc_temp,cuminc_lag,v1,v2,&t,start,stop);

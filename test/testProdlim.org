@@ -1,8 +1,7 @@
-* Survival
-** Let lava generate some data
+* Let lava generate some data
 #+BEGIN_SRC R  :results output raw  :exports results  :session *R* :cache no
 library(lava)
-m <- lvm(~X1+X2+X3+eventtime+censtime+Noise)
+m <- lvm(~X1+X2+X3+X4+eventtime+censtime+Noise)
 distribution(m,"X2") <- binomial.lvm()
 distribution(m,"X3") <- binomial.lvm()
 distribution(m,"eventtime") <- coxWeibull.lvm(scale=1/100)
@@ -11,14 +10,18 @@ regression(m,to="eventtime",from=c("X1","X2","X3")) <- c(0.6,-0.7,0.7)
 m <- eventTime(m,time~min(eventtime=1,censtime=0),"event")
 set.seed(17)
 d <- sim(m,200)
+#set.seed(17)
+#d <- sim(m,5)
 d$X2 <- factor(d$X2,levels=c(0,1),labels=c("low survival","high survival"))
 d$X3 <- factor(d$X3,levels=c(0,1),labels=c("high survival","low survival"))
 #+END_SRC
 
 #+RESULTS:
 
+* Survival
+  
 ** Test combinations of discrete and continuous covariates   
-#+BEGIN_SRC R  :results output raw  :exports results  :session *R* :cache yes 
+#+BEGIN_SRC R  :results output raw  :exports results  :session *R* :cache no 
 library(prodlim)
 f0 <- prodlim(Hist(time,event)~1,data=d)
 f1 <- prodlim(Hist(time,event)~X1,data=d)
@@ -34,23 +37,50 @@ u <- Hist(time,event)~X1+X2+X3
 f123 <- prodlim(u,data=d)
 #+END_SRC
 
-#+BEGIN_SRC R :results graphics  :file "~/research/SoftWare/eventhistory/pkg/prodlim/test/prodlim-plot2.pdf" :exports results :session *R* :cache yes 
+#+BEGIN_SRC R :results graphics  :file "~/research/SoftWare/eventhistory/pkg/prodlim/test/prodlim-plot2.pdf" :exports results :session *R* :cache no 
 plot(prodlim(Hist(time,event)~X2,data=d))
 #+END_SRC
 
 #+RESULTS[<2013-04-28 09:17:30> e998dd25b653b4bcf54d31ca63503fd842b848bd]:
 [[file:~/research/SoftWare/eventhistory/pkg/prodlim/test/prodlim-plot2.pdf]]
 
-#+BEGIN_SRC R :results graphics  :file "~/research/SoftWare/eventhistory/pkg/prodlim/test/prodlim-plot3.pdf" :exports results :session *R* :cache yes 
+#+BEGIN_SRC R :results graphics  :file "~/research/SoftWare/eventhistory/pkg/prodlim/test/prodlim-plot3.pdf" :exports results :session *R* :cache no 
 plot(prodlim(Hist(time,event)~X3,data=d))
 #+END_SRC
 
 #+RESULTS[<2013-04-28 09:19:05> e0145e89b5c1ffc413ba6dd802e03894a641c3c2]:
 [[file:~/research/SoftWare/eventhistory/pkg/prodlim/test/prodlim-plot3.pdf]]
 
+** Compare with survfit (survival)
+
+#+BEGIN_SRC R :exports both :results output raw  :session *R* :cache yes 
+library(survival)
+f0 <- prodlim(Hist(time,event)~1,data=d)
+f0.s <- survfit(Surv(time,event)~1,data=d)
+ttt <- sort(unique(d$time))
+sum0.s <- summary(f0.s,times=ttt[1:5])
+plot(f0.s,lwd=6)
+plot(f0,add=TRUE,col=2)
+
+summary(f0.s,times=c(0,0.1,0.2,0.3))
+
+
+result.survfit <- data.frame(time=sum0.s$time,n.risk=sum0.s$n.risk,n.event=sum0.s$n.event,surv=sum0.s$surv,std.err=sum0.s$std.err,lower=sum0.s$lower,upper=sum0.s$upper)
+result.prodlim <- data.frame(summary(f0,times=ttt)$table[,c("time","n.risk","n.event","n.lost","surv","se.surv","lower","upper")])
+cbind(result.survfit[,c("time","n.risk","n.event","surv")],result.prodlim[,c("time","n.risk","n.event","surv")])
+a <- round(result.survfit$surv,8)
+b <- round(result.prodlim$surv[!is.na(result.prodlim$se.surv)],8)
+if (all(a==b)){cat("\nOK\n")}else{cat("\nERROR\n")}
+if (all(round(result.survfit$std.err,8)==round(result.prodlim$se.surv[!is.na(result.prodlim$se.surv)],8))){cat("\nOK\n")}else{cat("\nERROR\n")}
+#+END_SRC   
+
+#+RESULTS[<2013-12-04 13:12:16> 4bcb1cfe34752cab52afc58fc33e8919c4078e3c]:
+
+OK
+
 ** Bootstrap
 
-#+BEGIN_SRC R  :results output raw  :exports results  :session *R* :cache yes 
+#+BEGIN_SRC R  :results output raw  :exports results  :session *R* :cache no 
 library(survival)
 library(prodlim)
 data(pbc, package="survival")
@@ -66,7 +96,7 @@ plot(s2,add=TRUE,col=2,confint=FALSE)
    
 ** Case-weights 
 
-#+BEGIN_SRC R  :results output raw  :exports results  :session *R* :cache yes 
+#+BEGIN_SRC R  :results output raw  :exports results  :session *R* :cache no 
 library(survey)
 library(survival)
 library(prodlim)
@@ -84,7 +114,7 @@ plot(s2,add=TRUE,col=2,confint=FALSE)
 #+END_SRC   
 
 ** delayed entry 
-#+BEGIN_SRC R  :results output raw  :exports results  :session *R* :cache yes 
+#+BEGIN_SRC R  :results output raw  :exports results  :session *R* :cache no 
 library(SmoothHazard)
 library(survival)
 library(prodlim)
@@ -109,10 +139,14 @@ f <- survfit(Surv(illtime,lifetime,status)~1,data=illdata,type="kaplan-meier")
 F <- prodlim(Hist(lifetime,status,entry=illtime)~1,data=illdata)
 plot(f,lwd=5)
 plot(F,lwd=2,col=2,add=TRUE)
+
+f <- survfit(Surv(time,status!=0)~1,data=pbc,type="kaplan-meier")
+F <- prodlim(Hist(time,status!=0)~1,data=pbc)
+plot(f,lwd=5,xlim=c(0,100))
+plot(F,lwd=2,col=2,add=TRUE)
 #+END_SRC
 * Competing risks
-
-#+BEGIN_SRC R :results graphics  :file "~/research/SoftWare/eventhistory/pkg/prodlim/test/aj.pdf" :exports results :session *R* :cache yes 
+#+BEGIN_SRC R :results graphics  :file "~/research/SoftWare/eventhistory/pkg/prodlim/test/aj.pdf" :exports results :session *R* :cache no 
 library(riskRegression)
 data(Melanoma)
 aj <- prodlim(Hist(time,status)~thick,data=Melanoma)
@@ -123,56 +157,100 @@ plot(aj)
 [[file:~/research/SoftWare/eventhistory/pkg/prodlim/test/aj.pdf]]
 
 ** delayed entry 
-
 *** Without covariates
-#+BEGIN_SRC R  :results output raw  :exports results  :session *R* :cache yes 
+#+BEGIN_SRC R  :results output raw  :exports results  :session *R* :cache no 
 library(etm)
 data(abortion)
 cif.ab.etm <- etmCIF(Surv(entry, exit, cause != 0) ~ 1,abortion,etype = cause,failcode = 3)
 cif.ab.prodlim <- prodlim(Hist(time=exit, event=cause,entry=entry) ~ 1,data=abortion)
-cif.ab.etm
-plot(cif.ab.etm, ci.type = "bars", pos.ci = 24, col = c(1, 2), lty = 1, curvlab = c("Control", "Exposed"))
-plot(cif.ab.prodlim,add=TRUE,cause=3,confint=FALSE,col=3)
-plot(cif.ab.prodlim,add=TRUE,cause=2,confint=FALSE,col=1)
-plot(cif.ab.prodlim,add=TRUE,cause=1,confint=FALSE,col=2)
+test <- etm:::ci.transfo(cif.ab.etm[[1]],tr.choice=c("0 3"),level=0.95,transfo="cloglog")[[1]][,c("time","n.risk","n.event","P","var","lower","upper")]
+test <- cbind(test,summary(cif.ab.prodlim,cause=3,times=test$time)$table[[1]][,c("time","n.risk","n.event","cuminc","se.cuminc","lower","upper")])
+tail(test)
+stopifnot()
 #+END_SRC   
 
-*** With covariates
-   
-#+BEGIN_SRC R  :results output raw  :exports results  :session *R* :cache yes 
+#+BEGIN_SRC R :results graphics  :file "~/research/SoftWare/prodlim/test/delayedEntryCompRisk-testgraph.pdf" :exports results :session *R* :cache no 
 library(etm)
 data(abortion)
+par(mfrow=c(2,2))
 cif.ab.etm <- etmCIF(Surv(entry, exit, cause != 0) ~ 1,abortion,etype = cause,failcode = 3)
-names(cif.ab.etm[[1]])
-head(cbind(cif.ab.etm[[1]]$time,cif.ab.etm[[1]]$n.risk))
-
-cif.ab.prodlim <- prodlim(Hist(time=exit, event=cause,entry=entry) ~ group,data=abortion)
-cif.ab.etm
-plot(cif.ab.etm, ci.type = "bars", pos.ci = 24, col = c(1, 2), lty = 1, curvlab = c("Control", "Exposed"))
-plot(cif.ab.prodlim,add=TRUE,cause=3)
-plot(cif.ab.prodlim,add=TRUE,cause=2)
-plot(cif.ab.prodlim,add=TRUE,cause=1)
+cif.ab.prodlim <- prodlim(Hist(time=exit, event=cause,entry=entry) ~ 1,data=abortion)
+# cause 3
+plot(cif.ab.etm, ci.type = "bars", pos.ci = 24, col = c(1, 2), lty = 1,which.cif=3,lwd=8)
+plot(cif.ab.prodlim,add=TRUE,cause=3,confint=TRUE,col=2)
+# cause 2
+plot(cif.ab.etm, ci.type = "bars", pos.ci = 24, col = c(1, 2), lty = 1,which.cif=2,lwd=8)
+plot(cif.ab.prodlim,add=TRUE,cause=2,confint=TRUE,col=2)
+# cause 1
+plot(cif.ab.etm, ci.type = "bars", pos.ci = 24, col = c(1, 2), lty = 1,which.cif=1,lwd=8)
+plot(cif.ab.prodlim,add=TRUE,cause=1,confint=TRUE,col=2)
 #+END_SRC
 
-#+BEGIN_SRC R  :results output raw  :exports results  :session *R* :cache yes 
+#+RESULTS[<2013-12-04 08:51:41> 72f89ca9f0ef9945801985667c3399c6cde21502]:
+[[file:~/research/SoftWare/prodlim/test/delayedEntryCompRisk-testgraph.pdf]]
+
+    
+#+BEGIN_SRC R  :results output raw  :exports results  :session *R* :cache no 
+library(etm)
+data(abortion)
+head(abortion)
+# abortion <- abortion[order(abortion$exit),]
+cif.ab.etm <- etmCIF(Surv(entry, exit, cause != 0) ~ 1,abortion,etype = cause,failcode = 3)
+cif.ab.prodlim <- prodlim(Hist(time=exit, event=cause, entry=entry) ~ 1,data=abortion)
+plot(cif.ab.etm,lwd=6)
+plot(cif.ab.etm, ci.type = "bars", pos.ci = 24, col = c(1, 2), lty = 1, curvlab = c("Control", "Exposed"),lwd=8)
+plot(cif.ab.prodlim,add=TRUE,col=2,cause=3)
+
+
+u3 <- etm:::ci.transfo(cif.ab.etm[[1]],tr.choice=c("0 3"),level=0.95,transfo="cloglog")[[1]][,c("time","n.risk","n.event","P","var","lower","upper")]
+U3 <- cbind(u3,summary(cif.ab.prodlim,cause=3,times=u3$time)$table[[1]][,c("time","n.risk","n.event","cuminc","se.cuminc","lower","upper")])
+
+head(cbind(cif.ab.etm$""$time,cif.ab.etm$""$n.risk,cif.ab.etm$""$n.risk))
+head(cbind(cif.ab.prodlim$time,cif.ab.prodlim$n.risk,cause1=cif.ab.prodlim$cuminc[[1]],cause2=cif.ab.prodlim$cuminc[[2]],cause3=cif.ab.prodlim$cuminc[[3]]))
+
+
+names(cif.ab.etm[[1]])
+head(cbind(cif.ab.etm[[1]]$time,cif.ab.etm[[1]]$n.risk))
+plot(cif.ab.etm, ci.type = "bars", pos.ci = 24, col = c(1, 2), lty = 1, curvlab = c("Control", "Exposed"))
+plot(cif.ab.prodlim,add=TRUE,cause=3,confint=FALSE)
+plot(cif.ab.prodlim,add=FALSE,cause=3,confint=FALSE)
+plot(cif.ab.prodlim,add=TRUE,cause=2,confint=FALSE)
+plot(cif.ab.prodlim,add=TRUE,cause=1,confint=FALSE)
+#+END_SRC
+    
+*** With covariates
+    
+#+BEGIN_SRC R  :results output raw  :exports results  :session *R* :cache no 
+library(etm)
+data(abortion)
+cif.ab.etm <- etmCIF(Surv(entry, exit, cause != 0) ~ group,abortion,etype = cause,failcode = 3)
+names(cif.ab.etm[[1]])
+head(cbind(cif.ab.etm[[1]]$time,cif.ab.etm[[1]]$n.risk))
+cif.ab.prodlim <- prodlim(Hist(time=exit, event=cause,entry=entry) ~ group,data=abortion)
+plot(cif.ab.etm, ci.type = "bars", pos.ci = 24, col = c(1, 2), lty = 1, curvlab = c("Control", "Exposed"))
+plot(cif.ab.prodlim,add=TRUE,cause=3,confint=FALSE)
+plot(cif.ab.prodlim,add=FALSE,cause=3,confint=FALSE)
+plot(cif.ab.prodlim,add=TRUE,cause=2,confint=FALSE)
+plot(cif.ab.prodlim,add=TRUE,cause=1,confint=FALSE)
+#+END_SRC
+
+#+BEGIN_SRC R  :results output raw  :exports results  :session *R* :cache no 
 library(survival)
 library(prodlim)
 library(etm)
 data(pbc,package="survival")
 pbc$entry <- round(pbc$time/5)
 cif.pbc.etm <- etmCIF(Surv(entry, time, status != 0) ~ 1,data=pbc,etype = status,failcode = 2)
+cif.pbc.prodlim <- prodlim(Hist(time, status, entry) ~ 1,data=pbc)
 ttt <- sort(unique(c(pbc$time,pbc$entry)))
 out <- cbind(cbind(ttt,sapply(ttt,function(u){sum(pbc$entry<=u)}))[1:20,],cbind(cif.pbc.etm[[1]]$time,cif.pbc.etm[[1]]$n.risk)[1:20,])
-
-
 out <- cbind(cif.pbc.etm[[1]]$time,cif.pbc.etm[[1]]$n.risk,cif.pbc.prodlim$time,cif.pbc.prodlim$n.risk)
-
-plot(cif.pbc.etm, ci.type = "bars", pos.ci = 24, lwd=5)
-plot(cif.pbc.prodlim,add=TRUE,cause=2,col=2,confint=FALSE)
+plot(cif.pbc.etm, ci.type = "bars", pos.ci = c(1300), lwd=5)
+plot(cif.pbc.prodlim,add=TRUE,cause=2,col=2,confint=TRUE)
 #+END_SRC
 
 
-#+BEGIN_SRC R  :results output raw  :exports results  :session *R* :cache yes 
+#+BEGIN_SRC R  :results output raw  :exports results  :session *R* :cache no 
 library(survival)
 library(prodlim)
 library(etm)
@@ -180,10 +258,7 @@ testdata <- data.frame(entry=c(1,5,2,8,5),exit=c(10,6,4,12,33),event=c(0,1,0,1,0
 cif.test.etm <- etmCIF(Surv(entry, exit, event) ~ 1,data=testdata,etype = event,failcode = 1)
 cif.test.survival <- survfit(Surv(entry, exit, event) ~ 1,data=testdata)
 cif.test.prodlim <- prodlim(Hist(exit,event,entry=entry)~1,data=testdata)
-
-cbind(cif.pbc.etm[[1]]$time,cif.pbc.etm[[1]]$n.risk,cif.pbc.prodlim$time,cif.pbc.prodlim$n.risk)
-
 plot(cif.test.etm, ci.type = "bars", pos.ci = 24, lwd=5)
 plot(cif.test.etm, ci.type = "bars", pos.ci = 24, lwd=5)
-plot(cif.test.prodlim,add=TRUE,cause=2,col=2,confint=FALSE,type="cuminc")
+plot(cif.test.prodlim,add=TRUE,cause=2,col=2,confint=TRUE,type="cuminc")
 #+END_SRC

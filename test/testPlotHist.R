@@ -47,6 +47,41 @@ x=data.frame(from=c(1,2,1,3,4),to=c(2,1,3,4,1),time=1:5)
 y=with(x,Hist(time=time,event=list(from=from,to=to)))
 plot(y)
 
+# in a competing risk model multiple types of failure occur
+# --------------------------------------------------------------------
+
+compRiskHistory1 <- Hist(time=1:5,event=c("cause 1","cause 2","cause 3", 0,"cause 4"))
+plot(compRiskHistory1,layout=list(nrow=3,ncol=3,box.pos=list(c(2,2),c(1,1),c(1,3),c(3,1),c(3,3))),arrow.lab.offset=5)
+
+compRiskHistory2 <- Hist(time=1:5,event=c("Cancer","Heart attack","Car\naccident", 0,"Murder"))
+plot(compRiskHistory2,layout=list(nrow=3,ncol=3,box.pos=list(c(2,2),c(1,1),c(1,3),c(3,1),c(3,3))),arrow.lab.offset=5,state.cex=1.8,xbox.rule=.1,ybox.rule=.4,tagBoxes=TRUE)
+
+# in a multi state model events occur in a certain order
+# --------------------------------------------------------------------
+
+## illness-death model without recovery
+illness.death.frame <- data.frame(time=1:4,
+		    from=c("Disease-free","Disease-free",
+		      "Diseased","Disease-free"),
+		    to=c("0","Diseased","Dead","Dead"))
+
+IDHist <- with(illness.death.frame,Hist(time,event=list(from,to)))
+plot(IDHist,ybox.rule=4,xbox.rule=.3,state.cex=1.3,enum=TRUE,arrow.lab.side=c(-1,-1,1))
+
+
+## illness-death with recovery
+illness.death.frame2 <- data.frame(time=1:5,
+				   from=c("Disease\nfree","Disease\nfree",
+                                     "Diseased","Diseased","Disease\nfree"),
+				   to=c("0","Diseased","Disease\nfree",
+                                                           "Dead","Dead"))
+IDHist2 <- with(illness.death.frame2,Hist(time,event=list(from,to)))
+plot(IDHist2,ybox.rule=1.3,xbox.rule=.3,state.cex=2,arrow.lab.offset=c(13,13,8,10),enum=TRUE,verbose=FALSE)
+
+## change the layout of the graphic
+
+plot(IDHist2,ybox.rule=1.3,xbox.rule=.3,state.cex=2,enum=TRUE,verbose=FALSE,layout=list(ncol=3,nrow=2,box.pos=list(c(1,1),c(2,2),c(1,3))),arrow.lab.side=c(-1,1,-1,1),arrow.lab.offset=c(15,15,10,10))
+
 
 ## Bordeaux: 4 state model
 x=data.frame(from=c("1","1","2","2","3"),to=c("2","4","4","3","4"),time=1:5)

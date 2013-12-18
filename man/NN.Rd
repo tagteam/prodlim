@@ -21,10 +21,10 @@
 \author{Thomas Gerds }
 \seealso{\code{\link{prodlim}}}
 \examples{
-\dontrun{
+\donttest{
 library(survival)
 data(pbc)
-prodlim(Hist(time,status)~NN(age),data=pbc)
+prodlim(Hist(time,statusA)~NN(age),data=pbc)
 }
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the

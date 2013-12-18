@@ -25,8 +25,8 @@ summary.prodlim <- function(object,
         warning(call.=TRUE,immediate.=TRUE,paste("\n","Time(s) ",paste(times[times>max(jump.times)],collapse=", ")," are beyond the maximal follow-up time ",max(jump.times),"\n"))
     ntimes <- length(times)
     # }}}
-    # {{{ intervalCensored
-    if (cens.type=="intervalCensored"){
+    # {{{ interval-censored
+    if (cens.type=="interval-censored"){
         ltab <- data.frame(time=paste("(",paste(signif(object$time[1,],2),
                                signif(object$time[2,],2),
                                sep="-"),"]",sep=""),
