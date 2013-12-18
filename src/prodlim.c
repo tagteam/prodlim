@@ -21,6 +21,7 @@
 void prodlim(double *y,
 	     double *status,
 	     int *cause,
+	     double *entrytime,
 	     double *caseweights,
 	     int *cluster,
 	     int *N,
@@ -44,6 +45,7 @@ void prodlim(double *y,
 	     int *reverse,
 	     int *model,
 	     int *independent,
+	     int *delayed,
 	     int *weighted) {
   int t, u, start, stop, size_temp;
   t=0;
@@ -53,8 +55,8 @@ void prodlim(double *y,
     stop=start+size[u];
     if (*model==0){
       if (*independent==1){
-	if (*weighted==1){
-	  prodlim_surv_weighted(y,status,caseweights,time,nrisk,event,lost,surv,hazard,varhazard,reverse,&t,start,stop);
+	if (*weighted==1 || *delayed==1){
+	  prodlimSurvPlus(y,status,entrytime,caseweights,time,nrisk,event,lost,surv,hazard,varhazard,reverse,&t,start,stop,delayed,weighted);
 	}
 	else{
 	  prodlim_surv(y,status,time,nrisk,event,lost,surv,hazard,varhazard,reverse,&t,start,stop);
@@ -92,8 +94,8 @@ void prodlim(double *y,
 	cuminc_lag = extra_double + *NS;
 	v1 = extra_double + *NS + *NS;
 	v2 = extra_double + *NS + *NS + *NS;
-	if (*weighted==1){
-	  prodlim_comprisk_weighted(y,status,cause,caseweights,NS,time,nrisk,event,lost,surv,cuminc,hazard,varhazard,cuminc_temp,cuminc_lag,v1,v2,&t,start,stop);
+	if (*weighted==1 || *delayed==1){
+	  prodlimCompriskPlus(y,status,cause,entrytime,caseweights,NS,time,nrisk,event,lost,surv,cuminc,hazard,varhazard,cuminc_temp,cuminc_lag,v1,v2,&t,start,stop,delayed,weighted);
 	}
 	else{
 	  prodlim_comprisk(y,status,cause,NS,time,nrisk,event,lost,surv,cuminc,hazard,varhazard,cuminc_temp,cuminc_lag,v1,v2,&t,start,stop);

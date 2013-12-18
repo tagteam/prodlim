@@ -1,4 +1,5 @@
-
+* Survival
+** Let lava generate some data
 #+BEGIN_SRC R  :results output raw  :exports results  :session *R* :cache no
 library(lava)
 m <- lvm(~X1+X2+X3+eventtime+censtime+Noise)
@@ -16,6 +17,7 @@ d$X3 <- factor(d$X3,levels=c(0,1),labels=c("high survival","low survival"))
 
 #+RESULTS:
 
+** Test combinations of discrete and continuous covariates   
 #+BEGIN_SRC R  :results output raw  :exports results  :session *R* :cache yes 
 library(prodlim)
 f0 <- prodlim(Hist(time,event)~1,data=d)
@@ -46,32 +48,42 @@ plot(prodlim(Hist(time,event)~X3,data=d))
 #+RESULTS[<2013-04-28 09:19:05> e0145e89b5c1ffc413ba6dd802e03894a641c3c2]:
 [[file:~/research/SoftWare/eventhistory/pkg/prodlim/test/prodlim-plot3.pdf]]
 
-
+** Bootstrap
 
 #+BEGIN_SRC R  :results output raw  :exports results  :session *R* :cache yes 
-
-getSpecial <- function(term){
-n <- nchar(term)
-if (substr(term,n,n)==")")
-
-else term
-}
-pl <- function(formula,data){
-   cf <- as.character(formula)
+library(survival)
+library(prodlim)
+data(pbc, package="survival")
+pbc <- pbc[order(pbc$time,-pbc$status),]
+set.seed(17)
+boot <- sample(1:NROW(pbc),size=NROW(pbc),replace=TRUE)
+boot.weights <- table(factor(boot,levels=1:NROW(pbc)))
+s1 <- prodlim(Hist(time,status>0)~1,data=pbc,caseweights=boot.weights)
+plot(s1,col=1,confint=FALSE)
+s2 <- prodlim(Hist(time,status>0)~1,data=pbc[sort(boot),])
+plot(s2,add=TRUE,col=2,confint=FALSE)
+#+END_SRC   
    
-}
+** Case-weights 
 
-gsub("(\\w*)-(a-z)", "\\2", "sadfs-sd")
+#+BEGIN_SRC R  :results output raw  :exports results  :session *R* :cache yes 
+library(survey)
+library(survival)
+library(prodlim)
+data(pbc, package="survival")
+pbc <- pbc[order(pbc$time,-pbc$status),]
+## pbc$randprob<-fitted(biasmodel)
+## pbc$randprob <- as.numeric(pbc$sex=="m")+0.1
+set.seed(17)
+pbc$randprob <- abs(rnorm(NROW(pbc)))
+dpbc <- svydesign(id=~id, weights=~randprob, strata=NULL, data=pbc)
+s1<-svykm(Surv(time,status>0)~1, design=dpbc)
+plot(s1,lwd=8)
+s2 <- prodlim(Hist(time,status>0)~1,data=pbc,caseweights=pbc$randprob)
+plot(s2,add=TRUE,col=2,confint=FALSE)
+#+END_SRC   
 
-gsub(".*([a-z])", "\\1", "a(b(ab))")
-
-
-pl <- function(formula,data){
-model.frame(formula,data)
-
-}
-
-#+END_SRC
+* Competing risks
 
 #+BEGIN_SRC R :results graphics  :file "~/research/SoftWare/eventhistory/pkg/prodlim/test/aj.pdf" :exports results :session *R* :cache yes 
 library(riskRegression)
@@ -83,3 +95,47 @@ plot(aj)
 #+RESULTS[<2013-04-28 09:14:42> 8d0af189a155e48de3bf70a0111c8f4e360f1b98]:
 [[file:~/research/SoftWare/eventhistory/pkg/prodlim/test/aj.pdf]]
 
+** delayed entry 
+#+BEGIN_SRC R  :results output raw  :exports results  :session *R* :cache yes 
+library(SmoothHazard)
+library(survival)
+library(prodlim)
+## simulate data from an illness-death model
+mod <- idmModel(K=10,schedule=0,punctuality=1,cens="interval")
+regression(mod,from="X",to="lifetime") <- log(2)
+regression(mod,from="X",to="waittime") <- log(2)
+regression(mod,from="X",to="illtime") <- log(2)
+set.seed(137)
+## we round the event times to have some ties
+testdata <- round(sim(mod,250),1)
+## the data enter with delay into the intermediate state (ill)
+## thus, to estimate the cumulative incidence of
+## the absorbing state (death) after illness we 
+## have left-truncated data
+illdata <- testdata[testdata$ill==1,]
+illdata <- illdata[order(illdata$lifetime,-illdata$status),]
+## sindex(jump.times=illdata$illtime,eval.times=illdata$lifetime)
+## F <- prodlim(Hist(lifetime,status,entry=illtime)~1,data=illdata[1:5,])
+## f <- survfit(Surv(illtime,lifetime,status)~1,data=illdata[1:5,],type="kaplan-meier")
+
+f <- survfit(Surv(illtime,lifetime,status)~1,data=illdata,type="kaplan-meier")
+F <- prodlim(Hist(lifetime,status,entry=illtime)~1,data=illdata)
+plot(f,lwd=5)
+plot(F,lwd=2,col=2,add=TRUE)
+
+library(survival)
+library(prodlim)
+data(pbc,package="survival")
+test <- pbc
+test$entry <- round(pbc$time/2)
+F1 <- prodlim(Hist(time,status,entry=entry)~1,data=head(test))
+F1$n.risk
+
+library(etm)
+addprtwomenetm<-etmCIF(Surv(entryage,time,crstatus!=0)~+1,
+                       data=prtwomen,
+                       etype=crstatus,
+                       failcode=3)
+
+
+#+END_SRC
