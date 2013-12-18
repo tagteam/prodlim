@@ -320,3 +320,8 @@ str.Hist <- function(x){
   str(x)
 }
 
+head.Hist <- function(x){
+  class(x) <- "matrix"
+  head(x)
+}
+
