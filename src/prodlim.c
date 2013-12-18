@@ -39,7 +39,7 @@ void prodlim(double *y,
 	     double *varhazard,
 	     double *extra_double,
 	     int *max_nc,
-	     int *len,
+	     int *ntimes,
 	     int *size_strata,
 	     int *first_strata,
 	     int *reverse,
@@ -71,7 +71,7 @@ void prodlim(double *y,
 	the length of nrisk, nevent and lost is 2 * N
 	the first half is used for the individual level
 	the second for the cluster level.
-
+	
 	the function is thus still restricted to a single cluster variable
 	*/
 	cluster_nrisk = nrisk + *N;
@@ -93,43 +93,19 @@ void prodlim(double *y,
 	v1 = extra_double + *NS + *NS;
 	v2 = extra_double + *NS + *NS + *NS;
 	if (*weighted==1 || *delayed==1){
-	  prodlimCompriskPlus(y,
-			      status,
-			      cause,
-			      entrytime,
-			      caseweights,
-			      NS,
-			      time,
-			      nrisk,
-			      event,
-			      lost,
-			      surv,
-			      cuminc,
-			      hazard,
-			      varhazard,
-			      cuminc_temp,
-			      cuminc_lag,
-			      v1,
-			      v2,
-			      &t,
-			      start,
-			      stop,
-			      delayed,
-			      weighted);
+	  prodlimCompriskPlus(y,status,cause,entrytime,caseweights,NS,time,nrisk,event,lost,surv,cuminc,hazard,varhazard,cuminc_temp,cuminc_lag,v1,v2,&t,start,stop,delayed,weighted);
 	}
 	else{
 	  prodlim_comprisk(y,status,cause,NS,time,nrisk,event,lost,surv,cuminc,hazard,varhazard,cuminc_temp,cuminc_lag,v1,v2,&t,start,stop);
 	}
       }
     }
-    /* else */
-    /* Rprintf("Unknown model"); */
     start+=size[u];
     size_strata[u] = t - size_temp;
     first_strata[u] = t + 1 - size_strata[u];
     size_temp += size_strata[u];
   }
-  *len=t;
+  *ntimes=t;
 }
 
 

@@ -104,7 +104,10 @@ summary.prodlim <- function(object,
     else{
         tab <- data.frame(ltab)
     }
-    out <- list(table=ltab)
+    if (model=="competing.risks")
+        out <- list(table=ltab,cause=cause)
+    else
+        out <- list(table=ltab)
     out$model <- model
     out$cotype <- cotype
     class(out) <- "summary.prodlim"

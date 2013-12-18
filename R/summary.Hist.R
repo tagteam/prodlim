@@ -42,7 +42,12 @@ summary.Hist <- function(object, verbose=TRUE,...){
     cens.type <- attr(object,"cens.type")
     ## cens.string <- capitalize(cens.type)
     cens.string <- cens.type
-    Observations <- switch(cens.type,"interval-censored"=factor(D,levels=c(1,2,0),labels=c("exact.time","interval-censored","right-censored")),"right-censored"=factor(D,levels=c(1,0),labels=c("event","right.censored")),"uncensored"=factor(D,labels=c("event")))
+    Observations <- switch(cens.type,
+                           "interval-censored"=factor(D,levels=c(1,2,0),labels=c("exact.time","interval-censored","right-censored")),
+                           "intervalCensored"=factor(D,levels=c(1,2,0),labels=c("exact.time","interval-censored","right-censored")),
+                           "right-censored"=factor(D,levels=c(1,0),labels=c("event","right.censored")),
+                           "rightCensored"=factor(D,levels=c(1,0),labels=c("event","right.censored")),
+                           "uncensored"=factor(D,labels=c("event")))
     Freq <- table(Observations)
     ## entry time
     entry.type <- attr(object,"entry.type")

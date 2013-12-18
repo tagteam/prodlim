@@ -171,12 +171,11 @@ void prodlimCompriskPlus(double* y,
 	    (stop-start),
 	    (size_t) sizeof(double),
 	    (int (*)(const void *, const void *))(doubleNewOrder));
+      e=start; /* index for delayed entry */
     }else{
       atrisk=(double) stop-start; /* (sub-)sample size */
     }
   }
-  i=0;
-  e=0; /* index for delayed entry */
   if (*weighted==1){
     if (status[start]>0){
       event[s *(*NS) + cause[start]]=caseweights[start];
@@ -191,7 +190,6 @@ void prodlimCompriskPlus(double* y,
       loss[s]=1;
     }
   }
-  
   /* }}} */
   
   for (i=(1+start);i<=stop;i++){
@@ -213,18 +211,52 @@ void prodlimCompriskPlus(double* y,
     /* }}} */
     else{
       /* {{{ at s: set time, atrisk; reset d */
-      time[s]=y[i-1];
       if (*delayed==1){
 	/* delayed entry: find number of subjects that
 	   entered at time[s] */
 	entered=0;
-	while(e<stop && entrytime[e]<time[s]){
-	  e++;
+	while(e<stop && entrytime[e]< y[i-1]){ /*entry happens at t+ events at t*/
 	  entered++;
+	  if (e==start || entrytime[e]>entrytime[e-1]){
+	    /* unless there is a tie between the current
+	       and the next entry-time, add time to list of times, increase s
+	       and move the values of event, loss etc. to the next event time */
+	    nrisk[s]=atrisk+entered;
+	    if (entrytime[e]!=time[s-1]){ /* if entrytime[e]==y[i] then only increase
+					the number at risk but not move the
+					time counter or the values of event, etc.
+				     */
+	      /* Rprintf("e=%d\ts=%d\tentrytime[e]=%1.2f\ty[i-1]=%1.2f\ttime[s-1]=%1.2f\ti=%d\t\n",e,s,entrytime[e],y[i-1],time[s-1],i); */
+	      for(j=0; j < (*NS); ++j) { 
+		event[(s+1) * (*NS) + j]=event[s * (*NS) + j];
+		event[s * (*NS) + j]=0;
+	      }
+	      loss[s+1]=loss[s];
+	      loss[s]=0;
+	      if (entrytime[e]<y[start]){
+		surv[s]=1;
+		for(j=0; j < (*NS); ++j) {
+		  cuminc[s * (*NS) + j]=0;
+		  varcuminc[s * (*NS) + j]=0;
+		}
+	      } else{
+		surv[s]=S_lag;
+		for(j=0; j < (*NS); ++j) {
+		  cuminc[s * (*NS) + j]=cuminc[(s-1) * (*NS) + j];
+		  varcuminc[s * (*NS) + j]=varcuminc[(s-1) * (*NS) + j];
+		}
+	      }
+	      time[s]=entrytime[e];
+	      /* Rprintf("e=%d\ts=%d\tentrytime[e]=%1.2f\ttime[s]=%1.2f\t\n",e,s,entrytime[e],time[s]); */
+	      s++;
+	    } 
+	  }
+	  e++;/* increase cumulative counter  */
 	}
 	atrisk += (double) entered;
-	/* Rprintf("D1=%d\tD2=%d\tF3=%1.2f\tF4=%1.2f\t\n",entered,e,atrisk,entrytime[e]); */
       }
+      time[s]=y[i-1];
+      /* Rprintf("\nEventtime:s=%d\ti=%d\ttime[s]=%1.2f\tcause=%1.2f\n",s,i,time[s],cause[i]);  */
       nrisk[s]=atrisk;
       d = 0;
       /* }}} */
