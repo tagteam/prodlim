@@ -219,7 +219,7 @@ void prodlimCompriskPlus(double* y,
 	/* delayed entry: find number of subjects that
 	   entered at time[s] */
 	entered=0;
-	while(e<stop && entrytime[e]<=time[s]){
+	while(e<stop && entrytime[e]<time[s]){
 	  e++;
 	  entered++;
 	}
