@@ -1,10 +1,80 @@
 Package: prodlim
 Title: Product Limit Estimation for event history and survival analysis
-Version: 1.4.0
+Version: 1.4.1
 Author: Thomas A. Gerds
-Description: Fast and user friendly nonparametric estimation in censored survival (event history) analysis.
-Depends: R (>= 1.9.1)
-Suggests: lava, KernSmooth, survival
+Description: Fast and user friendly nonparametric estimation in censored
+    survival (event history) analysis.
+Depends:
+    R (>= 1.9.1)
+Suggests:
+    lava,
+    KernSmooth,
+    survival
 Maintainer: Thomas A. Gerds <tag@biostat.ku.dk>
 License: GPL (>= 2)
 Packaged: Wed Oct 3 20:15:28 2007; tag
+Collate:
+    'Hist.R'
+    'IntIndex.R'
+    'NN.R'
+    'PercentAxis.R'
+    'PetoInt.R'
+    'SimCompRisk.R'
+    'SimSurv.R'
+    'SmartControl.R'
+    'atRisk.R'
+    'backGround.R'
+    'bootstrap.prodlim.R'
+    'cluster.R'
+    'confInt.R'
+    'contrastMethods.R'
+    'dimColor.R'
+    'eventsMethods.R'
+    'extract.name.from.special.R'
+    'findArrow.R'
+    'getEvent.R'
+    'getStates.R'
+    'iindex.R'
+    'jackknife.R'
+    'lifeTab.R'
+    'lifeTab.competing.risks.R'
+    'lifeTab.survival.R'
+    'lines.prodlim.R'
+    'listNbh.R'
+    'markTime.R'
+    'mean.prodlim.R'
+    'meanNeighbors.R'
+    'model.specials.R'
+    'modelMatrix.R'
+    'neighborhood.R'
+    'neighbors.R'
+    'plot.Hist.R'
+    'plot.SimSurv.R'
+    'plot.prodlim.R'
+    'plotCompetingRiskModel.R'
+    'plotIllnessDeathModel.R'
+    'plotIntervals.R'
+    'predict.prodlim.R'
+    'predictSurvIndividual.R'
+    'print.Hist.R'
+    'print.IntIndex.R'
+    'print.neighborhood.R'
+    'print.prodlim.R'
+    'print.quantile.prodlim.R'
+    'print.summary.prodlim.R'
+    'prodlim.R'
+    'prodlimIcensSurv.R'
+    'prodlimMulti.R'
+    'quantile.prodlim.R'
+    'readFormula.R'
+    'resolveLinPred.R'
+    'resolveX.R'
+    'row.match.R'
+    'shiftPosition.R'
+    'sindex.R'
+    'statesMethods.R'
+    'summary.Hist.R'
+    'summary.prodlim.R'
+    'survModel.R'
+    'crModel.R'
+    'prodlim-package.R'
