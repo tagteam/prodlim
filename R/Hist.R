@@ -173,7 +173,6 @@
     else{
       states <- sort(as.character(unique(event)))
     }
-  
     states <- as.character(states[states!=cens.code])
   
   if (length(states)>1)
@@ -223,7 +222,6 @@
       states <- unique(c(levels(from),levels(to)))
     else
       states <- as.character(unique(c(from,to)))
-    
     states <- as.character(states[states!=cens.code])
     ## states <- states[match(state.order,states)]
     if (cens.code %in% levels(from)){

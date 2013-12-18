@@ -13,63 +13,62 @@ plot.Hist <- function(x,
                       cex,
                       verbose=FALSE,
                       ...){
-  # {{{ margin 
-  oldmar <- par()$mar
-  oldoma <- par()$oma
-  par(oma=c(0,0,0,0))
-  oldxpd <- par()$xpd
-  if (!missing(margin)){
-    par(mar=rep(margin,length.out=4),xpd=TRUE)
-  }
-  else
-    par(mar=c(0,0,0,0),xpd=TRUE)
-  # }}}
-  # {{{ find states 
-
-  model.type <- attr(x,"model")
-  states <- attr(x,"states")
-  origStates <- states
-  if (model.type!="multi.states"){ ## need an initial state
-    states <- c("initial", states)
-  }
-  NS <- length(states)
-  if (missing(stateLabels)){
-    if (all(as.character(as.numeric(as.factor(origStates)))==origStates))  ## make nice state boxlabels if states are integers
-      stateLabs <- switch(model.type,"survival"=paste(c("","Event"),states),"competing.risks"=paste(c("",rep("Cause",NS-1)),states),paste("State",states))
+    # {{{ margin 
+    oldmar <- par()$mar
+    oldoma <- par()$oma
+    par(oma=c(0,0,0,0))
+    oldxpd <- par()$xpd
+    if (!missing(margin)){
+        par(mar=rep(margin,length.out=4),xpd=TRUE)
+    }
     else
-      stateLabs <- states
-  }
-  else{
-    if(length(stateLabels)==NS-1){
-      stateLabs <- c("initial",stateLabels)
+        par(mar=c(0,0,0,0),xpd=TRUE)
+    # }}}
+    # {{{ find states 
+    model.type <- attr(x,"model")
+    states <- attr(x,"states")
+    origStates <- states
+    if (model.type!="multi.states"){ ## need an initial state
+        states <- c("initial", states)
+    }
+    NS <- length(states)
+    if (missing(stateLabels)){
+        if (all(as.character(as.numeric(as.factor(origStates)))==origStates))  ## make nice state boxlabels if states are integers
+            stateLabs <- switch(model.type,"survival"=paste(c("","Event"),states),"competing.risks"=paste(c("",rep("Cause",NS-1)),states),paste("State",states))
+        else
+            stateLabs <- states
     }
     else{
-      if (length(stateLabels)==NS){
-        stateLabs <- stateLabels
-      }
-      else{
-        stop("Wrong number of state names.")
-      }
+        if(length(stateLabels)==NS-1){
+            stateLabs <- c("initial",stateLabels)
+        }
+        else{
+            if (length(stateLabels)==NS){
+                stateLabs <- stateLabels
+            }
+            else{
+                stop("Wrong number of state names.")
+            }
+        }
     }
-  }
-  ## forcedLabels
-  thecall <- match.call(expand.dots=TRUE)
-  labelhits <- match(paste("box",1:NS,".label",sep=""),names(thecall),nomatch=0)
-  for (i in 1:NS){
-    if (labelhits[i]!=0)
-      ## may be language: thecall[[labelhits[i]]]
-      ## if user specifies box2.label=c("Event 1")
-      ## instead of box2.label="Event 1"
-      stateLabs[i] <- eval(thecall[[labelhits[i]]])[1]
-  }
-  numstates <- as.numeric(as.character(factor(states,levels=states,labels=1:NS)))
-  startCountZero <- TRUE 
-  if (startCountZero)
-    numstateLabels <- numstates-1
-  else
-    numstateLabels <- numstates
-  # {{{  find transitions between the states
-  
+    ## forcedLabels
+    thecall <- match.call(expand.dots=TRUE)
+    labelhits <- match(paste("box",1:NS,".label",sep=""),names(thecall),nomatch=0)
+    for (i in 1:NS){
+        if (labelhits[i]!=0)
+            ## may be language: thecall[[labelhits[i]]]
+            ## if user specifies box2.label=c("Event 1")
+            ## instead of box2.label="Event 1"
+            stateLabs[i] <- eval(thecall[[labelhits[i]]])[1]
+    }
+    numstates <- as.numeric(as.character(factor(states,levels=states,labels=1:NS)))
+    startCountZero <- TRUE 
+    if (startCountZero)
+        numstateLabels <- numstates-1
+    else
+        numstateLabels <- numstates
+    # {{{  find transitions between the states
+
   ## first remove the censored lines from the transition matrix
   ## x <- x[x[,"status"]!=attr(x,"cens.code"),,drop=FALSE]
   x <- x[x[,"status"]!=0,,drop=FALSE]
@@ -81,72 +80,72 @@ plot.Hist <- function(x,
   transitions <- sumx$trans.frame
   ordered.transitions <- unique(transitions)
   N <- NROW(ordered.transitions)
-
   # }}}
 
   # }}}
-  # {{{ default layout: arranging the boxes
-  
-  state.types <- sumx$states
-  state.types <- state.types[state.types>0]
-  if (missing(nrow))
-    if (model.type=="multi.states")
-      nrow <- NS
-    else
-      if (ceiling(NS/2)==floor(NS/2))
-        nrow <- NS-1
-      else
-        nrow <- NS
-  if (missing(ncol))
-    if (model.type=="multi.states")
-      ncol <- NS
-    else
-      ncol <- 2
-  ## placing boxes in rows and columns
-  if (model.type=="multi.states"){
-    adjustRowsInColumn <- rep(0,ncol)
-    adjustColsInRow <- rep(0,nrow)
-    box.col <- switch(as.character(NS),
-                      "2"=c(1,ncol),
-                      "3"=c(1,2,ncol),
-                      "4"=c(1,1,ncol,ncol),
-                      "5"=c(1,1,ceiling((ncol-1)/2),ncol,ncol),
-                      "6"=c(1,3,3,5,6,6))
-    box.row <- switch(as.character(NS),
-                      "2"=c(1,1),
-                      "3"=c(nrow,1,nrow),
-                      "4"=c(1,nrow,1,nrow),
-                      "5"=c(1,nrow,ceiling(nrow/2),1,nrow),
-                      "6"=c(3,1,6,4,1,6))
-  }
-  else{ # survival or competing risks
-    ## adjustRowsInColumn <- rep(1,ncol)
-    ## adjustColsInRow <- rep(1,nrow)
-    if (ceiling(NS/2)==floor(NS/2)){ ## equal number of states and unequal number of absorbing states
-      box.col <- c(1,rep(ncol,NS-1))
-      box.row <- c(NS/2,1:(NS-1))
-    } else{ 
-      box.col <- c(1,rep(ncol,NS-1))
-      box.row <- c((NS+1)/2,(1:NS)[-(NS+1)/2])
+    # {{{ default layout: arranging the boxes
+
+    state.types <- sumx$states
+    state.types <- state.types[state.types>0]
+    if (missing(nrow))
+        if (model.type=="multi.states")
+            nrow <- NS
+        else
+            if (ceiling(NS/2)==floor(NS/2))
+                nrow <- NS-1
+            else
+                nrow <- NS
+    if (missing(ncol))
+        if (model.type=="multi.states")
+            ncol <- NS
+        else
+            ncol <- 2
+    ## placing boxes in rows and columns
+    if (model.type=="multi.states"){
+        adjustRowsInColumn <- rep(0,ncol)
+        adjustColsInRow <- rep(0,nrow)
+        box.col <- switch(as.character(NS),
+                          "2"=c(1,ncol),
+                          "3"=c(1,2,ncol),
+                          "4"=c(1,1,ncol,ncol),
+                          "5"=c(1,1,ceiling((ncol-1)/2),ncol,ncol),
+                          "6"=c(1,3,3,5,6,6))
+        box.row <- switch(as.character(NS),
+                          "2"=c(1,1),
+                          "3"=c(nrow,1,nrow),
+                          "4"=c(1,nrow,1,nrow),
+                          "5"=c(1,nrow,ceiling(nrow/2),1,nrow),
+                          "6"=c(3,1,6,4,1,6))
     }
-  }
-  if (is.null(box.row) || is.null(box.col))
-    stop("Please specify the layout for this ",NS," state model (")
-  layoutDefaults <- data.frame(name=paste("box",1:NS,sep=""),
-                               row=box.row,
-                               column=box.col,
-                               stringsAsFactors=FALSE)
-  layoutDefaultList <- lapply(1:NS,function(x)layoutDefaults[x,-1,drop=FALSE])
-  names(layoutDefaultList) <- layoutDefaults$name
-  layout <- SmartControl(list(...),
-                         keys=c(layoutDefaults$name),
-                         defaults=c(layoutDefaultList),
-                         ignore.case=TRUE,
-                         replaceDefaults=FALSE,
-                         verbose=verbose)
+    else{ # survival or competing risks
+        ## adjustRowsInColumn <- rep(1,ncol)
+        ## adjustColsInRow <- rep(1,nrow)
+        if (ceiling(NS/2)==floor(NS/2)){ ## equal number of states and unequal number of absorbing states
+            box.col <- c(1,rep(ncol,NS-1))
+            box.row <- c(NS/2,1:(NS-1))
+        } else{ 
+            box.col <- c(1,rep(ncol,NS-1))
+            box.row <- c((NS+1)/2,(1:NS)[-(NS+1)/2])
+        }
+    }
+    if (is.null(box.row) || is.null(box.col))
+        stop("Please specify the layout for this ",NS," state model (")
+    layoutDefaults <- data.frame(name=paste("box",1:NS,sep=""),
+                                 row=box.row,
+                                 column=box.col,
+                                 stringsAsFactors=FALSE)
+    layoutDefaultList <- lapply(1:NS,function(x)layoutDefaults[x,-1,drop=FALSE])
+    names(layoutDefaultList) <- layoutDefaults$name
+    layout <- SmartControl(list(...),
+                           keys=c(layoutDefaults$name),
+                           defaults=c(layoutDefaultList),
+                           ignore.case=TRUE,
+                           replaceDefaults=FALSE,
+                           verbose=FALSE)
 
   # }}}
-  # {{{ draw empty frame
+    # {{{ draw empty frame
+
   # plot
   Xlim <- 100
   Ylim <- 100
@@ -154,7 +153,7 @@ plot.Hist <- function(x,
   ## backGround(c(0,100),c(0,100),bg="yellow")
 
   # }}}
-  # {{{ default values
+    # {{{ default values
 
   if (missing(cex))
     theCex <- 2
@@ -210,7 +209,7 @@ plot.Hist <- function(x,
   }
 
   # }}}
-  # {{{ compute box dimensions relative to cex of box labels
+    # {{{ compute box dimensions relative to cex of box labels
 
   ## to find the cex for the box labels, first initialize
   boxLabelCex <- rep(theCex,NS)
@@ -254,7 +253,8 @@ plot.Hist <- function(x,
   if (length(box.height)==1) box.height <- rep(box.height,NS)
   if (length(box.width)==1) box.width <- rep(box.width,NS)
   # }}}
-  # {{{ arrange the boxes in the layout
+    # {{{ arrange the boxes in the layout
+
   boxCol <- sapply(layout,function(x){x$column})
   if (any(boxCol>ncol)) ncol <- max(boxCol)
   boxRow <- sapply(layout,function(x){x$row})
@@ -263,23 +263,23 @@ plot.Hist <- function(x,
   names(ybox.position) <- paste("box",numstates,sep="")
   # {{{y box positions
   for (x in 1:ncol){
-    ## For each column find y positions for boxes
-    boxesInColumn <- names(boxCol)[boxCol==x]
-    boxesInColumnNumbers <- as.numeric(sapply(strsplit(boxesInColumn,"box"),function(x)x[[2]]))
-    if (length(boxesInColumn)>0){
-      ## if (adjustRowsInColumn[x]==1 && all(match(paste(boxesInColumn,"row",sep="."),names(thecall),nomatch=0)==0)){
-      # adjust the y position of the boxes according to the number of boxes in column
-      ## yPossible <- centerBoxes(Ylim,box.height[boxesInColumnNumbers],nrow,boxRow[boxesInColumn])
-      ## for (b in 1:length(boxesInColumn))
-      ## ybox.position[boxesInColumn[b]] <- yPossible[b]
-      ## }
-      ## else{
-      yPossible <- centerBoxes(Ylim,box.height[boxesInColumnNumbers],nrow,boxRow[boxesInColumn])
-      for (b in 1:length(boxesInColumn)){
-        ybox.position[boxesInColumn[b]] <- yPossible[b]
-        ## }
+      ## For each column find y positions for boxes
+      boxesInColumn <- names(boxCol)[boxCol==x]
+      boxesInColumnNumbers <- as.numeric(sapply(strsplit(boxesInColumn,"box"),function(x)x[[2]]))
+      if (length(boxesInColumn)>0){
+          ## if (adjustRowsInColumn[x]==1 && all(match(paste(boxesInColumn,"row",sep="."),names(thecall),nomatch=0)==0)){
+          # adjust the y position of the boxes according to the number of boxes in column
+          ## yPossible <- centerBoxes(Ylim,box.height[boxesInColumnNumbers],nrow,boxRow[boxesInColumn])
+          ## for (b in 1:length(boxesInColumn))
+          ## ybox.position[boxesInColumn[b]] <- yPossible[b]
+          ## }
+          ## else{
+          yPossible <- centerBoxes(Ylim,box.height[boxesInColumnNumbers],nrow,boxRow[boxesInColumn])
+          for (b in 1:length(boxesInColumn)){
+              ybox.position[boxesInColumn[b]] <- yPossible[b]
+              ## }
+          }
       }
-    }
   }
   ## row 1 is on top but the y-axis starts at the button
   ## therefore need to transform
@@ -289,36 +289,51 @@ plot.Hist <- function(x,
   xbox.position <- numeric(NS)
   names(xbox.position) <- paste("box",numstates,sep="")
   for (x in 1:nrow){
-    ## For each row find x positions for boxes
-    boxesInRow <- names(boxRow)[boxRow==x]
-    boxesInRowNumbers <- as.numeric(sapply(strsplit(boxesInRow,"box"),function(x)x[[2]]))
-    if (length(boxesInRow)>0){
-      ## if (adjustColsInRow[x]==1 && all(match(paste(boxesInRow,"row",sep="."),names(thecall),nomatch=0)==0)){
-      # adjust the x position of the boxes according to the number of boxes in row
-      ## xpossible <- centerBoxes(Ylim,box.height[boxesInRowNumbers],ncol,boxCol[boxesInRow])
-      ## for (b in 1:length(boxesInRow))
-      ## xbox.position[boxesInRow[b]] <- xpossible[b]
-      ## }
-      ## else{
-      xpossible <- centerBoxes(Ylim,box.width[boxesInRowNumbers],ncol,boxCol[boxesInRow])
-      for (b in 1:length(boxesInRow)){
-        xbox.position[boxesInRow[b]] <- xpossible[b]
+      ## For each row find x positions for boxes
+      boxesInRow <- names(boxRow)[boxRow==x]
+      boxesInRowNumbers <- as.numeric(sapply(strsplit(boxesInRow,"box"),function(x)x[[2]]))
+      if (length(boxesInRow)>0){
+          ## if (adjustColsInRow[x]==1 && all(match(paste(boxesInRow,"row",sep="."),names(thecall),nomatch=0)==0)){
+          # adjust the x position of the boxes according to the number of boxes in row
+          ## xpossible <- centerBoxes(Ylim,box.height[boxesInRowNumbers],ncol,boxCol[boxesInRow])
+          ## for (b in 1:length(boxesInRow))
+          ## xbox.position[boxesInRow[b]] <- xpossible[b]
+          ## }
+          ## else{
+          if (sum(box.width[boxesInRowNumbers])>Xlim)
+              stop(paste("Sum of box widths in row",x,"exceed limit",Xlim))
+          xpossible <- centerBoxes(Xlim,box.width[boxesInRowNumbers],ncol,boxCol[boxesInRow])
+          ## if (any(xpossible<0)) browser()
+          for (b in 1:length(boxesInRow)){
+              xbox.position[boxesInRow[b]] <- xpossible[b]
+          }
+          ## }
       }
-      ## }
-    }
   }
   # }}}
   xtext.position <- xbox.position + (box.width - state.width)/2
   ytext.position <- ybox.position + (box.height - state.height)/2
-  if (verbose)
-    print(cbind(boxCol,boxRow,xbox.position,ybox.position,box.width,state.width,state.height,boxLabelCex))
+  if (verbose){
+      cat("\n\nBoxlabel data:\n\n")
+      print(data.frame(stateLabs,
+                       boxCol,
+                       boxRow,
+                       x.pos=round(xbox.position,2),
+                       y.pos=round(ybox.position,2),
+                       width=round(box.width,2),
+                       label.width=round(state.width,2),
+                       label.height=round(state.height,2),
+                       boxLabelCex))
+  }
   boxDefaults <- cbind(boxDefaults,xleft=xbox.position,ybottom=ybox.position,xright=xbox.position+box.width,ytop=ybox.position+box.height)
   boxLabelDefaults <- cbind(boxLabelDefaults,
                             x=xtext.position,
                             y=ytext.position,
                             cex=boxLabelCex)
+
   # }}}
-  # {{{ compute arrow positions
+    # {{{ compute arrow positions
+
   doubleArrow <- match(paste(arrowDefaults[,"to"],arrowDefaults[,"from"]),paste(arrowDefaults[,"from"],arrowDefaults[,"to"]),nomatch=0)
   arrowDefaults <- cbind(arrowDefaults,doubleArrow)
   arrowList <- for (trans in 1:N){
@@ -328,7 +343,7 @@ plot.Hist <- function(x,
                                 Box2=c(round(xbox.position[to.state],4),round(ybox.position[to.state],4)),
                                 Box1Dim=c(box.width[from.state],box.height[from.state]),
                                 Box2Dim=c(box.width[to.state],box.height[to.state]),
-                                verbose=verbose)
+                                verbose=FALSE)
     Len <- function(x){sqrt(sum(x^2))}
     from <- ArrowPositions$from
     to <- ArrowPositions$to
@@ -386,8 +401,9 @@ plot.Hist <- function(x,
     arrowlabelDefaults[trans,"x"] <- ArrowLabelPos[1] 
     arrowlabelDefaults[trans,"y"] <- ArrowLabelPos[2]
   }
+
   # }}}
-  # {{{ Smart argument control
+    # {{{ Smart argument control
 
   boxDefaultList <- lapply(1:NS,function(x)boxDefaults[x,-1,drop=FALSE])
   names(boxDefaultList) <- boxDefaults$name
@@ -399,53 +415,65 @@ plot.Hist <- function(x,
   names(arrowlabelDefaultList) <- as.character(arrowlabelDefaults$name)
   boxTagsDefaultList <- list(labels=numstateLabels,cex=1.28,adj=c(-.5,1.43))
   smartArgs <- SmartControl(list(...),
-                            keys=c(boxDefaults$name,boxLabelDefaults$name,as.character(arrowDefaults$name),as.character(arrowlabelDefaults$name),"boxtags"),
+                            keys=c(boxDefaults$name,
+                                boxLabelDefaults$name,
+                                as.character(arrowDefaults$name),
+                                as.character(arrowlabelDefaults$name),
+                                "boxtags"),
                             defaults=c(boxLabelDefaultList,arrowDefaultList,arrowlabelDefaultList,boxDefaultList,list("boxtags"=boxTagsDefaultList)),
                             ignore.case=TRUE,
                             replaceDefaults=FALSE,
                             verbose=verbose)
+    
   # }}}
-  # {{{  draw the boxes
-
+    # {{{  draw the boxes
+  
   for (i in 1:NS) {
     suppressWarnings(do.call("rect",smartArgs[[paste("box",i,sep="")]]))
   }
 
   # }}}
-  # {{{  label the boxes
+    # {{{  label the boxes
   
   for (i in 1:NS) {
     suppressWarnings(do.call("text",c(list(adj=c(0,0)),smartArgs[[paste("label",i,sep="")]])))
   }
 
   # }}}
-  # {{{  draw the arrows
+    # {{{  draw the arrows
 
   for (i in 1:N){
     suppressWarnings(do.call("arrows",c(smartArgs[[paste("arrow",i,sep="")]])))
   }
 
   # }}}
-  # {{{ label the arrows
-  if (arrowLabels.p==TRUE){
-    for (i in 1:N){
-      labelList <- smartArgs[[paste("arrowlabel",i,sep="")]]
-      switch(labelList$label,"symbolic"={
-        ## lab <- (arrowLabels[[i]])
-        try1 <- try(mode((arrowLabels[[i]])[2])[[1]]=="call",silent=TRUE)
-        ## try2 <- try(as.character(arrowLabels[[i]])[[1]]=="paste",silent=TRUE)
-        labIsCall <- (class(try1)!="try-error" && try1)
-        suppressWarnings(do.call("text",c(list(labels=bquote(arrowLabels[[i]])),labelList)))        
-      }, "count"={
-        tabTrans <- as.matrix(table(transitions))
-        lab <- paste("n=",tabTrans[as.character(labelList$from),as.character(labelList$to)])
-        suppressWarnings(do.call("text",c(list(labels=quote(lab)),labelList)))
-      })
-      ## suppressWarnings(do.call("text",c(list(adj=c(labelWidth/2,labelHeight/2),labels="label"),smartArgs[[paste("arrowlabel",i,sep="")]])))
-    }}
-  # }}}
-  # {{{  put numbers in the upper left corner of the boxes (if wanted)
-  
+    # {{{ label the arrows
+    if (verbose) arrowLabel.data <- NULL
+    if (arrowLabels.p==TRUE){
+        for (i in 1:N){
+            labelList <- smartArgs[[paste("arrowlabel",i,sep="")]]
+            if (verbose) arrowLabel.data <- rbind(arrowLabel.data,cbind("arrowLabel"=i,data.frame(labelList)))
+            switch(labelList$label,"symbolic"={
+                ## lab <- (arrowLabels[[i]])
+                try1 <- try(mode((arrowLabels[[i]])[2])[[1]]=="call",silent=TRUE)
+                ## try2 <- try(as.character(arrowLabels[[i]])[[1]]=="paste",silent=TRUE)
+                labIsCall <- (class(try1)!="try-error" && try1)
+                suppressWarnings(do.call("text",c(list(labels=bquote(arrowLabels[[i]])),labelList)))        
+            }, "count"={
+                tabTrans <- as.matrix(table(transitions))
+                lab <- paste("n=",tabTrans[as.character(labelList$from),as.character(labelList$to)])
+                suppressWarnings(do.call("text",c(list(labels=quote(lab)),labelList)))
+            })
+            ## suppressWarnings(do.call("text",c(list(adj=c(labelWidth/2,labelHeight/2),labels="label"),smartArgs[[paste("arrowlabel",i,sep="")]])))
+        }
+    }
+    if (verbose) {
+        cat("\n\nArrow label data:\n\n")
+        print(arrowLabel.data)
+    }
+    # }}}
+    # {{{  put numbers in the upper left corner of the boxes (if wanted)
+
   if (tagBoxes==TRUE){
     tagList <- smartArgs$boxtags
     nix <- lapply(1:NS,function(b) {
@@ -458,10 +486,13 @@ plot.Hist <- function(x,
   }
 
   # }}}
-  # {{{ reset margin
+    # {{{ reset margin
   par(mar=oldmar,xpd=oldxpd,oma=oldoma)
   # }}}
-  invisible(smartArgs)
+    if (verbose){
+        cat("\nRelevel the factor 'event' in the dataset which defines the Hist object,\nto change the order of the boxes.\n")
+    }
+    invisible(smartArgs)
 }
 
 
@@ -476,23 +507,31 @@ position.finder <- function(border,len,n){
 }
 
 centerBoxes <- function(border,len,ncell,pos){
-  ## box i has length len[i] and is centered in cell pos[i]
-  ## return the position in [0,border] of the lower
-  ## border of the boxes
-  cellheight <- border/ncell
-  if (sum(len)>border) warning("sum of box dimensions exceeds limits")
-  if (length(len)>ncell) warning("more boxes than cells")
-  box.pos <- seq(from=0,to=border,by=cellheight)[pos]+sapply(len,function(l) {(border/ncell - l)/2})
-  ## spread as far as possible
-  boxPos <- sapply(1:length(box.pos),function(b){
-    bp <- box.pos[b]
-    if (ncell>1 && pos[b]==1) # at the left/lower border
-      bp <- min(0,box.pos[b])
-    if (ncell> 1 && pos[b]==ncell)# at the right/upper border
-      bp <- max(border-len[b],box.pos[b])
-    bp
-  })
-  boxPos
+    ## box i has length len[i] and is centered in cell pos[i]
+    ## return the position in [0,border] of the lower
+    ## border of the boxes
+    cellwidth <- border/ncell
+    nboxes <- length(len)
+    if ((luft <- border-sum(len))<0) stop("sum of box dimensions exceeds limits")
+    if (nboxes>ncell) stop("too many boxes in one row")
+    ## case: all boxes fit into given cell width
+    ## if (all(len<cellwidth)){
+    box.pos <- seq(from=0,to=border,by=cellwidth)[pos] + pmax(0,sapply(len,function(l) {(cellwidth - l)/2}))
+    ## spread as far as possible
+    boxPos <- sapply(1:length(box.pos),function(b){
+        bp <- box.pos[b]
+        if (ncell>1 && pos[b]==1) # at the left/lower border
+            bp <- min(0,abs(box.pos[b]))
+        if (ncell> 1 && pos[b]==ncell)# at the right/upper border
+            bp <- max(border-len[b],box.pos[b])
+        bp
+    })
+    ## }else{
+    ## ## case: at least one box exceeds the cellwidth
+    ## between <- luft/(nboxes-1)
+    ## boxPos <- c(0,len[-nboxes]+between)
+    ## }
+    boxPos
 }
 
 
