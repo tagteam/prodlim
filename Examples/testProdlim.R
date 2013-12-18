@@ -1,7 +1,6 @@
 ## The function `Hist' (short for history) generalizes
 ## the function `Surv' which is defined in the survival package
-
-# first test: a two state survival model 
+# {{{two state survival model 
 # --------------------------------------------------------------------
 
 ## If the status variable takes only two values, then `Surv' and
@@ -9,15 +8,23 @@
 ## print/summary functions are different. 
 
 library(prodlim)
+library(survival)
 data(pbc)
 
-sH1 <- Hist(pbc$time,pbc$status)
-sH2 <- Surv(pbc$time,pbc$status)
+sH1 <- Hist(pbc$time,pbc$status==1)
+sH2 <- Surv(pbc$time,pbc$status==1)
 stopifnot(all(unclass(sH1)==unclass(sH2)))
 summary(sH1)
 summary(sH2)
 
-# second test: a competing risk model 
+f <- survfit(Surv(time,status==1)~1,data=pbc,type="kaplan-meier")
+F <- prodlim(Hist(time,status==1)~1,data=pbc)
+plot(f,lwd=8)
+plot(F,lwd=3,col=2,add=TRUE)
+
+# }}}
+# {{{competing risk model 
+
 # --------------------------------------------------------------------
 
 require(prodlim)
@@ -57,6 +64,8 @@ all(round(pfit$surv,10)==round(survfit(Surv(time,status)~1,data=pbc)$surv,10))
 ## summary(pfit)
 ## plot(pfit,atrisk=T,conf.int=T)
 
+# }}}
+# {{{ marginal and with covariates
 a <- prodlim(Surv(time,status),data=pbc)
 a <- prodlim(Hist(time,status)~1,data=pbc)
 b <- prodlim(Surv(time,status)~1,data=pbc,reverse=TRUE)
@@ -64,39 +73,15 @@ c <- prodlim(Surv(time,status)~edema,data=pbc,reverse=TRUE)
 d <- prodlim(Surv(time,status)~NN(age),data=pbc,reverse=TRUE)
 e <- prodlim(Surv(time,status)~NN(age)+edema,data=pbc,reverse=TRUE)
 f <- prodlim(Surv(time,status)~NN(age)+edema+sex,data=pbc,reverse=TRUE)
-
-## class(c) <- "dynamic"
-
-
-normal.cox <- coxph(Surv(time,status)~edema,data=pbc)
-
-update.cox <- function(object,tstar,data){
-  object$call$data <- data[data$time>tstar,]
-  update <- eval(object$call)
-  class(update) <- "dynamicCox"
-  update
-}
-
-predictProb.dynamicCox <- function(object,newdata,cutpoints,learn.data,...){
-  p <- matrix(1,nrow=NROW(newdata),ncol=length(cutpoints))
-  p
-}
-
-
-pec.c <- pec(object=list(c),
-             formula=Surv(time,status)~1,
-             data=pbc,
-             exact=TRUE,
-             method="ipcw",
-             cens.model="marg",
-             B=0,
-             verbose=TRUE)
-
-
+g <- prodlim(Hist(time,status)~factor(edema)+strata(sex)+strata(stage),data=pbc)
+h <- prodlim(Hist(time,status)~factor(edema)+strata(sex)+factor(stage),data=pbc,caseweights=pbc$randprob[!is.na(pbc$stage)])
 a
 b
 c
 d
+e
+f
+g
 
 par(mfrow=c(2,2))
 plot(a)
@@ -104,8 +89,8 @@ plot(b)
 plot(c)
 plot(d)
 
-
-#cluster
+# }}}
+# {{{ clustered data
 if (!is.function("cluster")) cluster <- function(x)x
 testdat <- data.frame(time=c(1,2,2,3,7),status=c(0,1,1,0,1),patnr=c(1,2,1,3,2))
 y <- prodlim(Hist(time,status)~cluster(patnr),data=testdat)
@@ -115,12 +100,9 @@ x <- clustersurv(Surv(time,status)~1|patnr,data=testdat)
 x <- prodlim(Hist(survtime,survstatus)~cluster(patnr),data=Sterioss)
 data(primary)
 data(Sterioss)
-
-
 w <- as.numeric(Sterioss$patnr)
-
-
-# bootstrapping study units
+# }}}
+# {{{ bootstrapping study units
 # --------------------------------------------------------------------
 N <- NROW(Sterioss)
 boot <- matrix(sapply(1:B,function(b){sample(1:N,replace=TRUE)}),nrow=N,ncol=B)
@@ -128,7 +110,8 @@ bootx <- sapply(1:B,function(b){
   if ((b/100==round(b/100)))print(b)
   u <- predict(prodlim(Hist(survtime,survstatus)~1,data=Sterioss[boot[,b],]),times=seq(0,72,12),verbose=F)$surv
 })
-# bootstrapping patients
+# }}}
+# {{{ bootstrapping patients
 # --------------------------------------------------------------------
 B <- 1000
 N2 <- length(unique(Sterioss$patnr))
@@ -156,6 +139,7 @@ bootx3 <- sapply(1:B,function(b){
   data3 <- Sterioss[tapply(1:NROW(Sterioss),Sterioss$patnr,function(w){sample(w,1)}),]
   predict(prodlim(Hist(survtime,survstatus)~1,data=data3),times=seq(0,72,12),verbose=F)$surv
 })
+
 
 # Greenwood and Williams
 # --------------------------------------------------------------------
@@ -186,41 +170,9 @@ v <- clustersurv(Surv(surrogate.time,status)~1|child,
 
 v <- clustersurv(Surv(surrogate.time,status)~1|child,data=primary)
 
-#comprisk
-
-
-MVtest$event[MVtest$event==3] <- 0
-MVtest <- MVtest[order(MVtest$time,MVtest$event),]
-
-fit1 <- prodlim(Hist(time,event)~1,data=MVtest,subset=group=="B")
-cbind(fit1$time,fit1$n.event,fit1$se.cuminc[,1])[fit1$n.event[,1]>0,]
-
-fit2 <- with(MVtest[MVtest$group=="B",],cuminc(time,event))
-fit2 <- with(MVtest,cuminc(time,event))
-tmp1 <- (fit1$se.cuminc[fit1$n.event[,1]>0,1])^2
-
-
-tmp2 <- fit2$"1 1"$var[seq(1,length(fit2$"1 1"$var),2)]
-cbind(unique(c(0,MVtest$time[MVtest$event==1])),c(0,tmp1),tmp2)
-
-
-
-
-testdat1 <- data.frame(time=c(1,2,2,3,7),status=c(1,2,1,0,2))
-z <- prodlim(Hist(time,status)~1,data=testdat1)
-Z <- with(testdat1,cuminc(time,status))
-library(timereg)
-data(TRACE)
-
-
-a <- prodlim(Hist(time,as.numeric(TRACE$status>0))~1,data=TRACE)
-z <- prodlim(Hist(time,status)~1,data=TRACE)
-
-
-
-# interval censoring
+# }}}
+# {{{ interval censored data
 # --------------------------------------------------------------------
-
 library(Icens)
 data(cosmesis)
 csub1 <- subset(cosmesis, subset=Trt==0, select=c(L,R))
@@ -235,8 +187,8 @@ plot(e2,surv=TRUE)
 tmp1 <- PLicens(cosmesis[cosmesis$Trt==1,]$L,cosmesis[cosmesis$Trt==1,]$R,nintervals=0)
 lines(tmp1$sieve.L,tmp1$surv,type="s",col=2)
 
-
-# pseudo values
+# }}}
+# {{{ pseudo values
 # --------------------------------------------------------------------
 
 set.seed(111)
@@ -252,57 +204,40 @@ testdat <- SimSurv(N=N,surv.dist="rweibull",surv.args=list(shape = 1),surv.basel
 ## }))
 
 
-set.seed(111)
-N <- 300
-testdat <- SimSurv(N=N,surv.dist="rweibull",surv.args=list(shape = 1),surv.baseline=1/100,surv.link="exp",cens.dist="rexp",cens.args=NULL,cens.baseline=1/1000,cens.link="exp",censored=TRUE,cens.max=NULL,keep.uncensored=TRUE,method="transform",verbose=TRUE)
-fit <- prodlim(Surv(time,status)~1,data=testdat,reverse=FALSE)
-jackframe <- system.time(jackknife.prodlim(fit))
-summary((colMeans(jackframe)-fit$surv))
+## set.seed(111)
+## N <- 300
+## testdat <- SimSurv(N=N,surv.dist="rweibull",surv.args=list(shape = 1),surv.baseline=1/100,surv.link="exp",cens.dist="rexp",cens.args=NULL,cens.baseline=1/1000,cens.link="exp",censored=TRUE,cens.max=NULL,keep.uncensored=TRUE,method="transform",verbose=TRUE)
+## fit <- prodlim(Surv(time,status)~1,data=testdat,reverse=FALSE)
+## jackframe <- system.time(jackknife.prodlim(fit))
+## summary((colMeans(jackframe)-fit$surv))
+## system.time(testpec <- pec(object=fit,formula=Surv(time,status)~1,data=testdat,times=fit$time,replan="boot.632plus",B=300,verbose=FALSE))
+
+## N/(N-1)(all$surv-predict(mink,times=all$time))
 
 
-system.time(testpec <- pec(object=fit,
-                           formula=Surv(time,status)~1,
-                           data=testdat,
-                           times=fit$time,
-                           replan="boot.632plus",
-                           B=300,
-                           verbose=FALSE))
-
-
-
-N/(N-1)(all$surv-predict(mink,times=all$time)$surv)
-
-
-set.seed(111)
-N <- 10000
-k <- 5555
-testdat <- SimSurv(N=N,surv.dist="rweibull",surv.args=list(shape = 1),surv.baseline=1/100,surv.link="exp",cens.dist="rexp",cens.args=NULL,cens.baseline=1/1000,cens.link="exp",censored=TRUE,cens.max=NULL,keep.uncensored=TRUE,method=c("transform", "Bender"),verbose=TRUE)
-G <- predict(prodlim(Surv(time,status)~1,data=testdat,reverse=TRUE),times=testdat$time,individual=TRUE)
-jvk <- N*all$surv-(N-1)*predict(mink,times=all$time)$surv
-rhs <- 1-testdat$status[k]*sindex(testdat[k,]$time,testdat$time)/G[k]
-plot(unique(testdat$time),jvk,ylim=c(-1,1),type="l")
-lines(unique(testdat$time),rhs,type="l",col=2)
-abline(v=testdat$time[k])
+## set.seed(111)
+## N <- 10000
+## k <- 5555
+## testdat <- SimSurv(N=N,surv.dist="rweibull",surv.args=list(shape = 1),surv.baseline=1/100,surv.link="exp",cens.dist="rexp",cens.args=NULL,cens.baseline=1/1000,cens.link="exp",censored=TRUE,cens.max=NULL,keep.uncensored=TRUE,method=c("transform", "Bender"),verbose=TRUE)
+## G <- predict(prodlim(Surv(time,status)~1,data=testdat,reverse=TRUE),times=testdat$time,individual=TRUE)
+## jvk <- N*all$surv-(N-1)*predict(mink,times=all$time)$surv
+## rhs <- 1-testdat$status[k]*sindex(testdat[k,]$time,testdat$time)/G[k]
+## plot(unique(testdat$time),jvk,ylim=c(-1,1),type="l")
+## lines(unique(testdat$time),rhs,type="l",col=2)
+## abline(v=testdat$time[k])
 
 
 #set.seed(111)
-N <- 10000
-testdat <- SimSurv(N=N,surv.dist="rweibull",surv.args=list(shape = 1),surv.baseline=1/100,surv.link="exp",cens.dist="rexp",cens.args=NULL,cens.baseline=1/1000,cens.link="exp",censored=F,cens.max=NULL,keep.uncensored=TRUE,method=c("transform", "Bender"),verbose=TRUE)
-k <- 5555
-all <- prodlim(Surv(time,status)~1,data=testdat,reverse=F)
-tk <- testdat[-k,]
-mink <- prodlim(Surv(time,status)~1,data=tk,reverse=F)
-print(max(all$surv-predict(mink,times=all$time)$surv))
-pvk <- (N-1)*(all$surv-predict(mink,times=all$time)$surv)
-plot(all$time,pvk,ylim=c(-1,1),xlim=c(0,10))
-abline(v=testdat$time[k])
+## N <- 10000
+## testdat <- SimSurv(N=N,surv.dist="rweibull",surv.args=list(shape = 1),surv.baseline=1/100,surv.link="exp",cens.dist="rexp",cens.args=NULL,cens.baseline=1/1000,cens.link="exp",censored=F,cens.max=NULL,keep.uncensored=TRUE,method=c("transform", "Bender"),verbose=TRUE)
+## k <- 5555
+## all <- prodlim(Surv(time,status)~1,data=testdat,reverse=F)
+## tk <- testdat[-k,]
+## mink <- prodlim(Surv(time,status)~1,data=tk,reverse=F)
+## print(max(all$surv-predict(mink,times=all$time)$surv))
+## pvk <- (N-1)*(all$surv-predict(mink,times=all$time)$surv)
+## plot(all$time,pvk,ylim=c(-1,1),xlim=c(0,10))
+## abline(v=testdat$time[k])
 
+# }}}
 
-
-# plot.Hist
-# --------------------------------------------------------------------
-
-## two-state model
-
-frame2 <- data.frame(time=c(1,2),status=c(1,1))
-with(frame2,plot(Hist(time,status)))
