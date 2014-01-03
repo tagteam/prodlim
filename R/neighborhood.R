@@ -44,7 +44,7 @@
     cumtabx <- rep(cumtabu,tabu)
     tabx <- rep(tabu,tabu)
     if (!length(bandwidth)){ ## need a bandwidth (dpik is from KernSmooth)
-        require(KernSmooth)
+        ## require(KernSmooth)
         bandwidth <- dpik(cumtabx/N,kernel="box")
     }
     else

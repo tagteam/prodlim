@@ -86,7 +86,7 @@ summary.prodlim <- function(object,
     ntimes <- length(times)
     # }}}
     # {{{ interval-censored
-    if (cens.type=="interval-censored"){
+    if (cens.type=="intervalCensored"){
         ltab <- data.frame(time=paste("(",paste(signif(object$time[1,],2),
                                signif(object$time[2,],2),
                                sep="-"),"]",sep=""),

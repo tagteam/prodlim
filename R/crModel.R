@@ -11,7 +11,7 @@
 #' @author Thomas A. Gerds
 #' @export
 crModel <- function(){
-    require(lava)
+    # require(lava)
     crm <- lvm()
     distribution(crm,"eventtime1") <- coxWeibull.lvm(scale=1/100)
     distribution(crm,"eventtime2") <- coxWeibull.lvm(scale=1/100)

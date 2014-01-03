@@ -210,6 +210,7 @@
 #' plot(fitd)
 #'
 #' @useDynLib prodlim
+#' @import KernSmooth
 #' @export
 "prodlim" <- function(formula,
                       data = parent.frame(),
@@ -255,7 +256,7 @@
   #  FIX for people who use `Surv' instead of `Hist' 
   if (match("Surv",class(response),nomatch=0)!=0){
       attr(response,"model") <- "survival"
-      attr(response,"cens.type") <- "right-censored"
+      attr(response,"cens.type") <- "rightCensored"
       ## attr(response,"entry.type") <- ""
       model.type <- 1
   }
@@ -270,7 +271,7 @@
   event.history <- response
   ## print(attributes(response))
   ## print(cens.type)
-  if (cens.type!="interval-censored"){
+  if (cens.type!="intervalCensored"){
       event.time.order <- order(event.history[,"time"],-event.history[,"status"])
   }
   else{
@@ -326,7 +327,7 @@
     S <- do.call("paste", c(covariates$strata, sep = "\r"))
     NS <- length(unique(S))
     Sfactor <- factor(S,labels=1:NS)
-    if (cens.type!="interval-censored"){
+    if (cens.type!="intervalCensored"){
       sorted <- order(Sfactor, response[,"time"],-response[,"status"])
       }
     else{
@@ -378,7 +379,7 @@
          { # type=1
              size.strata <- NROW(response)
              NU <- 1
-             if (cens.type!="interval-censored")
+             if (cens.type!="intervalCensored")
                  N <- length(unique(response[,"time"]))
              else
                  N <- length(unique(response[,"L"]))
@@ -487,14 +488,14 @@
   # the following cases are not yet available
   ## if (length(attr(event.history,"entry.type"))>1) stop("Prodlim: Estimation for left-truncated data not yet implemented.")
   if (delayed & weighted>0) stop("Prodlim: Estimation for left-truncated data with caseweights not implemented.")
-  if (reverse && cens.type!="right-censored") stop("Prodlim: Estimation of the censoring distribution works only for right censored data.")
+  if (reverse && cens.type!="rightCensored") stop("Prodlim: Estimation of the censoring distribution works only for right censored data.")
   if (delayed && clustered) stop("Prodlim: Estimation with delayed entry and cluster-correlated observations not yet implemented.")
   if (reverse && clustered) stop("Prodlim: Estimation of censoring distribution with cluster-correlated observations not yet handled.")
-  if (cens.type=="interval-censored" && model.type>=2) stop("Prodlim: Interval censored observations only handled for two-state models")
-  ##   if (cens.type=="interval-censored" && model.type>2) stop("Interval censored observations only handled for two-state and competing risks models")
+  if (cens.type=="intervalCensored" && model.type>=2) stop("Prodlim: Interval censored observations only handled for two-state models")
+  ##   if (cens.type=="intervalCensored" && model.type>2) stop("Interval censored observations only handled for two-state and competing risks models")
   if (clustered && model.type>1) stop("Prodlim: Cluster-correlated observations only handled for two-state models")
   if (clustered && cotype %in% c(3,4)) stop("Prodlim: Cluster-correlated observations not yet handled in presence of continuous covariates") #cluster <- cluster[neighbors]
-  if (cotype>1 && cens.type=="interval-censored") stop("Prodlim: Interval censored data and covariate strata not yet handled.")
+  if (cotype>1 && cens.type=="intervalCensored") stop("Prodlim: Interval censored data and covariate strata not yet handled.")
   if (model.type==1){
       # }}}
       # {{{  two state model
@@ -506,7 +507,7 @@
           Cout$maxtime <- max(Cout$time)
       }
       else{
-          if (cens.type=="interval-censored"){
+          if (cens.type=="intervalCensored"){
               if (length(method)>1) method <- method[1]
               if (length(grep("impute",method))>0){
                   naiiveMethod <- strsplit(method,"impute.")[[1]][[2]]
@@ -604,7 +605,7 @@
   if (conf.int==TRUE) conf.int <- 0.95
   # }}}
   # {{{  confidence intervals
-  if (is.numeric(conf.int) && cens.type!="interval-censored"){
+  if (is.numeric(conf.int) && cens.type!="intervalCensored"){
       if (model.type==1){
           if (!(is.null(Cout$se.surv))){
               ## pointwise confidence intervals for survival probability

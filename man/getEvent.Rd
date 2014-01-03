@@ -1,6 +1,5 @@
 \name{getEvent}
 \alias{getEvent}
-\alias{getStates}
 \title{Extract a column from an event history object.}
 \usage{
   getEvent(object, mode = "factor", column = "event")

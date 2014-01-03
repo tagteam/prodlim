@@ -9,9 +9,10 @@
 #' latent event time, the latent right censored time, and the observed
 #' right censored event time.
 #' @author Thomas A. Gerds <tag@@biostat.ku.dk>
+#' @import lava
 #' @export 
 survModel <- function(){
-    require(lava)
+    ## require(lava)
     sm <- lvm(~eventtime+censtime)
     distribution(sm,"eventtime") <- coxWeibull.lvm(scale=1/100)
     distribution(sm,"censtime") <- coxWeibull.lvm(scale=1/100)

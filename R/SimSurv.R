@@ -12,7 +12,7 @@
 ##'
 ##' @export
 SimSurv <- function(N, ...){
-    require(lava)
+    ## require(lava)
     m <- survModel()
     regression(m,from="X1",to="eventtime") <- 1
     regression(m,from="X2",to="eventtime") <- 1

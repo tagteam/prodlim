@@ -7,7 +7,7 @@
 #' numeric or integer valued. To extract a correctly labeled version, the
 #' attribute \code{states} of the object is used to generate factor levels.
 #' 
-#' @aliases getEvent getStates
+#' @aliases getEvent 
 #' @param object Object of class \code{"Hist"}.
 #' @param mode Return mode. One of \code{"numeric"}, \code{"character"}, or
 #' \code{"factor"}.

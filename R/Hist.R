@@ -154,7 +154,7 @@
     time <- data.frame(time)
   }
   if (is.data.frame(time)){
-    cens.type <- "interval-censored"
+    cens.type <- "intervalCensored"
     L <- time[[1]]
     R <- time[[2]]
     N <- length(L)
@@ -171,7 +171,7 @@
   }
   else{
     stopifnot(is.numeric(time))
-    cens.type <- "right-censored"
+    cens.type <- "rightCensored"
     N <- length(time)
     status <- rep(1,N) ## temporary dummy
   }
@@ -187,7 +187,7 @@
       entry <- data.frame(entry)
     }
     if (is.data.frame(entry)){
-      entry.type <-"interval-censored"
+      entry.type <-"intervalCensored"
       U <- entry[[1]]
       V <- entry[[2]]
       stopifnot(is.numeric(U))
@@ -202,14 +202,14 @@
         entry.type <- "exact"
     }}
   ## check if entry < exit
-  if (cens.type=="interval-censored")
-    if (entry.type=="interval-censored")
+  if (cens.type=="intervalCensored")
+    if (entry.type=="intervalCensored")
       stopifnot(all(V<L))
     else{
       stopifnot(is.null(entry) || all(entry<L))
     }
   else
-    if (entry.type=="interval-censored")
+    if (entry.type=="intervalCensored")
       stopifnot(all(V<=time))
     else
       stopifnot(is.null(entry) || all(entry<time))
@@ -240,7 +240,7 @@
         ## inFormat <- "longitudinal"
         stopifnot(is.numeric(id) || is.factor(id))
         model <- "multi.states"
-        if (cens.type=="interval-censored"){
+        if (cens.type=="intervalCensored"){
           stop("Dont know the order of transitions for interval censored observations.")
         }
         else{
@@ -320,15 +320,15 @@
   else
       model <- "survival"
     
-    if (cens.type=="interval-censored"){
+    if (cens.type=="intervalCensored"){
       if (model=="survival"){
-        if (entry.type=="interval-censored")
+        if (entry.type=="intervalCensored")
           history <- cbind(U=U,V=V,L=L,R=R,status=status)
         else
           history <- cbind(entry = entry,L=L,R=R,status=status)
       }
       else{
-        if (entry.type=="interval-censored")
+        if (entry.type=="intervalCensored")
           history <- cbind(U=U,V=V,L=L,R=R,status=status,event=as.integer(factor(event,levels=c(states,cens.code))))
         else
           history <- cbind(entry = entry,L=L,R=R,status=status,event=as.integer(factor(event,levels=c(states,cens.code))))
@@ -336,13 +336,13 @@
     }
     else{
       if (model=="survival"){
-        if (entry.type=="interval-censored")
+        if (entry.type=="intervalCensored")
           history <- cbind(U=U,V=V,time=time,status=status)
         else
           history <- cbind(entry = entry,time=time,status=status)
       }
       else{
-        if (entry.type=="interval-censored")
+        if (entry.type=="intervalCensored")
           history <- cbind(U=U,V=V,time=time,status=status,event=as.integer(factor(event,levels=c(states,cens.code))))
         else
           history <- cbind(entry = entry,time=time,status=status,event=as.integer(factor(event,levels=c(states,cens.code))))
@@ -369,15 +369,15 @@
                  cens.code,
                  " identifies censored data, but is found amoung the `from' state of some transitions"))
     } 
-    if (cens.type=="interval-censored"){
-      if (entry.type=="interval-censored")
+    if (cens.type=="intervalCensored"){
+      if (entry.type=="intervalCensored")
         history <- cbind(U=U,V=V,L=L,R=R,status=status,from=as.integer(factor(from,levels=c(states,cens.code))),to=as.integer(factor(to,levels=c(states,cens.code))))
       else{
         history <- cbind(entry = entry,L=L,R=R,status=status,from=as.integer(factor(from,levels=c(states,cens.code))),to=as.integer(factor(to,levels=c(states,cens.code))))
       }
     }
     else{
-      if (entry.type=="interval-censored")
+      if (entry.type=="intervalCensored")
         history <- cbind(U=U,V=V,time=time,status=status,from=as.integer(factor(from,levels=c(states,cens.code))),to=as.integer(factor(to,levels=c(states,cens.code))))
       else{
         history <- cbind(entry = entry,time=time,status=status,from=as.integer(factor(from,levels=c(states,cens.code))),to=as.integer(factor(to,levels=c(states,cens.code))))

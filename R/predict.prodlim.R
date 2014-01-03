@@ -129,7 +129,7 @@
   order.times <- order(times)
   unsorted.times <- times
   times <- times[order.times]
-  if (object$cens.type=="interval-censored")
+  if (object$cens.type=="intervalCensored")
     jTimes <- object$time[2,]
   else
     jTimes <- object$time

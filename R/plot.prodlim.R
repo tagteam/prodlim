@@ -146,7 +146,7 @@
 ##' ajfitX <- prodlim(Hist(time, event) ~ X1+X2, data = datCR)
 ##' plot(ajfitX,newdata=data.frame(X1=c(1,1,0),X2=c(4,10,10)))
 ##' plot(ajfitX,newdata=data.frame(X1=c(1,1,0),X2=c(4,10,10)),cause=2)
- 
+#' @import survival 
 #' @method plot prodlim
 #' @S3method plot prodlim
 plot.prodlim <- function(x,
@@ -186,8 +186,8 @@ plot.prodlim <- function(x,
   # {{{  extracting a list of lines to draw
 
   cens.type <- x$cens.type    # uncensored, right or interval censored
-  if (cens.type=="interval-censored") confint <- FALSE
-  if (cens.type=="interval-censored") atrisk <- FALSE
+  if (cens.type=="intervalCensored") confint <- FALSE
+  if (cens.type=="intervalCensored") atrisk <- FALSE
   cotype <- x$covariate.type       # no, discrete, continuous or both
   model <- x$model                 # survival, competing risks or multi-state
   clusterp <- !is.null(x$clustervar)
@@ -199,7 +199,7 @@ plot.prodlim <- function(x,
     type <- match.arg(type,c("surv","cuminc","hazard"))
   if (model=="competing.risks" && type=="surv") stop("To plot the event-free survival curve, please fit a suitable model: prodlim(Hist(time,status!=0)~....")
   
-  if (cens.type=="interval-censored")
+  if (cens.type=="intervalCensored")
     plot.times <- sort(unique(x$time[2,]))
   else{
     plot.times <- sort(unique(x$time))
@@ -233,7 +233,7 @@ plot.prodlim <- function(x,
   }
   if (confint==TRUE)
     stats=c(stats,list(c("lower",startValue),c("upper",startValue)))
-  if (x$cens.type=="interval-censored")
+  if (x$cens.type=="intervalCensored")
     stop("FIXME")
   sumX <- lifeTab(x,
                   times=plot.times,
@@ -412,7 +412,7 @@ if (confint==TRUE) {
           lrform <- x$call$formula
           if (lrform[[2]][[1]]==as.name("Hist"))
               lrform[[2]][[1]] <- as.name("Surv")
-          require(survival)
+          ## require(survival)
           lrtest <- survdiff(eval(lrform),data=eval(x$call$data))
           ## from print.survdiff
           if (length(lrtest$n) == 1) {

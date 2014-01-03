@@ -12,11 +12,14 @@
 ##'             
 ##' @export
 SimCompRisk <- function(N, ...){
-    require(lava)
+    ## require(lava)
     m <- crModel()
     regression(m,from="X1",to="eventtime1") <- 1
     regression(m,from="X2",to="eventtime1") <- 1
     distribution(m,"X1") <- binomial.lvm()
-    sim(m,N)
+    out <- sim(m,N)
+    ## for backward compatibility
+    out$cause <- out$event
+    out
 }
  

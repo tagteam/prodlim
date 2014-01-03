@@ -22,7 +22,7 @@
 "quantile.prodlim" <- function(x,
                                q,
                                ...){
-  require(stats)
+  ## require(stats)
   stopifnot(x$model=="survival")
   if (missing(q)) q <- c(1,.75,0.5,.25,0)
   q <- 1-q ## since this is a survival function
