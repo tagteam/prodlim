@@ -7,16 +7,19 @@
 #' @seealso \code{\link{jackknife}}
 #' 
 #' @param object Object of class \code{"prodlim"}.
-#' @param times time points at which to compute leave-one-out event/survival probabilities.
-#' @param lag Logical. If \code{TRUE} lag the result, i.e. compute S(t-) instead of S(t).
+#' @param times time points at which to compute leave-one-out
+#' event/survival probabilities.
+#' @param cause For competing risks the cause of interest. 
+#' @param lag For survival models only. If \code{TRUE} lag the result, i.e. compute
+#' S(t-) instead of S(t).
 #' @param ... not used
 #' @export
-leaveOneOut <- function(object,times,lag=FALSE,...){
-  if (object$model=="survival")
-    leaveOneOut.survival(object=object,times=times,...)
-  else if (object$model=="competing.risks")
-    leaveOneOut.competing.risks(object=object,times=times,...)
-  else stop("No method for jackknifing this object.")
+leaveOneOut <- function(object,times,cause,lag=FALSE,...){
+    if (object$model=="survival")
+        leaveOneOut.survival(object=object,times=times,lag=lag,...)
+    else if (object$model=="competing.risks")
+        leaveOneOut.competing.risks(object=object,times=times,cause=cause,...)
+    else stop("No method for jackknifing this object.")
 }
 
 #' @export 

@@ -94,7 +94,11 @@ jackknife <- function(object,times,cause,keepResponse=FALSE,...){
   if (object$model=="survival")
     jackknife.survival(object=object,times=times,keepResponse=keepResponse,...)
   else if (object$model=="competing.risks")
-    jackknife.competing.risks(object=object,times=times,keepResponse=keepResponse,...)
+    jackknife.competing.risks(object=object,
+                              times=times,
+                              cause=cause,
+                              keepResponse=keepResponse,
+                              ...)
   else stop("No method for jackknifing this object.")
 }
 
@@ -115,7 +119,7 @@ jackknife.survival <- function(object,times,keepResponse=FALSE,...){
 #' @export
 jackknife.competing.risks <- function(object,times,cause,keepResponse=FALSE,...){
   F <- predict(object,times=times,newdata=object$model.response,cause=cause)
-  Fk <- leaveOneOut.competing.risks(object,times,cause,...)
+  Fk <- leaveOneOut.competing.risks(object,times,cause=cause,...)
   N <- NROW(Fk)
   Jk <- t(N*F-t((N-1)*Fk))
   colnames(Jk) <- paste("t",times,sep=".")
