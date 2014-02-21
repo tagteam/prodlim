@@ -30,7 +30,6 @@
 #'
 #' d <- SimSurv(20)
 #' neighborhood(d$X2)
-#' @importFrom KernSmooth dpik
 #' @export
 "neighborhood" <- function(x,bandwidth=NULL,kernel="box"){
     if (any(is.na(x))) stop("Missing values in x")
@@ -46,7 +45,7 @@
     tabx <- rep(tabu,tabu)
     if (!length(bandwidth)){ ## need a bandwidth (dpik is from KernSmooth)
         ## require(KernSmooth)
-        bandwidth <- dpik(cumtabx/N,kernel="box")
+        bandwidth <- KernSmooth::dpik(cumtabx/N,kernel="box")
     }
     else
         if (bandwidth=="smooth") bandwidth <- N^{-1/4}

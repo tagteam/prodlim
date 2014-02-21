@@ -19,7 +19,12 @@
 
   This function requires the \code{lava} package.
 }
+\examples{
+m <- crModel()
+d <- sim(m,6)
+print(d)
+}
 \author{
-  Thomas A. Gerds import lava
+  Thomas A. Gerds
 }
 

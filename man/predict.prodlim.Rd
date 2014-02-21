@@ -1,6 +1,6 @@
 \name{predict.prodlim}
-\alias{predict.prodlim}
 \alias{predictCuminc}
+\alias{predict.prodlim}
 \alias{predictSurv}
 \title{Predicting event probabilities from product limit estimates}
 \usage{

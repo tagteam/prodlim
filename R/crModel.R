@@ -9,13 +9,18 @@
 #' latent event times of two causes, the latent right censored time, and the observed
 #' right censored event time.
 #' @author Thomas A. Gerds
+#' @examples
+#' m <- crModel()
+#' d <- sim(m,6)
+#' print(d)
+#'
 #' @export
 crModel <- function(){
     # require(lava)
-    crm <- lvm()
-    distribution(crm,"eventtime1") <- coxWeibull.lvm(scale=1/100)
-    distribution(crm,"eventtime2") <- coxWeibull.lvm(scale=1/100)
-    distribution(crm,"censtime") <- coxWeibull.lvm(scale=1/100)
-    crm <- eventTime(crm,time~min(eventtime1=1,eventtime2=2,censtime=0),"event")
+    crm <- lava::lvm()
+    lava::distribution(crm,"eventtime1") <- lava::coxWeibull.lvm(scale=1/100)
+    lava::distribution(crm,"eventtime2") <- lava::coxWeibull.lvm(scale=1/100)
+    lava::distribution(crm,"censtime") <- lava::coxWeibull.lvm(scale=1/100)
+    crm <- lava::eventTime(crm,time~min(eventtime1=1,eventtime2=2,censtime=0),"event")
     crm
 }
