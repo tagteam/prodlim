@@ -3,8 +3,8 @@
 ##' Applying this function to the fit of prodlim means to apply
 ##' it to \code{fit$model.response}.
 ##' @title States of a multi-state model
-##' @param object
-##' @param ...
+##' @param object Object of class \code{prodlim} or \code{Hist} .
+##' @param ... not used
 ##' @return A character vector with the states of the model.
 ##' @author Thomas A. Gerds
 #' @export
@@ -19,7 +19,7 @@ getStates.Hist <- function(object,...){
 
 #' @method getStates prodlim
 #' @S3method getStates prodlim
-getStates.prodlim <- function(object){
+getStates.prodlim <- function(object,...){
   attr(object$model.response,"states")
 }
 

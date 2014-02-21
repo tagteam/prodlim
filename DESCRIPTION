@@ -7,7 +7,6 @@ Description: Fast and user friendly nonparametric estimation in censored
 Depends:
     R (>= 1.9.1)
 Imports:
-    lava,
     stats,
     survival,
     KernSmooth
@@ -70,9 +69,9 @@ Collate:
     'resolveX.R'
     'row.match.R'
     'sindex.R'
-    'statesMethods.R'
     'summary.Hist.R'
     'summary.prodlim.R'
     'survModel.R'
     'crModel.R'
     'leaveOneOut.R'
+    'getStates.R'

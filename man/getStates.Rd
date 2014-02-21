@@ -5,9 +5,10 @@
   getStates(object, ...)
 }
 \arguments{
-  \item{object}{}
+  \item{object}{Object of class \code{prodlim} or
+  \code{Hist} .}
 
-  \item{...}{}
+  \item{...}{not used}
 }
 \value{
   A character vector with the states of the model.
