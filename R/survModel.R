@@ -12,9 +12,9 @@
 #' @export 
 survModel <- function(){
     ## require(lava)
-    sm <- lvm(~eventtime+censtime)
-    distribution(sm,"eventtime") <- coxWeibull.lvm(scale=1/100)
-    distribution(sm,"censtime") <- coxWeibull.lvm(scale=1/100)
-    sm <- eventTime(sm,time~min(eventtime=1,censtime=0),"event")
+    sm <- lava::lvm(~eventtime+censtime)
+    lava::distribution(sm,"eventtime") <- lava::coxWeibull.lvm(scale=1/100)
+    lava::distribution(sm,"censtime") <- lava::coxWeibull.lvm(scale=1/100)
+    sm <- lava::eventTime(sm,time~min(eventtime=1,censtime=0),"event")
     sm
 }

@@ -46,7 +46,7 @@
 
   [L[i],R[i]]
 
-  that overlap the currentn
+  that overlap the current
   grid interval:
 
   [grid[s] ; grid[s+1]]
