@@ -5,11 +5,12 @@ Author: Thomas A. Gerds
 Description: Fast and user friendly nonparametric estimation in censored
     survival (event history) analysis.
 Depends:
-    R (>= 1.9.1),
+    R (>= 1.9.1)
+Imports:
     lava,
-    KernSmooth,
+    stats,
     survival,
-    stats
+    KernSmooth
 Maintainer: Thomas A. Gerds <tag@biostat.ku.dk>
 License: GPL (>= 2)
 Packaged: Wed Oct 3 20:15:28 2007; tag
@@ -33,7 +34,6 @@ Collate:
     'extract.name.from.special.R'
     'findArrow.R'
     'getEvent.R'
-    'getStates.R'
     'iindex.R'
     'jackknife.R'
     'lifeTab.R'

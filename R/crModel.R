@@ -9,6 +9,7 @@
 #' latent event times of two causes, the latent right censored time, and the observed
 #' right censored event time.
 #' @author Thomas A. Gerds
+#' import lava
 #' @export
 crModel <- function(){
     # require(lava)

@@ -148,6 +148,7 @@ fit <- prodlim(Hist(time,status)~1,data=dat)
 print(fit)
 plot(fit)
 summary(fit)
+quantile(fit)
 
 ## --------------------clustered data---------------------
 library(survival)

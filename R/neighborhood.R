@@ -30,6 +30,7 @@
 #'
 #' d <- SimSurv(20)
 #' neighborhood(d$X2)
+#' @importFrom KernSmooth dpik
 #' @export
 "neighborhood" <- function(x,bandwidth=NULL,kernel="box"){
     if (any(is.na(x))) stop("Missing values in x")

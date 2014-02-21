@@ -70,11 +70,11 @@ confInt <- function(x,
                                 ...)
                    },
                    "shadow"={
-                       ccrgb=as.list(col2rgb(col[i],alpha=TRUE))
-                       names(ccrgb) <- c("red","green","blue","alpha")
-                       ccrgb$alpha=density
-                       cc=do.call("rgb",c(ccrgb,list(max=255)))
-                       ## polygon(x=c(ci[[i]]$time,rev(ci[[i]]$time)),y=c(ci[[i]]$lower,rev(ci[[i]]$upper)),col=cc,border=NA)
+                       cc <- dimColor(col[i],density=density)
+                       ## ccrgb=as.list(col2rgb(col[i],alpha=TRUE))
+                       ## names(ccrgb) <- c("red","green","blue","alpha")
+                       ## ccrgb$alpha=density
+                       ## cc=do.call("rgb",c(ccrgb,list(max=255)))
                        ttt <- ci[[i]]$time
                        nt <- length(ttt)
                        ttt <- c(ttt,ttt)

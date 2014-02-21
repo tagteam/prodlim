@@ -125,6 +125,7 @@
 #' print(fit)
 #' plot(fit)
 #' summary(fit)
+#' quantile(fit)
 #' 
 #' ## --------------------clustered data---------------------
 #' library(survival)
@@ -210,7 +211,6 @@
 #' plot(fitd)
 #'
 #' @useDynLib prodlim
-#' @import KernSmooth
 #' @export
 "prodlim" <- function(formula,
                       data = parent.frame(),

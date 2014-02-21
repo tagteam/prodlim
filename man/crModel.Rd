@@ -20,6 +20,6 @@
   This function requires the \code{lava} package.
 }
 \author{
-  Thomas A. Gerds
+  Thomas A. Gerds import lava
 }
 

@@ -16,7 +16,7 @@
 #' # median
 #' quantile(f,.5)
 #'
-#' @import stats
+#' @importFrom stats quantile
 #' @method quantile prodlim
 #' @S3method quantile prodlim
 "quantile.prodlim" <- function(x,
