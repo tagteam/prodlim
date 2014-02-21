@@ -261,7 +261,9 @@
   if (match("Surv",class(response),nomatch=0)!=0){
       attr(response,"model") <- "survival"
       attr(response,"cens.type") <- "rightCensored"
-      ## attr(response,"entry.type") <- ""
+      attr(response,"entry.type") <- ifelse(ncol(response)==2,"","leftTruncated")
+      if (attr(response,"entry.type")=="leftTruncated")
+          colnames(response) <- c("entry","time","status")
       model.type <- 1
   }
   else{
@@ -368,7 +370,8 @@
   
   # }}}
   # {{{ delay (left truncation)
-  delayed <- !(is.null(attr(event.history,"entry.type"))) && !(attr(event.history,"entry.type")=="")
+  delayed <- attr(event.history,"entry.type")=="leftTruncated"
+  ## && !(attr(event.history,"entry.type")=="")
   if (!delayed) { ## either NULL or ""
       entrytime <- NULL
   }  else {

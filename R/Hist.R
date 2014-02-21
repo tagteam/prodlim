@@ -177,6 +177,7 @@
   }
   # }}}
   # {{{ resolving the `entry' argument
+
   if (is.null(entry))
     entry.type <- ""
   else{
@@ -197,7 +198,7 @@
     else{
       stopifnot(is.numeric(entry))
       if (is.null(id))
-        entry.type <- "left-truncated"
+        entry.type <- "leftTruncated"
       else
         entry.type <- "exact"
     }}
@@ -213,9 +214,10 @@
       stopifnot(all(V<=time))
     else
       stopifnot(is.null(entry) || all(entry<time))
-  
+
   # }}}
   # {{{ resolving the argument `event' 
+
   if (missing(event)){
     model <- "onejump"
     event <-  rep(1,N)

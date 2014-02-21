@@ -19,7 +19,6 @@ d$X3 <- factor(d$X3,levels=c(0,1),labels=c("high survival","low survival"))
 #+RESULTS:
 
 * Survival
-  
 ** Test combinations of discrete and continuous covariates   
 #+BEGIN_SRC R  :results output raw  :exports results  :session *R* :cache no 
 library(prodlim)
@@ -115,23 +114,22 @@ plot(s2,add=TRUE,col=2,confint=FALSE)
 #+END_SRC   
 
 ** delayed entry 
-
 *** Without covariates
 #+BEGIN_SRC R  :results output raw  :exports results  :session *R* :cache yes 
 library(survival)
 library(prodlim)
 data(pbc,package="survival")
 pbc$entry <- round(pbc$time/5)
-pbc0 <- pbc[1:10,c("entry","time","status")]
 f <- survfit(Surv(entry,time,status!=0)~1,data=pbc)
 F <- prodlim(Hist(time,status!=0,entry=entry)~1,data=pbc)
-plot(f,lwd=5)
-plot(F,lwd=2,col=2,add=TRUE)
-plot(F)
+F2 <- prodlim(Surv(entry,time,status!=0)~1,data=pbc)
+plot(f,lwd=8)
+plot(F,lwd=4,col=2,add=TRUE)
+plot(F2,lwd=1,col=4,add=TRUE,confint=FALSE)
 
 F0 <- prodlim(Hist(time,status!=0,entry=entry)~1,data=pbc0)
 f0 <- survfit(Surv(entry,time,status!=0)~1,data=pbc0)
-plot(f0,lwd=5)
+plot(f0,lwd=5,xlim=c(0,1000))
 plot(F0,lwd=2,col=2,add=TRUE)
 plot(F0)
 #+END_SRC
