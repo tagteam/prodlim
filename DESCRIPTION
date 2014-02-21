@@ -1,5 +1,6 @@
 Package: prodlim
-Title: Product-limit estimation. Kaplan-Meier and Aalen-Johansson method for censored event history (survival) analysis
+Title: Product-limit estimation. Kaplan-Meier and Aalen-Johansson method for
+    censored event history (survival) analysis
 Version: 1.4.2
 Author: Thomas A. Gerds
 Description: Fast and user friendly implementation of nonparametric estimators

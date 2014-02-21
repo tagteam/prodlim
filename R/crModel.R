@@ -10,6 +10,7 @@
 #' right censored event time.
 #' @author Thomas A. Gerds
 #' @examples
+#' library(lava)
 #' m <- crModel()
 #' d <- sim(m,6)
 #' print(d)

@@ -72,7 +72,7 @@
 #' 
 #' set.seed(17)
 #' N <- 200
-#' ddd <- simCompRisk(200)
+#' ddd <- SimCompRisk(200)
 #' ttt <- c(3,5,10)
 #' # ttt <- ddd$time
 #' fff <- prodlim(Hist(time,event)~1,data=ddd)

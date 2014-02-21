@@ -20,6 +20,7 @@
   This function requires the \code{lava} package.
 }
 \examples{
+library(lava)
 m <- crModel()
 d <- sim(m,6)
 print(d)
