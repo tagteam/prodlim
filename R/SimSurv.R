@@ -5,6 +5,7 @@
 ##' @param N sample size
 ##' @param ... do nothing
 ##' @return data.frame with simulated data
+##' @references Bender, Augustin & Blettner. Generating survival times to simulate Cox proportional hazards models. Statistics in Medicine, 24: 1713-1723, 2005.
 ##' @author Thomas Alexander Gerds
 ##' @examples
 ##' 

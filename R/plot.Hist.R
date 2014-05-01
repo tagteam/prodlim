@@ -355,8 +355,8 @@ plot.Hist <- function(x,
     arrowLabels <- NULL
   }
   arrowLabels.p <- TRUE
-  if (length(arrowLabels)>0 &&is.logical(arrowLabels) && arrowLabels==FALSE){
-    arrowLabels <- rep("",1:N)
+    if (length(arrowLabels)>0 &&is.logical(arrowLabels) && arrowLabels==FALSE){
+    arrowLabels <- rep("",N)
     arrowLabels.p <- FALSE
   }
   else{

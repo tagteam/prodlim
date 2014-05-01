@@ -415,18 +415,18 @@ plot.prodlim <- function(x,
 # {{{  setting margin parameters 
 
   if (atrisk==TRUE){
-    oldmar <- par()$mar
-    if (missing(automar) || automar==TRUE){
-      ##        bottomMargin =  margin line (in 'mex' units) for xlab
-      ##                        + distance of xlab from xaxis
-      ##                        + distance of atrisk numbers from xlab
-      ##                        + number of atrisk lines
-      ##                        + one extra line below the bottom number atrisk line
-      ##      leftSideMargin =  margin line + atrisk.lab
-      bottomMargin <- par()$mgp[2] + smartA$atrisk$dist+ ifelse(clusterp,2,1)*nlines + 1
-      newmar <- par()$mar + c(bottomMargin,0,0,0)
-      par(mar=newmar)
-    }
+      oldmar <- par()$mar
+      if (missing(automar) || automar==TRUE){
+          ##        bottomMargin =  margin line (in 'mex' units) for xlab
+          ##                        + distance of xlab from xaxis
+          ##                        + distance of atrisk numbers from xlab
+          ##                        + number of atrisk lines
+          ##                        + one extra line below the bottom number atrisk line
+          ##      leftSideMargin =  margin line + atrisk.lab
+          bottomMargin <- par()$mgp[2] + smartA$atrisk$dist+ ifelse(clusterp,2,1)*nlines + 1
+          newmar <- par()$mar + c(bottomMargin,0,0,0)
+          par(mar=newmar)
+      }
   }
 
   # }}}

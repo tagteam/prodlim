@@ -52,7 +52,6 @@ leaveOneOut.survival <- function(object,times,lag=FALSE,...){
             S=double(NU*N),
             N=as.integer(N),
             NT=as.integer(NU),
-            DUP=FALSE,
             PACKAGE="prodlim")$S
   out <- matrix(loo,nrow=N,ncol=NU,byrow=FALSE)
   ## }
@@ -114,7 +113,6 @@ leaveOneOut.competing.risks <- function(object,times,cause,...){
             F=double(NU*N),
             N=as.integer(N),
             NT=as.integer(NU),
-            DUP=FALSE,
             PACKAGE="prodlim")$F
   out <- matrix(loo,nrow=N,ncol=NU,byrow=FALSE)
   ## browser()

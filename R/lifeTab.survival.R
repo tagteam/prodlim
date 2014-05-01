@@ -1,4 +1,10 @@
-lifeTab.survival <- function(object,times,newdata,stats,intervals=FALSE,percent=TRUE,showTime=TRUE){
+lifeTab.survival <- function(object,
+                             times,
+                             newdata,
+                             stats,
+                             intervals=FALSE,
+                             percent=TRUE,
+                             showTime=TRUE){
     # {{{ get the indices
     IndeX <- predict(object,
                      newdata=newdata,
@@ -110,7 +116,7 @@ lifeTab.survival <- function(object,times,newdata,stats,intervals=FALSE,percent=
                     x <- cbind(time=times,x)
                 rownames(x) <- 1:NROW(x)
             }
-            else{ # times are rownames
+            else{                       # times are rownames
                 if (intervals==TRUE)
                     rownames(x) <- paste("(",paste(c(0,round(times[-length(times)],2)),round(times,2),sep="-"),"]",sep="")
                 else
@@ -130,7 +136,7 @@ lifeTab.survival <- function(object,times,newdata,stats,intervals=FALSE,percent=
                 out <- cbind(time=times,out)
             rownames(out) <- 1:NROW(out)
         }
-        else{ # times are rownames
+        else{                           # times are rownames
             if (intervals==TRUE)
                 rownames(out) <- paste("(",paste(c(0,round(times[-length(times)],2)),round(times,2),sep="-"),"]",sep="")
             else

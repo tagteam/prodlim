@@ -48,7 +48,7 @@
     neval <- length(eval.times)
     if (!(neval> 0 && N >0)) stop("missing data")
     new.order <- order(eval.times)
-    ind <- .C("sindex",index = integer(neval),as.double(sort(jump.times)),as.double(eval.times[new.order]),as.integer(N),as.integer(neval),as.integer(strict),DUP=FALSE,PACKAGE="prodlim")$index
+    ind <- .C("sindex",index = integer(neval),as.double(sort(jump.times)),as.double(eval.times[new.order]),as.integer(N),as.integer(neval),as.integer(strict),PACKAGE="prodlim")$index
     ind[order(new.order)]
   }
 }
