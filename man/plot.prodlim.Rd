@@ -3,13 +3,11 @@
 \alias{plot.prodlim}
 \title{Plotting event probabilities over time}
 \usage{
-  \method{plot}{prodlim} (x, type, cause = 1, newdata,
-    add = FALSE, col, lty, lwd, ylim, xlim, xlab = "Time",
-    ylab, legend = TRUE, logrank = FALSE, marktime = FALSE,
-    confint = TRUE, automar,
-    atrisk = ifelse(add, FALSE, TRUE), timeOrigin = 0,
-    axes = TRUE, background = TRUE, percent = TRUE,
-    minAtrisk = 0, ...)
+\method{plot}{prodlim}(x, type, cause = 1, newdata, add = FALSE, col, lty,
+  lwd, ylim, xlim, xlab = "Time", ylab, legend = TRUE, logrank = FALSE,
+  marktime = FALSE, confint = TRUE, automar, atrisk = ifelse(add, FALSE,
+  TRUE), timeOrigin = 0, axes = TRUE, background = TRUE, percent = TRUE,
+  minAtrisk = 0, ...)
 }
 \arguments{
   \item{x}{an object of class `prodlim' as returned by the
@@ -107,35 +105,34 @@
   \code{\link{backGround}}}
 }
 \value{
-  The (invisible) object.
+The (invisible) object.
 }
 \description{
-  Function to plot survival and cumulative incidence curves
-  against time.
+Function to plot survival and cumulative incidence curves
+against time.
 }
 \details{
-  From version 1.1.3 on the arguments legend.args,
-  atrisk.args, confint.args are obsolete and only available
-  for backward compatibility. Instead arguments for the
-  invoked functions \code{atRisk}, \code{legend},
-  \code{confInt}, \code{markTime}, \code{axis} are simply
-  specified as \code{atrisk.cex=2}. The specification is
-  not case sensitive, thus \code{atRisk.cex=2} or
-  \code{atRISK.cex=2} will have the same effect.  The
-  function \code{axis} is called twice, and arguments of
-  the form \code{axis1.labels}, \code{axis1.at} are used
-  for the time axis whereas \code{axis2.pos},
-  \code{axis1.labels}, etc. are used for the y-axis.
+From version 1.1.3 on the arguments legend.args,
+atrisk.args, confint.args are obsolete and only available
+for backward compatibility. Instead arguments for the
+invoked functions \code{atRisk}, \code{legend},
+\code{confInt}, \code{markTime}, \code{axis} are simply
+specified as \code{atrisk.cex=2}. The specification is not
+case sensitive, thus \code{atRisk.cex=2} or
+\code{atRISK.cex=2} will have the same effect.  The
+function \code{axis} is called twice, and arguments of the
+form \code{axis1.labels}, \code{axis1.at} are used for the
+time axis whereas \code{axis2.pos}, \code{axis1.labels},
+etc. are used for the y-axis.
 
-  These arguments are processed via \code{\dots{}} of
-  \code{plot.prodlim} and inside by using the function
-  \code{SmartControl}.  Documentation of these arguments
-  can be found in the help pages of the corresponding
-  functions.
+These arguments are processed via \code{\dots{}} of
+\code{plot.prodlim} and inside by using the function
+\code{SmartControl}.  Documentation of these arguments can
+be found in the help pages of the corresponding functions.
 }
 \note{
-  Similar functionality is provided by the function
-  \code{\link{plot.survfit}} of the survival library
+Similar functionality is provided by the function
+\code{\link{plot.survfit}} of the survival library
 }
 \examples{
 ## simulate right censored data from a two state model
@@ -273,15 +270,15 @@ plot(ajfitX,
      plot.main="Subject specific stacked plot")
 }
 \author{
-  Thomas Alexander Gerds <tag@biostat.ku.dk>
+Thomas Alexander Gerds <tag@biostat.ku.dk>
 }
 \seealso{
-  \code{\link{plot}}, \code{\link{legend}},
-  \code{\link{axis}},
-  \code{\link{prodlim}},\code{\link{plot.Hist}},\code{\link{summary.prodlim}},
-  \code{\link{neighborhood}}, \code{\link{atRisk}},
-  \code{\link{confInt}}, \code{\link{markTime}},
-  \code{\link{backGround}}
+\code{\link{plot}}, \code{\link{legend}},
+\code{\link{axis}},
+\code{\link{prodlim}},\code{\link{plot.Hist}},\code{\link{summary.prodlim}},
+\code{\link{neighborhood}}, \code{\link{atRisk}},
+\code{\link{confInt}}, \code{\link{markTime}},
+\code{\link{backGround}}
 }
 \keyword{survival}
 

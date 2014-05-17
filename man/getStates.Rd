@@ -2,7 +2,7 @@
 \alias{getStates}
 \title{States of a multi-state model}
 \usage{
-  getStates(object, ...)
+getStates(object, ...)
 }
 \arguments{
   \item{object}{Object of class \code{prodlim} or
@@ -11,16 +11,16 @@
   \item{...}{not used}
 }
 \value{
-  A character vector with the states of the model.
+A character vector with the states of the model.
 }
 \description{
-  Extract the states of a multi-state model
+Extract the states of a multi-state model
 }
 \details{
-  Applying this function to the fit of prodlim means to
-  apply it to \code{fit$model.response}.
+Applying this function to the fit of prodlim means to apply
+it to \code{fit$model.response}.
 }
 \author{
-  Thomas A. Gerds
+Thomas A. Gerds
 }
 

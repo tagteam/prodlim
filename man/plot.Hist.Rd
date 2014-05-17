@@ -2,11 +2,10 @@
 \alias{plot.Hist}
 \title{Box-arrow diagrams for multi-state models.}
 \usage{
-  \method{plot}{Hist} (x, nrow, ncol, stateLabels,
-    arrowLabels, arrowLabelStyle = "symbolic",
-    arrowLabelSymbol = "lambda", changeArrowLabelSide,
-    tagBoxes = FALSE, startCountZero = TRUE, oneFitsAll,
-    margin, cex, verbose = FALSE, ...)
+\method{plot}{Hist}(x, nrow, ncol, stateLabels, arrowLabels,
+  arrowLabelStyle = "symbolic", arrowLabelSymbol = "lambda",
+  changeArrowLabelSide, tagBoxes = FALSE, startCountZero = TRUE, oneFitsAll,
+  margin, cex, verbose = FALSE, ...)
 }
 \arguments{
   \item{x}{An object of class \code{Hist}.}
@@ -66,13 +65,13 @@
   of the second arrow. See examples.}
 }
 \description{
-  Automated plotting of the states and transitions that
-  characterize a multi states model.
+Automated plotting of the states and transitions that
+characterize a multi states model.
 }
 \note{
-  Use the functionality of the unix program `dot'
-  http://www.graphviz.org/About.php via R package Rgraphviz
-  to obtain more complex graphs.
+Use the functionality of the unix program `dot'
+http://www.graphviz.org/About.php via R package Rgraphviz
+to obtain more complex graphs.
 }
 \examples{
 ## A simple survival model
@@ -195,10 +194,10 @@ arrowlabel4.x=68)
 ##'
 }
 \author{
-  Thomas A Gerds \email{tag@biostat.ku.dk}
+Thomas A Gerds \email{tag@biostat.ku.dk}
 }
 \seealso{
-  \code{\link{Hist}}\code{\link{SmartControl}}
+\code{\link{Hist}}\code{\link{SmartControl}}
 }
 \keyword{survival}
 

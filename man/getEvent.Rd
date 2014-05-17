@@ -2,7 +2,7 @@
 \alias{getEvent}
 \title{Extract a column from an event history object.}
 \usage{
-  getEvent(object, mode = "factor", column = "event")
+getEvent(object, mode = "factor", column = "event")
 }
 \arguments{
   \item{object}{Object of class \code{"Hist"}.}
@@ -14,14 +14,14 @@
   object.}
 }
 \description{
-  Extract a column from an event history object, as
-  obtained with the function \code{\link{Hist}}.
+Extract a column from an event history object, as obtained
+with the function \code{\link{Hist}}.
 }
 \details{
-  Since objects of class \code{"Hist"} are also matrices,
-  all columns are numeric or integer valued. To extract a
-  correctly labeled version, the attribute \code{states} of
-  the object is used to generate factor levels.
+Since objects of class \code{"Hist"} are also matrices, all
+columns are numeric or integer valued. To extract a
+correctly labeled version, the attribute \code{states} of
+the object is used to generate factor levels.
 }
 \examples{
 dat= data.frame(time=1:5,event=letters[1:5])
@@ -32,10 +32,10 @@ dat= data.frame(time=1:5,event=letters[1:5])
   getEvent(x)
 }
 \author{
-  Thomas Alexander Gerds <tag@biostat.ku.dk>
+Thomas Alexander Gerds <tag@biostat.ku.dk>
 }
 \seealso{
-  \code{\link{Hist}}
+\code{\link{Hist}}
 }
 \keyword{survival}
 

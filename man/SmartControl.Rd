@@ -2,8 +2,8 @@
 \alias{SmartControl}
 \title{Function to facilitate the control of arguments passed to subroutines.}
 \usage{
-  SmartControl(call, keys, ignore, defaults, forced, split,
-    ignore.case = TRUE, replaceDefaults, verbose = TRUE)
+SmartControl(call, keys, ignore, defaults, forced, split, ignore.case = TRUE,
+  replaceDefaults, verbose = TRUE)
 }
 \arguments{
   \item{call}{A list of named arguments, as for example can
@@ -36,12 +36,11 @@
   \code{key}.}
 }
 \description{
-  Many R functions need to pass several arguments to
-  several different subroutines. Such arguments can are
-  given as part of the three magic dots "...". The function
-  SmartControl reads the dots together with a list of
-  default values and returns for each subroutine a list of
-  arguments.
+Many R functions need to pass several arguments to several
+different subroutines. Such arguments can are given as part
+of the three magic dots "...". The function SmartControl
+reads the dots together with a list of default values and
+returns for each subroutine a list of arguments.
 }
 \examples{
 myPlot = function(...){
@@ -61,10 +60,10 @@ myPlot = function(...){
 myPlot(plot.ylim=c(0,5),plot.xlim=c(0,20),lines.lty=3,axis2.At=c(0,3,4))
 }
 \author{
-  Thomas Alexander Gerds <tag@biostat.ku.dk>
+Thomas Alexander Gerds <tag@biostat.ku.dk>
 }
 \seealso{
-  \code{\link{plot.prodlim}}
+\code{\link{plot.prodlim}}
 }
 \keyword{Graphics}
 

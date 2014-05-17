@@ -4,7 +4,7 @@
 \alias{print.prodlim}
 \title{Print objects in the prodlim library}
 \usage{
-  \method{print}{prodlim} (x, ...)
+\method{print}{prodlim}(x, ...)
 }
 \arguments{
   \item{x}{Object of class \code{prodlim}, \code{Hist} and
@@ -13,15 +13,15 @@
   \item{\dots}{Not used.}
 }
 \description{
-  Pretty printing of objects created with the functionality
-  of the `prodlim' library.
+Pretty printing of objects created with the functionality
+of the `prodlim' library.
 }
 \author{
-  Thomas Gerds <tag@biostat.ku.dk>
+Thomas Gerds <tag@biostat.ku.dk>
 }
 \seealso{
-  \code{\link{summary.prodlim}},
-  \code{\link{predict.prodlim}}
+\code{\link{summary.prodlim}},
+\code{\link{predict.prodlim}}
 }
 \keyword{survival}
 

@@ -3,9 +3,8 @@
 \title{Drawing numbers of subjects at-risk of experiencing an event below
 Kaplan-Meier and Aalen-Johannsen plots.}
 \usage{
-  atRisk(x, newdata, times, line, col, interspace, cex,
-    labels, title = "", pos, adj, dist,
-    adjust.labels = TRUE, ...)
+atRisk(x, newdata, times, line, col, interspace, cex, labels, title = "", pos,
+  adj, dist, adjust.labels = TRUE, ...)
 }
 \arguments{
   \item{x}{an object of class `prodlim' as returned by the
@@ -48,23 +47,23 @@ Kaplan-Meier and Aalen-Johannsen plots.}
   function \code{mtext}.}
 }
 \value{
-  Nil
+Nil
 }
 \description{
-  This function is invoked and controlled by
-  \code{plot.prodlim}.
+This function is invoked and controlled by
+\code{plot.prodlim}.
 }
 \details{
-  This function should not be called directly. The
-  arguments can be specified as \code{atRisk.arg} in the
-  call to \code{plot.prodim}.
+This function should not be called directly. The arguments
+can be specified as \code{atRisk.arg} in the call to
+\code{plot.prodim}.
 }
 \author{
-  Thomas Alexander Gerds <tag@biostat.ku.dk>
+Thomas Alexander Gerds <tag@biostat.ku.dk>
 }
 \seealso{
-  \code{\link{plot.prodlim}}, \code{\link{confInt}},
-  \code{\link{markTime}}
+\code{\link{plot.prodlim}}, \code{\link{confInt}},
+\code{\link{markTime}}
 }
 \keyword{survival}
 

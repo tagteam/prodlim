@@ -2,8 +2,8 @@
 \alias{backGround}
 \title{Background and grid color control.}
 \usage{
-  backGround(xlim, ylim, bg = "white", fg = "gray77",
-    horizontal = NULL, vertical = NULL, border = "black")
+backGround(xlim, ylim, bg = "white", fg = "gray77", horizontal = NULL,
+  vertical = NULL, border = "black")
 }
 \arguments{
   \item{xlim}{Limits for the xaxis, defaults to
@@ -27,11 +27,11 @@
   background.}
 }
 \description{
-  Some users like background colors, and it may be helpful
-  to have grid lines to read off e.g. probabilities from a
-  Kaplan-Meier graph. Both things can be controlled with
-  this function. However, it mainly serves
-  \code{\link{plot.prodlim}}.
+Some users like background colors, and it may be helpful to
+have grid lines to read off e.g. probabilities from a
+Kaplan-Meier graph. Both things can be controlled with this
+function. However, it mainly serves
+\code{\link{plot.prodlim}}.
 }
 \examples{
 plot(0,0)
@@ -42,7 +42,7 @@ backGround(bg=c("yellow","green"),fg="red",xlim=c(-1,1),ylim=c(-1,1),horizontal=
 backGround(bg=c("yellow","green"),fg="red",horizontal=seq(0,1,.1))
 }
 \author{
-  Thomas Alexander Gerds <tag@biostat.ku.dk>
+Thomas Alexander Gerds <tag@biostat.ku.dk>
 }
 \keyword{survival}
 

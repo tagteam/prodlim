@@ -2,7 +2,7 @@
 \alias{predictSurvIndividual}
 \title{Predict individual survival probabilities}
 \usage{
-  predictSurvIndividual(object, lag = 1)
+predictSurvIndividual(object, lag = 1)
 }
 \arguments{
   \item{object}{A fitted object of class "prodlim".}
@@ -12,12 +12,12 @@
   times, etc.}
 }
 \value{
-  A vector of survival probabilities.
+A vector of survival probabilities.
 }
 \description{
-  Function to extract the predicted probabilities at the
-  individual event times that have been used for fitting a
-  prodlim object.
+Function to extract the predicted probabilities at the
+individual event times that have been used for fitting a
+prodlim object.
 }
 \examples{
 SurvFrame <- data.frame(time=1:10,status=rbinom(10,1,.5))
@@ -25,10 +25,10 @@ SurvFrame <- data.frame(time=1:10,status=rbinom(10,1,.5))
  predictSurvIndividual(x,lag=1)
 }
 \author{
-  Thomas A. Gerds \email{tag@biostat.ku.dk}
+Thomas A. Gerds \email{tag@biostat.ku.dk}
 }
 \seealso{
-  \code{\link{predict.prodlim}},\code{\link{predictSurv}},
+\code{\link{predict.prodlim}},\code{\link{predictSurv}},
 }
 \keyword{survival}
 

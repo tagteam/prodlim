@@ -4,9 +4,9 @@
 \alias{predictSurv}
 \title{Predicting event probabilities from product limit estimates}
 \usage{
-  \method{predict}{prodlim} (object, times, newdata,
-    level.chaos = 1, type = c("surv", "cuminc", "list"),
-    mode = "list", bytime = FALSE, cause = 1, ...)
+\method{predict}{prodlim}(object, times, newdata, level.chaos = 1,
+  type = c("surv", "cuminc", "list"), mode = "list", bytime = FALSE,
+  cause = 1, ...)
 }
 \arguments{
   \item{object}{A fitted object of class "prodlim".}
@@ -54,38 +54,38 @@
   \item{\dots}{Only for compatibility reasons.}
 }
 \value{
-  \code{type=="surv"} A list or a matrix with survival
-  probabilities for all times and all newdata.
+\code{type=="surv"} A list or a matrix with survival
+probabilities for all times and all newdata.
 
-  \code{type=="cuminc"} A list or a matrix with cumulative
-  incidences for all times and all newdata.
+\code{type=="cuminc"} A list or a matrix with cumulative
+incidences for all times and all newdata.
 
-  \code{type=="list"} A list with the following components:
+\code{type=="list"} A list with the following components:
 
-  \item{times}{The argument \code{times} carried forward}
+\item{times}{The argument \code{times} carried forward}
 
-  \item{predictors}{The relevant part of the argument
-  \code{newdata}.} \item{indices}{ A list with the
-  following components
+\item{predictors}{The relevant part of the argument
+\code{newdata}.} \item{indices}{ A list with the following
+components
 
-  \code{time}: Where to find values corresponding to the
-  requested times \code{strata}: Where to find values
-  corresponding to the values of the variables in newdata.
-  Together time and strata show where to find the predicted
-  probabilities.  } \item{dimensions}{ a list with the
-  following components: \code{time} : The length of
-  \code{times} \code{strata} : The number of rows in
-  \code{newdata} \code{names.strata} : Labels for the
-  covariate values.  }
+\code{time}: Where to find values corresponding to the
+requested times \code{strata}: Where to find values
+corresponding to the values of the variables in newdata.
+Together time and strata show where to find the predicted
+probabilities.  } \item{dimensions}{ a list with the
+following components: \code{time} : The length of
+\code{times} \code{strata} : The number of rows in
+\code{newdata} \code{names.strata} : Labels for the
+covariate values.  }
 }
 \description{
-  Evaluation of estimated survival or event probabilities
-  at given times and covariate constellations.
+Evaluation of estimated survival or event probabilities at
+given times and covariate constellations.
 }
 \details{
-  Predicted (survival) probabilities are returned that can
-  be plotted, summarized and used for inverse of
-  probability of censoring weighting.
+Predicted (survival) probabilities are returned that can be
+plotted, summarized and used for inverse of probability of
+censoring weighting.
 }
 \examples{
 dat <- SimSurv(400)
@@ -109,10 +109,10 @@ predict(mfit,times=c(-1,0,10,100,1000,10000),newdata=dat[18:21,],mode="matrix")
 predict(mfit,times=c(-1,0,10,100,1000,10000),newdata=dat[18:21,],mode="matrix",bytime=TRUE)
 }
 \author{
-  Thomas Alexander Gerds <tag@biostat.ku.dk>
+Thomas Alexander Gerds <tag@biostat.ku.dk>
 }
 \seealso{
-  \code{\link{predictSurvIndividual}}
+\code{\link{predictSurvIndividual}}
 }
 \keyword{survival}
 

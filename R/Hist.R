@@ -179,41 +179,43 @@
   # {{{ resolving the `entry' argument
 
   if (is.null(entry))
-    entry.type <- ""
+      entry.type <- ""
   else{
-    if (is.matrix(entry)) entry <- data.frame(entry)
-    if (class(entry)=="list"){
-      if (length(entry) !=2 || length(entry[[1]])!=length(entry[[2]]))
-        stop("Argument entry has a wrong format")
-      entry <- data.frame(entry)
-    }
-    if (is.data.frame(entry)){
-      entry.type <-"intervalCensored"
-      U <- entry[[1]]
-      V <- entry[[2]]
-      stopifnot(is.numeric(U))
-      stopifnot(is.numeric(V))
-      stopifnot(all(!is.na(U))|all(!is.na(V)))
-    }
-    else{
-      stopifnot(is.numeric(entry))
-      if (is.null(id))
-        entry.type <- "leftTruncated"
-      else
-        entry.type <- "exact"
-    }}
+      if (is.matrix(entry)) entry <- data.frame(entry)
+      if (class(entry)=="list"){
+          if (length(entry) !=2 || length(entry[[1]])!=length(entry[[2]]))
+              stop("Argument entry has a wrong format")
+          entry <- data.frame(entry)
+      }
+      if (is.data.frame(entry)){
+          entry.type <-"intervalCensored"
+          U <- entry[[1]]
+          V <- entry[[2]]
+          stopifnot(is.numeric(U))
+          stopifnot(is.numeric(V))
+          stopifnot(all(!is.na(U))|all(!is.na(V)))
+      }
+      else{
+          stopifnot(is.numeric(entry))
+          if (is.null(id))
+              entry.type <- "leftTruncated"
+          else
+              entry.type <- "exact"
+      }}
   ## check if entry < exit
-  if (cens.type=="intervalCensored")
-    if (entry.type=="intervalCensored")
-      stopifnot(all(V<L))
-    else{
-      stopifnot(is.null(entry) || all(entry<L))
-    }
-  else
-    if (entry.type=="intervalCensored")
-      stopifnot(all(V<=time))
-    else
-      stopifnot(is.null(entry) || all(entry<time))
+  if (cens.type=="intervalCensored"){
+      if (entry.type=="intervalCensored"){
+          stopifnot(all(V<=L))
+      } else{
+          stopifnot(is.null(entry) || all(entry<=L))
+      }
+  } else{
+      if (entry.type=="intervalCensored"){
+          stopifnot(all(V<=time))
+      } else{
+          stopifnot(is.null(entry) || all(entry<=time))
+      }
+  }
 
   # }}}
   # {{{ resolving the argument `event' 

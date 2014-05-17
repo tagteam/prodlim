@@ -3,8 +3,8 @@
 \title{Add point-wise confidence limits to the graphs of Kaplan-Meier and
 Aalen-Johannsen estimates of survival and cumulative incidence.}
 \usage{
-  confInt(x, times, newdata, type, citype, cause, col, lty,
-    lwd, density = 55, ...)
+confInt(x, times, newdata, type, citype, cause, col, lty, lwd, density = 55,
+  ...)
 }
 \arguments{
   \item{x}{an object of class `prodlim' as returned by the
@@ -39,23 +39,23 @@ Aalen-Johannsen estimates of survival and cumulative incidence.}
   \code{lines} else.}
 }
 \value{
-  Nil
+Nil
 }
 \description{
-  This function is invoked and controlled by
-  \code{plot.prodlim}.
+This function is invoked and controlled by
+\code{plot.prodlim}.
 }
 \details{
-  This function should not be called directly. The
-  arguments can be specified as \code{Confint.arg} in the
-  call to \code{plot.prodim}.
+This function should not be called directly. The arguments
+can be specified as \code{Confint.arg} in the call to
+\code{plot.prodim}.
 }
 \author{
-  Thomas Alexander Gerds <tag@biostat.ku.dk>
+Thomas Alexander Gerds <tag@biostat.ku.dk>
 }
 \seealso{
-  \code{\link{plot.prodlim}}, \code{\link{atRisk}},
-  \code{\link{markTime}}
+\code{\link{plot.prodlim}}, \code{\link{atRisk}},
+\code{\link{markTime}}
 }
 \keyword{survival}
 

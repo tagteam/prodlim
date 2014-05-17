@@ -2,7 +2,7 @@
 \alias{neighborhood}
 \title{Symmetric neighborhoods for kernel smoothing}
 \usage{
-  neighborhood(x, bandwidth = NULL, kernel = "box")
+neighborhood(x, bandwidth = NULL, kernel = "box")
 }
 \arguments{
   \item{x}{Numeric vector -- typically the observations of
@@ -20,38 +20,37 @@
   implemented.}
 }
 \value{
-  An object of class 'neighborhood'.  The value is a list
-  that includes the unique values of `x' (\code{values})
-  for which a neighborhood, consisting of the nearest
-  neighbors, is defined by the first neighbor
-  (\code{first.nbh}) of the usually very long vector
-  \code{neighbors} and the size of the neighborhood
-  (\code{size.nbh}).
+An object of class 'neighborhood'.  The value is a list
+that includes the unique values of `x' (\code{values}) for
+which a neighborhood, consisting of the nearest neighbors,
+is defined by the first neighbor (\code{first.nbh}) of the
+usually very long vector \code{neighbors} and the size of
+the neighborhood (\code{size.nbh}).
 
-  Further values are the arguments \code{bandwidth},
-  \code{kernel}, the total sample size \code{n} and the
-  number of unique values \code{nu}.
+Further values are the arguments \code{bandwidth},
+\code{kernel}, the total sample size \code{n} and the
+number of unique values \code{nu}.
 }
 \description{
-  Nearest neighborhoods for the values of a continuous
-  predictor. The result is used for the conditional
-  Kaplan-Meier estimator and other conditional product
-  limit estimators.
+Nearest neighborhoods for the values of a continuous
+predictor. The result is used for the conditional
+Kaplan-Meier estimator and other conditional product limit
+estimators.
 }
 \examples{
 d <- SimSurv(20)
 neighborhood(d$X2)
 }
 \author{
-  Thomas Gerds
+Thomas Gerds
 }
 \references{
-  Stute, W. "Asymptotic Normality of Nearest Neighbor
-  Regression Function Estimates", \emph{The Annals of
-  Statistics}, 1984,12,917--926.
+Stute, W. "Asymptotic Normality of Nearest Neighbor
+Regression Function Estimates", \emph{The Annals of
+Statistics}, 1984,12,917--926.
 }
 \seealso{
-  \code{\link{dpik}}, \code{\link{prodlim}}
+\code{\link{dpik}}, \code{\link{prodlim}}
 }
 \keyword{smooth}
 

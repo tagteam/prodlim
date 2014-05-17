@@ -2,7 +2,7 @@
 \alias{row.match}
 \title{Identifying rows in a matrix or data.frame}
 \usage{
-  row.match(x, table, nomatch = NA)
+row.match(x, table, nomatch = NA)
 }
 \arguments{
   \item{x}{Vector or matrix whose rows are to be matched}
@@ -14,15 +14,15 @@
   no match is found. Note that it is coerced to 'integer'.}
 }
 \value{
-  A vector of the same length as 'x'.
+A vector of the same length as 'x'.
 }
 \description{
-  Function for finding matching rows between two matrices
-  or data.frames. First the matrices or data.frames are
-  vectorized by row wise pasting together the elements.
-  Then it uses the function match.  Thus the function
-  returns a vector with the row numbers of (first) matches
-  of its first argument in its second.
+Function for finding matching rows between two matrices or
+data.frames. First the matrices or data.frames are
+vectorized by row wise pasting together the elements. Then
+it uses the function match.  Thus the function returns a
+vector with the row numbers of (first) matches of its first
+argument in its second.
 }
 \examples{
 tab <- data.frame(num=1:26,abc=letters)
@@ -32,10 +32,10 @@ x <- data.frame(n=c(3,8),z=c("c","h"))
 row.match(x,tab)
 }
 \author{
-  Thomas A. Gerds
+Thomas A. Gerds
 }
 \seealso{
-  \code{match}
+\code{match}
 }
 \keyword{misc}
 

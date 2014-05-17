@@ -2,7 +2,7 @@
 \alias{markTime}
 \title{Marking product-limit plots at the censored times.}
 \usage{
-  markTime(x, times, nlost, pch, col, ...)
+markTime(x, times, nlost, pch, col, ...)
 }
 \arguments{
   \item{x}{The values of the curves at \code{times}.}
@@ -19,23 +19,23 @@
   \item{...}{Arguments passed to \code{points}.}
 }
 \value{
-  Nil
+Nil
 }
 \description{
-  This function is invoked and controlled by
-  \code{plot.prodlim}.
+This function is invoked and controlled by
+\code{plot.prodlim}.
 }
 \details{
-  This function should not be called directly. The
-  arguments can be specified as \code{atRisk.arg} in the
-  call to \code{plot.prodim}.
+This function should not be called directly. The arguments
+can be specified as \code{atRisk.arg} in the call to
+\code{plot.prodim}.
 }
 \author{
-  Thomas Alexander Gerds <tag@biostat.ku.dk>
+Thomas Alexander Gerds <tag@biostat.ku.dk>
 }
 \seealso{
-  \code{\link{plot.prodlim}}, \code{\link{confInt}},
-  \code{\link{atRisk}}
+\code{\link{plot.prodlim}}, \code{\link{confInt}},
+\code{\link{atRisk}}
 }
 \keyword{survival}
 

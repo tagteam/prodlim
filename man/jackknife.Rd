@@ -4,8 +4,7 @@
 \alias{jackknife.survival}
 \title{Compute jackknife pseudo values.}
 \usage{
-  jackknife(object, times, cause, keepResponse = FALSE,
-    ...)
+jackknife(object, times, cause, keepResponse = FALSE, ...)
 }
 \arguments{
   \item{object}{Object of class \code{"prodlim"}.}
@@ -22,17 +21,17 @@
   \item{...}{not used}
 }
 \description{
-  Compute jackknife pseudo values.
+Compute jackknife pseudo values.
 }
 \details{
-  Compute jackknife pseudo values based on marginal
-  Kaplan-Meier estimate of survival, or based on marginal
-  Aalen-Johannsen estimate of cumulative incidence.
+Compute jackknife pseudo values based on marginal
+Kaplan-Meier estimate of survival, or based on marginal
+Aalen-Johannsen estimate of cumulative incidence.
 }
 \note{
-  The R-package pseudo does a similar job, and appears to
-  be a little faster in small samples, but much slower in
-  large samples. See examples.
+The R-package pseudo does a similar job, and appears to be
+a little faster in small samples, but much slower in large
+samples. See examples.
 }
 \examples{
 ## pseudo-values for survival models
@@ -104,15 +103,15 @@ system.time({jack2 <- jackknife.competing.risks(fff,times=ttt)})
 }
 }
 \author{
-  Thomas Alexander Gerds <tag@biostat.ku.dk>
+Thomas Alexander Gerds <tag@biostat.ku.dk>
 }
 \references{
-  Andersen PK & Perme MP (2010). Pseudo-observations in
-  survival analysis Statistical Methods in Medical
-  Research, 19(1), 71-99.
+Andersen PK & Perme MP (2010). Pseudo-observations in
+survival analysis Statistical Methods in Medical Research,
+19(1), 71-99.
 }
 \seealso{
-  \code{\link{prodlim}}
+\code{\link{prodlim}}
 }
 \keyword{survival}
 

@@ -4,7 +4,7 @@
 \alias{leaveOneOut.survival}
 \title{Compute jackknife pseudo values.}
 \usage{
-  leaveOneOut(object, times, cause, lag = FALSE, ...)
+leaveOneOut(object, times, cause, lag = FALSE, ...)
 }
 \arguments{
   \item{object}{Object of class \code{"prodlim"}.}
@@ -20,15 +20,15 @@
   \item{...}{not used}
 }
 \description{
-  Compute leave-one-out estimates
+Compute leave-one-out estimates
 }
 \details{
-  This function is the work-horse for \code{jackknife}
+This function is the work-horse for \code{jackknife}
 }
 \author{
-  Thomas Alexander Gerds <tag@biostat.ku.dk>
+Thomas Alexander Gerds <tag@biostat.ku.dk>
 }
 \seealso{
-  \code{\link{jackknife}}
+\code{\link{jackknife}}
 }
 

@@ -2,7 +2,7 @@
 \alias{quantile.prodlim}
 \title{Quantiles for Kaplan-Meier and Aalen-Johannsen estimates.}
 \usage{
-  \method{quantile}{prodlim} (x, q, ...)
+\method{quantile}{prodlim}(x, q, ...)
 }
 \arguments{
   \item{x}{Object of class \code{"prodlim"}.}
@@ -12,7 +12,7 @@
   \item{...}{not used}
 }
 \description{
-  Quantiles for Kaplan-Meier and Aalen-Johannsen estimates.
+Quantiles for Kaplan-Meier and Aalen-Johannsen estimates.
 }
 \examples{
 d=SimSurv(30)
@@ -21,7 +21,7 @@ f=prodlim(Hist(time,status)~X1,data=d)
 quantile(f,.5)
 }
 \author{
-  Thomas Alexander Gerds <tag@biostat.ku.dk>
+Thomas Alexander Gerds <tag@biostat.ku.dk>
 }
 \keyword{survival}
 

@@ -2,8 +2,7 @@
 \alias{plotIllnessDeathModel}
 \title{Plotting an illness-death-model.}
 \usage{
-  plotIllnessDeathModel(stateLabels, style = 1,
-    recovery = FALSE, ...)
+plotIllnessDeathModel(stateLabels, style = 1, recovery = FALSE, ...)
 }
 \arguments{
   \item{stateLabels}{Labels for the three boxes.}
@@ -18,7 +17,7 @@
   \item{\dots}{Arguments passed to plot.Hist.}
 }
 \description{
-  Plotting an illness-death-model using \code{plot.Hist}.
+Plotting an illness-death-model using \code{plot.Hist}.
 }
 \examples{
 plotIllnessDeathModel()
@@ -30,11 +29,11 @@ plotIllnessDeathModel(style=2,
                       box3.col="red")
 }
 \author{
-  Thomas Alexander Gerds <tag@biostat.ku.dk>
+Thomas Alexander Gerds <tag@biostat.ku.dk>
 }
 \seealso{
-  \code{\link{plotCompetingRiskModel}},
-  \code{\link{plot.Hist}}
+\code{\link{plotCompetingRiskModel}},
+\code{\link{plot.Hist}}
 }
 \keyword{survival}
 
