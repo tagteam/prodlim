@@ -1,0 +1,137 @@
+\name{EventHistory.frame}
+\alias{EventHistory.frame}
+\title{Event history frame}
+\usage{
+EventHistory.frame(formula, data, unspecialsDesign = TRUE, specials,
+  specialsFactor = TRUE, specialsDesign = FALSE, stripSpecialNames = TRUE,
+  subset = NULL, na.action = options()$na.action)
+}
+\arguments{
+  \item{formula}{Formula whose left hand side specifies the
+  event history, i.e., either via Surv() or Hist().}
+
+  \item{data}{Data frame in which the formula is
+  interpreted}
+
+  \item{unspecialsDesign}{Passed as is to
+  \code{\link{model.design}}.}
+
+  \item{specials}{Character vector of special function
+  names. Usually the body of the special functions is
+  function(x)x but e.g., \code{\link{strata}} from the
+  survival package does treat the values}
+
+  \item{specialsFactor}{Passed as is to
+  \code{\link{model.design}}.}
+
+  \item{specialsDesign}{Passed as is to
+  \code{\link{model.design}}}
+
+  \item{stripSpecialNames}{Passed as is to
+  \code{\link{model.design}}}
+
+  \item{subset}{Passed as is to \code{\link{model.frame}}}
+
+  \item{na.action}{Passed as is to
+  \code{\link{model.frame}} na.action.}
+}
+\value{
+A list which contains - the event.history (see
+\code{\link{Hist}}) - the design matrix (see
+\code{\link{model.design}}) - one entry for each special
+(see \code{\link{model.design}})
+}
+\description{
+Extract event history data and design matrix including
+specials from call
+}
+\details{
+Obtain a list with the data used for event history
+regression analysis. This function cannot be used directly
+on the user level but inside a function to prepare data for
+survival analysis.
+}
+\examples{
+## Here are some data with an event time and no competing risks
+## and two covariates X1 and X2.
+## Suppose we want to declare that variable X1 is treated differently
+## than variable X2. For example, X1 could be a cluster variable, or
+## X1 should have a proportional effect on the outcome.
+dsurv <- data.frame(time=1:7,
+                    status=c(0,1,1,0,0,0,1),
+                    X2=c(2.24,3.22,9.59,4.4,3.54,6.81,5.05),
+                    X3=c(1,1,1,1,0,0,1),
+                    X4=c(44.69,37.41,68.54,38.85,35.9,27.02,41.84),
+                    X1=factor(c("a","b","a","c","c","a","b"),
+                        levels=c("c","a","b")))
+## define special functions prop and cluster
+prop <- function(x)x
+cluster <- function(x)x
+## We pass a formula and the data
+e <- EventHistory.frame(Hist(time,status)~prop(X1)+X2+cluster(X3)+X4,
+                        data=dsurv,
+                        specials=c("prop","cluster"))
+names(e)
+## The first element is the event.history which is result of the left hand
+## side of the formula:
+e$event.history
+## same as
+with(dsurv,Hist(time,status))
+## to see the structure do
+colnames(e$event.history)
+head(e$event.history)
+## in case of competing risks there will be an additional column called event,
+## see help(Hist) for more details
+
+## The other elements are the design, i.e., model.matrix for the non-special covariates
+e$design
+## and a data.frame for the special covariates
+e$prop
+## The special covariates can be returned as a model.matrix
+e2 <- EventHistory.frame(Hist(time,status)~prop(X1)+X2+cluster(X3)+X4,
+                         data=dsurv,
+                         specials=c("prop","cluster"),
+                         specialsDesign=TRUE)
+e2$prop
+## and the non-special covariates can be returned as a data.frame
+e3 <- EventHistory.frame(Hist(time,status)~prop(X1)+X2+cluster(X3)+X4,
+                         data=dsurv,
+                         specials=c("prop","cluster"),
+                         specialsDesign=TRUE,
+                         unspecialsDesign=FALSE)
+e3$design
+
+## the idea is that the function is used to parse the combination of
+## formula and data inside another function. Here is an example with
+## competing risks
+SampleRegression <- function(formula,data=parent.frame()){
+    thecall <- match.call()
+    ehf <- EventHistory.frame(formula=formula,data=data,specials=c("prop","timevar"))
+    time <- ehf$event.history[,"time"]
+    status <- ehf$event.history[,"status"]
+    ## event as a factor
+    if (attr(ehf$event.history,"model")=="competing.risks"){
+        event <- ehf$event.history[,"event"]
+        Event <- getEvent(ehf$event.history)
+        data.frame(time,status,event,Event)
+    }
+    else{ # no competing risks
+        data.frame(time,status)
+    }
+}
+dsurv$outcome <- c("cause1","0","cause2","cause1","cause2","cause2","0")
+SampleRegression(Hist(time,outcome)~prop(X1)+X2+cluster(X3)+X4,dsurv)
+
+## let's test if the parsing works
+form1 <- Hist(time,outcome!="0")~prop(X1)+X2+cluster(X3)+X4
+form2 <- Hist(time,outcome)~prop(X1)+cluster(X3)+X4
+ff <- list(form1,form2)
+lapply(ff,function(f){SampleRegression(f,dsurv)})
+}
+\author{
+Thomas A. Gerds <tag@biostat.ku.dk>
+}
+\seealso{
+model.frame model.design Hist
+}
+
