@@ -1,5 +1,5 @@
-* Let lava generate some data
-#+BEGIN_SRC R  :results output raw  :exports results  :session *R* :cache no
+* Lava some data
+#+BEGIN_SRC R  :results output   :exports results  :session *R* :cache no
 library(lava)
 m <- lvm(~X1+X2+X3+X4+eventtime+censtime+Noise)
 distribution(m,"X2") <- binomial.lvm()
@@ -16,12 +16,12 @@ d$X2 <- factor(d$X2,levels=c(0,1),labels=c("low survival","high survival"))
 d$X3 <- factor(d$X3,levels=c(0,1),labels=c("high survival","low survival"))
 #+END_SRC
 
-#+RESULTS:
-
 * Survival
+  
 ** Test combinations of discrete and continuous covariates   
-#+BEGIN_SRC R  :results output raw  :exports results  :session *R* :cache no 
+#+BEGIN_SRC R  :results output   :exports results  :session *R* :cache no 
 library(prodlim)
+library(survival)
 f0 <- prodlim(Hist(time,event)~1,data=d)
 summary(f0)
 f1 <- prodlim(Hist(time,event)~X1,data=d)
@@ -42,36 +42,45 @@ u <- Hist(time,event)~X1+X2+X3
 f123 <- prodlim(u,data=d)
 #+END_SRC
 
-#+BEGIN_SRC R :results output raw :exports both :session *R* :cache no 
+#+BEGIN_SRC R :results output  :exports both :session *R* :cache no 
 plot(prodlim(Hist(time,event)~X2,data=d))
 #+END_SRC
 
 
-#+BEGIN_SRC R :results output raw :exports results :session *R* :cache no 
+#+BEGIN_SRC R :results output  :exports results :session *R* :cache no 
 plot(prodlim(Hist(time,event)~X3,data=d))
 #+END_SRC
 
-** Compare with survfit (survival)
+** COMMENT Compare with survfit (survival)
 
-#+BEGIN_SRC R :exports both :results output raw  :session *R* :cache yes 
-library(survival)
-f0 <- prodlim(Hist(time,event)~1,data=d)
-f0.s <- survfit(Surv(time,event)~1,data=d)
-ttt <- sort(unique(d$time))
-sum0.s <- summary(f0.s,times=ttt[1:5])
-plot(f0.s,lwd=6)
-plot(f0,add=TRUE,col=2)
+#+BEGIN_SRC R :exports both :results output   :session *R* :cache yes 
+  library(survival)
+  f0 <- prodlim(Hist(time,event)~1,data=d)
+  f0.s <- survfit(Surv(time,event)~1,data=d)
+  ttt <- sort(unique(d$time)[d$event==1])
+  ttt <- ttt[-length(ttt)]
+  sum0.s <- summary(f0.s,times=ttt)
+  plot(f0.s,lwd=6)
+  plot(f0,add=TRUE,col=2)
+  ## FIXME: there is arounding issue with summary.survfit:
+  library(survival)
+  testdata <- data.frame(time=c(16.107812,3.657545,1.523978),event=c(0,1,1))
+  sum0 <- summary(survfit(Surv(time,event)~1,data=testdata),times=sort(testdata$time))
+  testdata$timeR <- round(testdata$time,1)
+  sum1 <- summary(survfit(Surv(timeR,event)~1,data=testdata),times=sort(testdata$time))
+  sum0
+  sum1
 
-summary(f0.s,times=c(0,0.1,0.2,0.3))
 
-
-result.survfit <- data.frame(time=sum0.s$time,n.risk=sum0.s$n.risk,n.event=sum0.s$n.event,surv=sum0.s$surv,std.err=sum0.s$std.err,lower=sum0.s$lower,upper=sum0.s$upper)
-result.prodlim <- data.frame(summary(f0,times=ttt)$table[,c("time","n.risk","n.event","n.lost","surv","se.surv","lower","upper")])
-cbind(result.survfit[,c("time","n.risk","n.event","surv")],result.prodlim[,c("time","n.risk","n.event","surv")])
-a <- round(result.survfit$surv,8)
-b <- round(result.prodlim$surv[!is.na(result.prodlim$se.surv)],8)
-if (all(a==b)){cat("\nOK\n")}else{cat("\nERROR\n")}
-if (all(round(result.survfit$std.err,8)==round(result.prodlim$se.surv[!is.na(result.prodlim$se.surv)],8))){cat("\nOK\n")}else{cat("\nERROR\n")}
+  ## sum0 != sum1
+  ## summary(f0.s,times=c(0,0.1,0.2,0.3))
+  result.survfit <- data.frame(time=sum0.s$time,n.risk=sum0.s$n.risk,n.event=sum0.s$n.event,surv=sum0.s$surv,std.err=sum0.s$std.err,lower=sum0.s$lower,upper=sum0.s$upper)
+  result.prodlim <- data.frame(summary(f0,times=ttt)$table[,c("time","n.risk","n.event","n.lost","surv","se.surv","lower","upper")])
+  cbind(result.survfit[,c("time","n.risk","n.event","surv")],result.prodlim[,c("time","n.risk","n.event","surv")])
+  a <- round(result.survfit$surv,8)
+  b <- round(result.prodlim$surv[!is.na(result.prodlim$se.surv)],8)
+  if (all(a==b)){cat("\nOK\n")}else{cat("\nERROR\n")}
+  if (all(round(result.survfit$std.err,8)==round(result.prodlim$se.surv[!is.na(result.prodlim$se.surv)],8))){cat("\nOK\n")}else{cat("\nERROR\n")}
 #+END_SRC   
 
 #+RESULTS[<2013-12-04 13:12:16> 4bcb1cfe34752cab52afc58fc33e8919c4078e3c]:
@@ -80,7 +89,7 @@ OK
 
 ** Bootstrap
 
-#+BEGIN_SRC R  :results output raw  :exports results  :session *R* :cache no 
+#+BEGIN_SRC R  :results output   :exports results  :session *R* :cache no 
 library(survival)
 library(prodlim)
 data(pbc, package="survival")
@@ -96,7 +105,7 @@ plot(s2,add=TRUE,col=2,confint=FALSE)
    
 ** Case-weights 
 
-#+BEGIN_SRC R  :results output raw  :exports results  :session *R* :cache no 
+#+BEGIN_SRC R  :results output   :exports results  :session *R* :cache no 
 library(survey)
 library(survival)
 library(prodlim)
@@ -115,7 +124,8 @@ plot(s2,add=TRUE,col=2,confint=FALSE)
 
 ** delayed entry 
 *** Without covariates
-#+BEGIN_SRC R  :results output raw  :exports results  :session *R* :cache yes 
+    
+#+BEGIN_SRC R  :results output   :exports results  :session *R* :cache yes 
 library(survival)
 library(prodlim)
 data(pbc,package="survival")
@@ -137,7 +147,7 @@ plot(F0)
 *** With covariates
 
 
-#+BEGIN_SRC R  :results output raw  :exports results  :session *R* :cache yes 
+#+BEGIN_SRC R  :results output   :exports results  :session *R* :cache yes 
 library(survival)
 library(prodlim)
 data(pbc,package="survival")
@@ -151,7 +161,7 @@ F.0.5 <- prodlim(Hist(time,status!=0,entry=entry)~1,data=pbc0[pbc0$edema==0.5,])
 summary(F)
 #+END_SRC    
 
-#+BEGIN_SRC R  :results output raw  :exports results  :session *R* :cache yes 
+#+BEGIN_SRC R  :results output   :exports results  :session *R* :cache yes 
 library(survival)
 library(prodlim)
 data(pbc,package="survival")
@@ -172,7 +182,7 @@ plot(F,lwd=2,col=1:3,lty=3,add=TRUE,confint=FALSE)
 
 *** Illness-death model
 
-#+BEGIN_SRC R  :results output raw  :exports results  :session *R* :cache no 
+#+BEGIN_SRC R  :results output   :exports results  :session *R* :cache no 
 library(SmoothHazard)
 library(survival)
 library(prodlim)
@@ -199,7 +209,8 @@ plot(f,lwd=5)
 plot(F,lwd=2,col=2,add=TRUE)
 #+END_SRC
 * Competing risks
-#+BEGIN_SRC R :results graphics  :file "~/research/SoftWare/eventhistory/pkg/prodlim/test/aj.pdf" :exports results :session *R* :cache no 
+  
+#+BEGIN_SRC R :results graphics  :file "~/research/SoftWare/eventhistory/pkg/prodlim/test/aj.png" :exports results :session *R* :cache no 
 library(riskRegression)
 data(Melanoma)
 aj <- prodlim(Hist(time,status)~thick,data=Melanoma)
@@ -207,11 +218,11 @@ plot(aj)
 #+END_SRC
 
 #+RESULTS[<2013-04-28 09:14:42> 8d0af189a155e48de3bf70a0111c8f4e360f1b98]:
-[[file:~/research/SoftWare/eventhistory/pkg/prodlim/test/aj.pdf]]
+[[file:~/research/SoftWare/eventhistory/pkg/prodlim/test/aj.png]]
 
 ** delayed entry 
 *** Without covariates
-#+BEGIN_SRC R  :results output raw  :exports results  :session *R* :cache no 
+#+BEGIN_SRC R  :results output   :exports results  :session *R* :cache no 
 library(etm)
 data(abortion)
 cif.ab.etm <- etmCIF(Surv(entry, exit, cause != 0) ~ 1,abortion,etype = cause,failcode = 3)
@@ -221,7 +232,7 @@ test <- cbind(test,summary(cif.ab.prodlim,cause=3,times=test$time)$table[[1]][,c
 tail(test)
 #+END_SRC   
 
-#+BEGIN_SRC R :results graphics  :file "~/research/SoftWare/prodlim/test/delayedEntryCompRisk-testgraph.pdf" :exports results :session *R* :cache no 
+#+BEGIN_SRC R :results graphics  :file "~/research/SoftWare/prodlim/test/delayedEntryCompRisk-testgraph.png" :exports results :session *R* :cache no 
 library(prodlim)
 library(etm)
 data(abortion)
@@ -246,10 +257,10 @@ plot(cif.ab.prodlim,add=TRUE,cause=1,confint=TRUE,col=2)
 #+END_SRC
 
 #+RESULTS[<2013-12-04 08:51:41> 72f89ca9f0ef9945801985667c3399c6cde21502]:
-[[file:~/research/SoftWare/prodlim/test/delayedEntryCompRisk-testgraph.pdf]]
+[[file:~/research/SoftWare/prodlim/test/delayedEntryCompRisk-testgraph.png]]
 
     
-#+BEGIN_SRC R  :results output raw  :exports results  :session *R* :cache no 
+#+BEGIN_SRC R  :results output   :exports results  :session *R* :cache no 
 library(etm)
 data(abortion)
 head(abortion)
@@ -279,7 +290,7 @@ plot(cif.ab.prodlim,add=TRUE,cause=1,confint=FALSE)
     
 *** With covariates
     
-#+BEGIN_SRC R  :results output raw  :exports results  :session *R* :cache no 
+#+BEGIN_SRC R  :results output   :exports results  :session *R* :cache no 
 library(etm)
 data(abortion)
 cif.ab.etm <- etmCIF(Surv(entry, exit, cause != 0) ~ group,abortion,etype = cause,failcode = 3)
@@ -293,7 +304,7 @@ plot(cif.ab.prodlim,add=TRUE,cause=2,confint=FALSE)
 plot(cif.ab.prodlim,add=TRUE,cause=1,confint=FALSE)
 #+END_SRC
 
-#+BEGIN_SRC R  :results output raw  :exports results  :session *R* :cache no 
+#+BEGIN_SRC R  :results output   :exports results  :session *R* :cache no 
 library(survival)
 library(prodlim)
 library(etm)
@@ -309,7 +320,7 @@ plot(cif.pbc.prodlim,add=TRUE,cause=2,col=2,confint=TRUE)
 #+END_SRC
 
 
-#+BEGIN_SRC R  :results output raw  :exports results  :session *R* :cache no 
+#+BEGIN_SRC R  :results output   :exports results  :session *R* :cache no 
 library(survival)
 library(prodlim)
 library(etm)
