@@ -1,28 +1,28 @@
 lifeTab.competing.risks <- function(object,times,cause,newdata,stats,intervals=FALSE,percent=TRUE,showTime=TRUE){
-  # {{{---------get the indices--------------------------
-  IndeX <- predict(object,newdata=newdata,level.chaos=0,times=times,type="list")
-  # }}}
-  # {{{--------------times-------------------------------
+    # {{{---------get the indices--------------------------
+    IndeX <- predict(object,newdata=newdata,level.chaos=0,times=times,type="list")
+    # }}}
+    # {{{--------------times-------------------------------
   times <- IndeX$times
   Ntimes <- IndeX$dimensions$time
   pindex <- IndeX$indices$time
   # }}}
-  # {{{---------covariate strata--------------------------
+    # {{{---------covariate strata--------------------------
   Nstrata <- IndeX$dimensions$strata
   findex <- IndeX$indices$strata
   # }}}
-  # {{{---------competing causes--------------------------
+    # {{{---------competing causes--------------------------
   causes <- attributes(object$model.response)$states
   stopifnot(length(causes)==length(object$n.event))
   # }}}
-  # {{{--------------stats-------------------------------
+    # {{{--------------stats-------------------------------
   if (missing(stats) || (!missing(stats) && is.null(stats)))
     stats <- list(c("n.event",0),c("n.lost",0))
   else
     stats <- c(list(c("n.event",0),c("n.lost",0)),stats)
   #
   # }}}
-  # {{{---------loop over causes--------------------------
+    # {{{---------loop over causes--------------------------
   #
   outList <- lapply(1:length(causes),function(cc){
     # ---no. at atrisk, events, and censored------------------
@@ -102,46 +102,46 @@ lifeTab.competing.risks <- function(object,times,cause,newdata,stats,intervals=F
     # }}}
     # {{{ split according to covariate strata----------------
     if (Nstrata > 1) {
-      split.cova <- rep(1:Nstrata,rep(Ntimes,Nstrata))
-      out <- split(out,split.cova)
-      names(out) <- IndeX$names.strata
-      out <- lapply(out,function(x){
-        x <- as.matrix(x)
-        if (showTime==TRUE){
-          if (intervals==TRUE)
-            x <- cbind(time0=c(0,round(times[-length(times)],2)),time1=times,x)
-          else
-            x <- cbind(time=times,x)
-          rownames(x) <- 1:NROW(x)
-        }
-        else{ # times are rownames
-          if (intervals==TRUE)
-            rownames(x) <- paste("(",paste(c(0,round(times[-length(times)],2)),round(times,2),sep="-"),"]",sep="")
-          else
-            rownames(x) <- round(times,2)
-        }
-        x
-      })
+        split.cova <- rep(1:Nstrata,rep(Ntimes,Nstrata))
+        out <- split(out,split.cova)
+        names(out) <- IndeX$names.strata
+        out <- lapply(out,function(x){
+            x <- as.matrix(x)
+            if (showTime==TRUE){
+                if (intervals==TRUE)
+                    x <- cbind(time0=c(0,round(times[-length(times)],2)),time1=times,x)
+                else
+                    x <- cbind(time=times,x)
+                rownames(x) <- 1:NROW(x)
+            }
+            else{ # times are rownames
+                if (intervals==TRUE)
+                    rownames(x) <- paste("(",paste(c(0,round(times[-length(times)],2)),round(times,2),sep="-"),"]",sep="")
+                else
+                    rownames(x) <- round(times,2)
+            }
+            x
+        })
     }
     else{
-      out <- as.matrix(out)
-      if (showTime==TRUE){
-        if (intervals==TRUE)
-          out <- cbind(time0=c(0,round(times[-length(times)],2)),time1=times,out)
-        else
-          out <- cbind(time=times,out)
-        rownames(out) <- 1:NROW(out)
-      }
-      else{ # times are rownames
-        if (intervals==TRUE)
-          rownames(out) <- paste("(",paste(c(0,round(times[-length(times)],2)),round(times,2),sep="-"),"]",sep="")
-        else
-          rownames(out) <- round(times,2)
-      }
-      out
+        out <- as.matrix(out)
+        if (showTime==TRUE){
+            if (intervals==TRUE)
+                out <- cbind(time0=c(0,round(times[-length(times)],2)),time1=times,out)
+            else
+                out <- cbind(time=times,out)
+            rownames(out) <- 1:NROW(out)
+        }
+        else{ # times are rownames
+            if (intervals==TRUE)
+                rownames(out) <- paste("(",paste(c(0,round(times[-length(times)],2)),round(times,2),sep="-"),"]",sep="")
+            else
+                rownames(out) <- round(times,2)
+        }
+        out
     }
-  })
-  # }}}
-  names(outList) <- causes
-  outList
+})
+# }}}
+names(outList) <- causes
+outList
 }
