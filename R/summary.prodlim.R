@@ -15,7 +15,7 @@
 #' @param times Vector of times at which to return the estimated probabilities.
 #' @param newdata A data frame with the same variable names as those that
 #' appear on the right hand side of the 'prodlim' formula.  Defaults to
-#' \code{object$model.matrix}.
+#' \code{object$X}.
 #' @param max.tables Integer. If \code{newdata} is not given the value of
 #' \code{max.tables} decides about the maximal number of tables to be shown.
 #' Defaults to 20.
@@ -102,7 +102,13 @@ summary.prodlim <- function(object,
             if (missing(newdata) || length(newdata)==0){
                 X <- object$X
                 if (NROW(X)>max.tables){
-                    warning(call.=TRUE,immediate.=TRUE,paste("\nLife tables are available for",NROW(X),"different covariate constellations.\nShown are only the first, the median and the last table ...\nto see other tables use arguments `X' and `max.tables'\n"))
+                    warning(call.=TRUE,immediate.=TRUE,paste("\nLife tables are available for",
+                                           NROW(X),
+                                           "different covariate constellations.\n",
+                                           "Shown are the table corresponding to the first row in object$X,",
+                                           "corresponding to the middle row (median of the number of rows in object$X) ",
+                                           "and corresponding to the last row in object$X ...\n",
+                                           "to see more tables use arguments `newdata' and `max.tables'\n"))
                     X <- X[c(1,round(median(1:NROW(X))),NROW(X)),,drop=FALSE]
                 }
             } else{

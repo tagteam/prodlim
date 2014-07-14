@@ -1,247 +1,1311 @@
 * Lava some data
-#+BEGIN_SRC R  :results output   :exports results  :session *R* :cache no
+#+BEGIN_SRC R  :results output :exports both  :session *R* :cache no
 library(lava)
-m <- lvm(~X1+X2+X3+X4+eventtime+censtime+Noise)
-distribution(m,"X2") <- binomial.lvm()
+library(prodlim)
+## library(survival)
+m <- crModel()
+addvar(m) <- ~X1+X2+X3+X4+X5+X6
 distribution(m,"X3") <- binomial.lvm()
-distribution(m,"eventtime") <- coxWeibull.lvm(scale=1/100)
-distribution(m,"censtime") <- coxWeibull.lvm(scale=1/100)
-regression(m,to="eventtime",from=c("X1","X2","X3")) <- c(0.6,-0.7,0.7)
-m <- eventTime(m,time~min(eventtime=1,censtime=0),"event")
+distribution(m,"X4") <- normal.lvm(mean=50,sd=10)
+distribution(m,"eventtime1") <- coxWeibull.lvm(scale=1/200)
+distribution(m,"censtime") <- coxWeibull.lvm(scale=1/1000)
+m <- categorical(m,K=4,eventtime1~X5,beta=c(1,0,0,0),p=c(0.1,0.2,0.3))
+m <- categorical(m,K=3,eventtime1~X1,beta=c(-2,-1,0),p=c(0.3,0.2))
+regression(m,to="eventtime1",from=c("X2","X4")) <- c(0.3,0)
+regression(m,to="eventtime2",from=c("X2","X4")) <- c(0.6,-0.07)
 set.seed(17)
 d <- sim(m,200)
-#set.seed(17)
-#d <- sim(m,5)
-d$X2 <- factor(d$X2,levels=c(0,1),labels=c("low survival","high survival"))
-d$X3 <- factor(d$X3,levels=c(0,1),labels=c("high survival","low survival"))
+d$X1 <- factor(d$X1,levels=c(0,1,2),labels=c("low survival","medium survival","high survival"))
+## d$X3 <- factor(d$X3,levels=c(0,1),labels=c("high survival","low survival"))
+d$X5 <- factor(d$X5,levels=c("0","1","2","3"),labels=c("one","two","three","four"))
+d$Event <- factor(d$event,levels=c("0","1","2"),labels=c("0","cause-1","cause-2"))
+d$status <- 1*(d$event!=0)
+head(d)
 #+END_SRC
+
+#+RESULTS:
+#+begin_example
+  eventtime1 eventtime2 censtime      time              X1         X2 X3       X4    X5          X6
+1  12.328725   28.36668 46.33944 12.328725 medium survival  0.2375120  0 32.89716   one  0.73842735
+2  11.296672   86.73601 17.33772 11.296672   high survival  0.1788684  1 67.52404 three -0.65837580
+3  27.017950  376.92554 33.33961 27.017950 medium survival -1.9009896  0 74.11518 three  0.84023350
+4   5.295417   15.89916 12.23024  5.295417   high survival  1.5901963  0 50.90537   two  0.16059842
+5   2.903647   12.37039 13.60167  2.903647   high survival  1.5462582  0 47.14730   two  1.38629432
+6   9.964190  141.53094 13.13803  9.964190   high survival -2.3390492  1 60.12252  four -0.09119535
+  event   Event status
+1     1 cause-1      1
+2     1 cause-1      1
+3     1 cause-1      1
+4     1 cause-1      1
+5     1 cause-1      1
+6     1 cause-1      1
+#+end_example
 
 * Survival
-  
-** Test combinations of discrete and continuous covariates   
-#+BEGIN_SRC R  :results output   :exports results  :session *R* :cache no 
-library(prodlim)
-library(survival)
-f0 <- prodlim(Hist(time,event)~1,data=d)
-summary(f0)
-f1 <- prodlim(Hist(time,event)~X1,data=d)
-summary(f1)
-f2 <- prodlim(Hist(time,event)~X2,data=d)
-summary(f2)
-f23 <- prodlim(Hist(time,event)~X2+X3,data=d)
-summary(f23)
-f123 <- prodlim(Hist(time,event)~X1+X2+X3,data=d)
-summary(f123)
-summary(f123,newdata=data.frame(X1="high survival",X2="low survival",X3=d$X3[17]))
-f0 <- prodlim(Surv(time,event)~1,data=d)
-f1 <- prodlim(Surv(time,event)~X1,data=d)
-f2 <- prodlim(Surv(time,event)~X2,data=d)
-f23 <- prodlim(Surv(time,event)~X2+X3,data=d)
-f123 <- prodlim(Surv(time,event)~X1+X2+X3,data=d)
-u <- Hist(time,event)~X1+X2+X3
-f123 <- prodlim(u,data=d)
-#+END_SRC
-
-#+BEGIN_SRC R :results output  :exports both :session *R* :cache no 
-plot(prodlim(Hist(time,event)~X2,data=d))
-#+END_SRC
-
-
-#+BEGIN_SRC R :results output  :exports results :session *R* :cache no 
-plot(prodlim(Hist(time,event)~X3,data=d))
-#+END_SRC
-
-** COMMENT Compare with survfit (survival)
-
-#+BEGIN_SRC R :exports both :results output   :session *R* :cache yes 
-  library(survival)
-  f0 <- prodlim(Hist(time,event)~1,data=d)
-  f0.s <- survfit(Surv(time,event)~1,data=d)
-  ttt <- sort(unique(d$time)[d$event==1])
-  ttt <- ttt[-length(ttt)]
-  sum0.s <- summary(f0.s,times=ttt)
-  plot(f0.s,lwd=6)
-  plot(f0,add=TRUE,col=2)
-  ## FIXME: there is arounding issue with summary.survfit:
-  library(survival)
-  testdata <- data.frame(time=c(16.107812,3.657545,1.523978),event=c(0,1,1))
-  sum0 <- summary(survfit(Surv(time,event)~1,data=testdata),times=sort(testdata$time))
-  testdata$timeR <- round(testdata$time,1)
-  sum1 <- summary(survfit(Surv(timeR,event)~1,data=testdata),times=sort(testdata$time))
-  sum0
-  sum1
-
-
-  ## sum0 != sum1
-  ## summary(f0.s,times=c(0,0.1,0.2,0.3))
-  result.survfit <- data.frame(time=sum0.s$time,n.risk=sum0.s$n.risk,n.event=sum0.s$n.event,surv=sum0.s$surv,std.err=sum0.s$std.err,lower=sum0.s$lower,upper=sum0.s$upper)
-  result.prodlim <- data.frame(summary(f0,times=ttt)$table[,c("time","n.risk","n.event","n.lost","surv","se.surv","lower","upper")])
-  cbind(result.survfit[,c("time","n.risk","n.event","surv")],result.prodlim[,c("time","n.risk","n.event","surv")])
-  a <- round(result.survfit$surv,8)
-  b <- round(result.prodlim$surv[!is.na(result.prodlim$se.surv)],8)
-  if (all(a==b)){cat("\nOK\n")}else{cat("\nERROR\n")}
-  if (all(round(result.survfit$std.err,8)==round(result.prodlim$se.surv[!is.na(result.prodlim$se.surv)],8))){cat("\nOK\n")}else{cat("\nERROR\n")}
+** No covariates
+*** fit + print
+#+BEGIN_SRC R :exports both :results output   :session *R* 
+s0 <- prodlim(Hist(time,status)~1,data=d)
+print(s0)
 #+END_SRC   
 
-#+RESULTS[<2013-12-04 13:12:16> 4bcb1cfe34752cab52afc58fc33e8919c4078e3c]:
+#+RESULTS:
+#+begin_example
 
-OK
+Call: prodlim(formula = Hist(time, status) ~ 1, data = d)
 
-** Bootstrap
+Kaplan-Meier estimator for the event time survival function
 
-#+BEGIN_SRC R  :results output   :exports results  :session *R* :cache no 
+No covariates
+
+Right-censored response of a survival model 
+
+No.Observations: 200 
+
+Pattern:
+                Freq
+ event          153 
+ right.censored 47
+#+end_example
+
+*** summary
+
+#+BEGIN_SRC R :exports both :results output  :session *R*  
+summary(s0,intervals=TRUE)
+#+END_SRC   
+
+#+RESULTS:
+:   time0     time1 n.risk n.event n.lost       surv     se.surv     lower      upper
+: 1  0.00  1.262884    200       0      0 0.99500000 0.004987484 0.9852247 1.00000000
+: 2  1.26  7.114883    200      44      6 0.77654590 0.029714687 0.7183062 0.83478562
+: 3  7.11 11.432829    150      43      7 0.54738109 0.036100131 0.4766261 0.61813605
+: 4 11.43 19.315383    100      33     17 0.34822464 0.036153947 0.2773642 0.41908508
+: 5 19.32 62.077524     50      33     16 0.02626531 0.022630113 0.0000000 0.07061952
+
+*** predict
+#+BEGIN_SRC R :exports both :results output   :session *R*  
+predict(s0,times=1:10)
+#+END_SRC   
+
+#+RESULTS:
+:  [1] 1.0000000 0.9850000 0.9550000 0.8997261 0.8639694 0.8230397 0.7817229 0.7298093 0.6932030
+: [10] 0.6344505
+
+*** plot
+#+BEGIN_SRC R :results graphics :file "~/research/SoftWare/prodlim/test/s0.png" :exports both :session *R* :cache no 
+plot(s0)
+#+END_SRC   
+
+#+RESULTS[<2014-07-13 10:45:24> 5dc298061fec7e1e4353a69d8ff7d1bac39206dc]:
+[[file:~/research/SoftWare/prodlim/test/s0.png]]
+
+** A single binary covariate
+*** fit + print
+#+BEGIN_SRC R :exports both :results output   :session *R* 
+s1 <- prodlim(Hist(time,status)~X1,data=d)
+print(s1)
+#+END_SRC   
+
+#+RESULTS:
+#+begin_example
+
+Call: prodlim(formula = Hist(time, status) ~ X1, data = d)
+
+Stratified Kaplan-Meier estimator for the conditional event time survival function
+
+Discrete predictor variables: X1
+
+Right-censored response of a survival model 
+
+No.Observations: 200 
+
+Pattern:
+                Freq
+ event          153 
+ right.censored 47
+#+end_example
+
+*** summary
+
+#+BEGIN_SRC R :exports both :results output  :session *R*  
+summary(s1,intervals=TRUE,newdata=data.frame(X1=c("medium survival","high survival","low survival")))
+#+END_SRC   
+
+#+RESULTS:
+#+begin_example
+X1=high survival   :
+  time0     time1 n.risk n.event n.lost      surv    se.surv      lower     upper
+1  0.00  1.262884    104       0      0 1.0000000 0.00000000 0.00000000 1.0000000
+2  1.26  7.114883    104      33      2 0.6782268 0.04617310 0.58772915 0.7687244
+3  7.11 11.432829     69      30      2 0.3766838 0.04846230 0.28169941 0.4716681
+4 11.43 19.315383     37      18      6 0.1693072 0.03968308 0.09152977 0.2470846
+5 19.32 62.077524     13       8      5        NA         NA         NA        NA
+
+X1=low survival    :
+  time0     time1 n.risk n.event n.lost       surv    se.surv     lower     upper
+1  0.00  1.262884     50       0      0 1.00000000 0.00000000 0.0000000 1.0000000
+2  1.26  7.114883     50       2      3 0.95958333 0.02799987 0.9047046 1.0000000
+3  7.11 11.432829     45       5      4 0.84812141 0.05307655 0.7440933 0.9521495
+4 11.43 19.315383     36       5      5 0.72717881 0.06775365 0.5943841 0.8599735
+5 19.32 62.077524     26      16      9 0.08592241 0.07330212 0.0000000 0.2295919
+
+X1=medium survival :
+  time0     time1 n.risk n.event n.lost      surv    se.surv     lower     upper
+1  0.00  1.262884     46       0      0 0.9782609 0.02150154 0.9361186 1.0000000
+2  1.26  7.114883     46       9      1 0.8016967 0.05922758 0.6856128 0.9177806
+3  7.11 11.432829     36       8      1 0.6200623 0.07276218 0.4774510 0.7626736
+4 11.43 19.315383     27      10      6 0.3560083 0.07720689 0.2046856 0.5073310
+5 19.32 62.077524     11       9      2        NA         NA        NA        NA
+#+end_example
+
+*** predict
+#+BEGIN_SRC R :exports both :results output   :session *R*  
+predict(s1,times=0:10,newdata=data.frame(X1=c("medium survival","low survival","high survival")))
+#+END_SRC   
+
+#+RESULTS:
+#+begin_example
+$`X1=medium survival`
+ [1] 1.0000000 1.0000000 0.9565217 0.9347826 0.9130435 0.8462354 0.8016967 0.8016967 0.7794274
+[10] 0.7571580 0.7348887
+
+$`X1=low survival   `
+ [1] 1.0000000 1.0000000 1.0000000 1.0000000 0.9800000 0.9800000 0.9595833 0.9595833 0.9164393
+[10] 0.9164393 0.8946193
+
+$`X1=high survival  `
+ [1] 1.0000000 1.0000000 0.9903846 0.9423077 0.8551555 0.8158380 0.7666911 0.6880561 0.6192505
+[10] 0.5599353 0.4683096
+#+end_example
+
+*** plot
+#+BEGIN_SRC R :results graphics :file "~/research/SoftWare/prodlim/test/s1.png" :exports both :session *R* :cache no 
+plot(s1)
+#+END_SRC   
+
+#+RESULTS[<2014-07-13 10:45:24> 5dc298061fec7e1e4353a69d8ff7d1bac39206dc]:
+[[file:~/research/SoftWare/prodlim/test/s1.png]]
+
+** A single continuous covariate
+*** fit + print
+#+BEGIN_SRC R :exports both :results output   :session *R* 
+s2 <- prodlim(Hist(time,status)~X2,data=d)
+print(s2)
+#+END_SRC   
+
+#+RESULTS:
+#+begin_example
+
+Call: prodlim(formula = Hist(time, status) ~ X2, data = d)
+
+Stone-Beran estimator for the conditional event time survival function
+
+Continuous predictors: X2
+
+Right-censored response of a survival model 
+
+No.Observations: 200 
+
+Pattern:
+                Freq
+ event          153 
+ right.censored 47
+#+end_example
+
+*** summary
+
+#+BEGIN_SRC R :exports both :results output  :session *R*  
+summary(s2,intervals=TRUE)
+#+END_SRC   
+
+#+RESULTS:
+#+begin_example
+Warning in summary.prodlim(s2, intervals = TRUE) :
+  
+Life tables are available for 200 different covariate constellations.
+Shown are only the first, the median and the last table ...
+to see other tables use arguments `X' and `max.tables'
+
+X2=-3.494 :
+  time0     time1 n.risk n.event n.lost      surv    se.surv     lower     upper
+1  0.00  1.262884     31       0      0 1.0000000 0.00000000 0.0000000 1.0000000
+2  1.26  7.114883     31       7      1 0.7704715 0.07625603 0.6210124 0.9199305
+3  7.11 11.432829     23       7      2 0.5191412 0.09359203 0.3357042 0.7025782
+4 11.43 19.315383     14       3      1 0.4017164 0.09392171 0.2176332 0.5857996
+5 19.32 62.077524     10       5      5        NA         NA        NA        NA
+
+X2=-0.066 :
+  time0     time1 n.risk n.event n.lost      surv    se.surv     lower     upper
+1  0.00  1.262884     61       0      0 1.0000000 0.00000000 0.0000000 1.0000000
+2  1.26  7.114883     61      10      2 0.8343091 0.04787854 0.7404689 0.9281494
+3  7.11 11.432829     49      10      3 0.6609601 0.06188500 0.5396677 0.7822525
+4 11.43 19.315383     36      15      4 0.3725427 0.06616289 0.2428658 0.5022196
+5 19.32 62.077524     17      12      5        NA         NA        NA        NA
+
+X2= 3.940 :
+  time0     time1 n.risk n.event n.lost      surv    se.surv     lower     upper
+1  0.00  1.262884     31       0      0 0.9677419 0.03173351 0.9055454 1.0000000
+2  1.26  7.114883     31      12      1 0.6058906 0.08881186 0.4318226 0.7799586
+3  7.11 11.432829     18       8      1 0.3218794 0.08718416 0.1510016 0.4927572
+4 11.43 19.315383      9       5      2 0.1001403 0.06373760 0.0000000 0.2250637
+5 19.32 62.077524      2       1      1        NA         NA        NA        NA
+#+end_example
+
+*** predict
+#+BEGIN_SRC R :exports both :results output   :session *R*  
+predict(s2,times=0:10,newdata=data.frame(X2=quantile(d$X2)))
+#+END_SRC   
+
+#+RESULTS:
+#+begin_example
+$`X2=-3.494`
+ [1] 1.0000000 1.0000000 0.9354839 0.9354839 0.9354839 0.8709677 0.8709677 0.8039702 0.7704715
+[10] 0.7354500 0.5933042
+
+$`X2=-0.799`
+ [1] 1.0000000 1.0000000 1.0000000 1.0000000 0.9672131 0.9338609 0.9171849 0.8498391 0.7988488
+[10] 0.7814825 0.7459606
+
+$`X2=-0.061`
+ [1] 1.0000000 1.0000000 1.0000000 0.9836066 0.9344262 0.9177400 0.8509953 0.8343091 0.7491755
+[10] 0.7321488 0.6976801
+
+$`X2= 0.710`
+ [1] 1.0000000 1.0000000 1.0000000 0.9672131 0.9180328 0.8846498 0.8178838 0.7845007 0.7340469
+[10] 0.6657634 0.5956831
+
+$`X2= 3.940`
+ [1] 1.0000000 1.0000000 0.9677419 0.8387097 0.7068724 0.6732118 0.6395512 0.6058906 0.5722300
+[10] 0.5364656 0.5007013
+#+end_example
+
+*** plot
+#+BEGIN_SRC R :results graphics :file "~/research/SoftWare/prodlim/test/s2.png" :exports both :session *R* :cache no 
+plot(s2)
+#+END_SRC   
+
+#+RESULTS[<2014-07-13 10:45:24> 5dc298061fec7e1e4353a69d8ff7d1bac39206dc]:
+[[file:~/research/SoftWare/prodlim/test/s2.png]]
+
+** Combination of two categorical covariates
+*** fit + print
+#+BEGIN_SRC R :exports both :results output   :session *R* 
+s1a <- prodlim(Hist(time,status)~X1+X3,data=d)
+print(s1a)
+#+END_SRC   
+
+#+RESULTS:
+#+begin_example
+
+Call: prodlim(formula = Hist(time, status) ~ X1 + X3, data = d)
+
+Stratified Kaplan-Meier estimator for the conditional event time survival function
+
+Discrete predictor variables: X1, X3
+
+Right-censored response of a survival model 
+
+No.Observations: 200 
+
+Pattern:
+                Freq
+ event          153 
+ right.censored 47
+#+end_example
+
+*** summary
+
+#+BEGIN_SRC R :exports both :results output  :session *R*  
+summary(s1a,intervals=TRUE)
+#+END_SRC   
+
+#+RESULTS:
+#+begin_example
+X1=high survival  , X3=0 :
+  time0     time1 n.risk n.event n.lost      surv    se.surv      lower     upper
+1  0.00  1.262884     53       0      0 1.0000000 0.00000000 0.00000000 1.0000000
+2  1.26  7.114883     53      16      1 0.6936973 0.06382992 0.56859297 0.8188017
+3  7.11 11.432829     36      13      2 0.4316339 0.06989874 0.29463486 0.5686329
+4 11.43 19.315383     21      10      5 0.1932906 0.06083532 0.07405556 0.3125256
+5 19.32 62.077524      6       3      3        NA         NA         NA        NA
+
+X1=high survival  , X3=1 :
+  time0     time1 n.risk n.event n.lost      surv    se.surv      lower     upper
+1  0.00  1.262884     51       0      0 1.0000000 0.00000000 0.00000000 1.0000000
+2  1.26  7.114883     51      17      1 0.6621067 0.06676008 0.53125936 0.7929541
+3  7.11 11.432829     33      17      0 0.3210214 0.06607399 0.19151879 0.4505241
+4 11.43 19.315383     16       8      1 0.1498100 0.05158211 0.04871093 0.2509091
+5 19.32 62.077524      7       5      2        NA         NA         NA        NA
+
+X1=low survival   , X3=0 :
+  time0     time1 n.risk n.event n.lost      surv    se.surv     lower     upper
+1  0.00  1.262884     31       0      0 1.0000000 0.00000000 0.0000000 1.0000000
+2  1.26  7.114883     31       2      1 0.9343715 0.04487704 0.8464141 1.0000000
+3  7.11 11.432829     28       3      3 0.8286800 0.07004328 0.6913976 0.9659623
+4 11.43 19.315383     22       4      3 0.6759182 0.08964343 0.5002204 0.8516161
+5 19.32 62.077524     15       9      5 0.1058781 0.09297916 0.0000000 0.2881139
+
+X1=low survival   , X3=1 :
+  time0     time1 n.risk n.event n.lost      surv    se.surv     lower upper
+1  0.00  1.262884     19       0      0 1.0000000 0.00000000 0.0000000     1
+2  1.26  7.114883     19       0      2 1.0000000 0.00000000 0.0000000     1
+3  7.11 11.432829     17       2      1 0.8823529 0.07814249 0.7291965     1
+4 11.43 19.315383     14       1      2 0.8088235 0.10043392 0.6119767     1
+5 19.32 62.077524     11       7      4        NA         NA        NA    NA
+
+X1=medium survival, X3=0 :
+  time0     time1 n.risk n.event n.lost      surv    se.surv     lower     upper
+1  0.00  1.262884     24       0      0 0.9583333 0.04078938 0.8783876 1.0000000
+2  1.26  7.114883     24       4      1 0.8312500 0.07701503 0.6803033 0.9821967
+3  7.11 11.432829     19       5      0 0.6125000 0.10135154 0.4138546 0.8111454
+4 11.43 19.315383     14       5      1 0.3818182 0.10342737 0.1791043 0.5845321
+5 19.32 62.077524      8       7      1        NA         NA        NA        NA
+
+X1=medium survival, X3=1 :
+  time0     time1 n.risk n.event n.lost      surv    se.surv      lower     upper
+1  0.00  1.262884     22       0      0 1.0000000 0.00000000 0.00000000 1.0000000
+2  1.26  7.114883     22       5      0 0.7727273 0.08934607 0.59761220 0.9478423
+3  7.11 11.432829     17       3      1 0.6331169 0.10346499 0.43032923 0.8359045
+4 11.43 19.315383     13       5      5 0.2976190 0.12316115 0.05622763 0.5390105
+5 19.32 62.077524      3       2      1        NA         NA         NA        NA
+#+end_example
+
+*** predict
+#+BEGIN_SRC R :exports both :results output   :session *R*  
+predict(s1a,times=0:10,newdata=expand.grid(X1=levels(d$X1),X3=unique(d$X3)))
+#+END_SRC   
+
+#+RESULTS:
+#+begin_example
+$`X1=low survival   , X3=0`
+ [1] 1.0000000 1.0000000 1.0000000 1.0000000 0.9677419 0.9677419 0.9343715 0.9343715 0.8663472
+[10] 0.8663472 0.8663472
+
+$`X1=medium survival, X3=0`
+ [1] 1.0000000 1.0000000 0.9166667 0.8750000 0.8750000 0.8312500 0.8312500 0.8312500 0.7875000
+[10] 0.7875000 0.7875000
+
+$`X1=high survival  , X3=0`
+ [1] 1.0000000 1.0000000 1.0000000 0.9245283 0.8478523 0.8093135 0.7515054 0.7129667 0.6358892
+[10] 0.6166198 0.5138499
+
+$`X1=low survival   , X3=1`
+ [1] 1.0000000 1.0000000 1.0000000 1.0000000 1.0000000 1.0000000 1.0000000 1.0000000 1.0000000
+[10] 1.0000000 0.9411765
+
+$`X1=medium survival, X3=1`
+ [1] 1.0000000 1.0000000 1.0000000 1.0000000 0.9545455 0.8636364 0.7727273 0.7727273 0.7727273
+[10] 0.7272727 0.6818182
+
+$`X1=high survival  , X3=1`
+ [1] 1.0000000 1.0000000 0.9803922 0.9607843 0.8627451 0.8226174 0.7824897 0.6621067 0.6019152
+[10] 0.5015960 0.4213406
+#+end_example
+
+*** plot
+#+BEGIN_SRC R :results graphics :file "~/research/SoftWare/prodlim/test/s1a.png" :exports both :session *R* :cache no 
+plot(s1a,confint=FALSE,atrisk=FALSE,legend.x="bottomleft",legend.cex=0.8)
+#+END_SRC   
+
+#+RESULTS:
+[[file:~/research/SoftWare/prodlim/test/s1a.png]]
+
+** Combination of one categorical and one continuous covariate
+*** fit + print
+#+BEGIN_SRC R :exports both :results output   :session *R* 
+s3 <- prodlim(Hist(time,status)~X1+X2,data=d)
+print(s3)
+#+END_SRC   
+
+#+RESULTS:
+#+begin_example
+
+Call: prodlim(formula = Hist(time, status) ~ X1 + X2, data = d)
+
+Stratified Stone-Beran estimator for the conditional event time survival function
+
+  Discrete predictor variables: X1
+Continuous predictor variables: X2
+
+Right-censored response of a survival model 
+
+No.Observations: 200 
+
+Pattern:
+                Freq
+ event          153 
+ right.censored 47
+#+end_example
+
+*** summary
+
+#+BEGIN_SRC R :exports both :results output  :session *R*  
+summary(s3,intervals=TRUE)
+#+END_SRC   
+
+#+RESULTS:
+#+begin_example
+Warning in summary.prodlim(s3, intervals = TRUE) :
+  
+Life tables are available for 200 different covariate constellations.
+Shown are only the first, the median and the last table ...
+to see other tables use arguments `X' and `max.tables'
+
+X1=high survival  , X2=-3.5 :
+  time0     time1 n.risk n.event n.lost      surv    se.surv     lower     upper
+1  0.00  1.262884     20       0      0 1.0000000 0.00000000 0.0000000 1.0000000
+2  1.26  7.114883     20       5      0 0.7500000 0.09682458 0.5602273 0.9397727
+3  7.11 11.432829     15       6      1 0.4285714 0.11358202 0.2059548 0.6511881
+4 11.43 19.315383      8       5      0 0.1607143 0.08482479 0.0000000 0.3269678
+5 19.32 62.077524      3       1      2        NA         NA        NA        NA
+
+X1=high survival  , X2= 2.0 :
+  time0     time1 n.risk n.event n.lost       surv    se.surv      lower     upper
+1  0.00  1.262884     24       0      0 1.00000000 0.00000000 0.00000000 1.0000000
+2  1.26  7.114883     24      11      1 0.52777778 0.10388336 0.32417013 0.7313854
+3  7.11 11.432829     12       7      0 0.21990741 0.08669188 0.04999444 0.3898204
+4 11.43 19.315383      5       3      1 0.06597222 0.05859071 0.00000000 0.1808079
+5 19.32 62.077524      1       1      0         NA         NA         NA        NA
+
+X1=medium survival, X2= 3.3 :
+  time0     time1 n.risk n.event n.lost      surv    se.surv     lower     upper
+1  0.00  1.262884     12       0      0 0.9166667 0.07978559 0.7602898 1.0000000
+2  1.26  7.114883     12       5      0 0.5833333 0.14231876 0.3043937 0.8622730
+3  7.11 11.432829      7       2      0 0.4166667 0.14231876 0.1377270 0.6956063
+4 11.43 19.315383      5       3      2        NA         NA        NA        NA
+5 19.32 62.077524      0       0      0        NA         NA        NA        NA
+#+end_example
+
+*** predict
+#+BEGIN_SRC R :exports both :results output   :session *R*  
+predict(s3,times=0:10,newdata=expand.grid(X1=levels(d$X1),X2=c(quantile(d$X2,0.05),median(d$X2))))
+#+END_SRC   
+
+#+RESULTS:
+#+begin_example
+$`X1=low survival   , X2=-1.745`
+ [1] 1 1 1 1 1 1 1 1 1 1 1
+
+$`X1=medium survival, X2=-1.745`
+ [1] 1.0000000 1.0000000 0.9285714 0.9285714 0.9285714 0.8511905 0.8511905 0.8511905 0.7738095
+[10] 0.7738095 0.6964286
+
+$`X1=high survival  , X2=-1.745`
+ [1] 1.0000000 1.0000000 0.9600000 0.9600000 0.9600000 0.8800000 0.8800000 0.8000000 0.7600000
+[10] 0.7177778 0.5911111
+
+$`X1=low survival   , X2=-0.061`
+ [1] 1.0000000 1.0000000 1.0000000 1.0000000 1.0000000 1.0000000 0.9600000 0.9600000 0.9182609
+[10] 0.9182609 0.8765217
+
+$`X1=medium survival, X2=-0.061`
+ [1] 1.0000000 1.0000000 1.0000000 1.0000000 1.0000000 0.9545455 0.9090909 0.9090909 0.9090909
+[10] 0.8636364 0.8636364
+
+$`X1=high survival  , X2=-0.061`
+ [1] 1.0000000 1.0000000 1.0000000 0.9743590 0.8717949 0.8717949 0.7925408 0.6868687 0.5811966
+[10] 0.4755245 0.4195804
+#+end_example
+
+*** plot
+#+BEGIN_SRC R :results graphics :file "~/research/SoftWare/prodlim/test/s3.png" :exports both :session *R* :cache no 
+plot(s3,confint=FALSE,atrisk=FALSE,legend.x="bottomleft",legend.cex=0.8,newdata=expand.grid(X1=levels(d$X1),X2=c(quantile(d$X2,0.05),median(d$X2))))
+#+END_SRC   
+
+#+RESULTS:
+[[file:~/research/SoftWare/prodlim/test/s3.png]]
+
+* Competing risks
+** No covariates
+*** fit + print
+#+BEGIN_SRC R :exports both :results output   :session *R* 
+f0 <- prodlim(Hist(time,event)~1,data=d)
+print(f0)
+#+END_SRC   
+
+#+RESULTS:
+#+begin_example
+
+Call: prodlim(formula = Hist(time, event) ~ 1, data = d)
+
+
+No covariates
+
+Right-censored response of a competing.risks model 
+
+No.Observations: 200 
+
+Pattern:
+         
+Cause     event right.censored
+  1         130              0
+  2          23              0
+  unknown     0             47
+#+end_example
+
+*** summary
+
+#+BEGIN_SRC R :exports both :results output  :session *R*  
+summary(f0,intervals=TRUE)
+#+END_SRC   
+
+#+RESULTS:
+#+begin_example
+
+
+----------> Cause:  1 
+
+  time0     time1 n.risk n.event n.lost    cuminc   se.cuminc     lower      upper
+1  0.00  1.262884    200       0      0 0.0050000 0.004987484 0.0000000 0.01477529
+2  1.26  7.114883    200      39      6 0.1983419 0.028459699 0.1425619 0.25412184
+3  7.11 11.432829    150      34      7 0.3794304 0.035123310 0.3105900 0.44827084
+4 11.43 19.315383    100      28     17 0.5469867 0.037355161 0.4737719 0.62020144
+5 19.32 62.077524     50      29     16 0.8168976 0.037161988 0.7440615 0.88973380
+
+
+----------> Cause:  2 
+
+  time0     time1 n.risk n.event n.lost     cuminc  se.cuminc       lower      upper
+1  0.00  1.262884    200       0      0 0.00000000 0.00000000 0.000000000 0.00000000
+2  1.26  7.114883    200       5      6 0.02511225 0.01108958 0.003377075 0.04684742
+3  7.11 11.432829    150       9      7 0.07318849 0.01885269 0.036237898 0.11013909
+4 11.43 19.315383    100       5     17 0.10478868 0.02288528 0.059934357 0.14964301
+5 19.32 62.077524     50       4     16 0.15683705 0.03293242 0.092290687 0.22138341
+#+end_example
+
+*** predict
+#+BEGIN_SRC R :exports both :results output   :session *R*  
+predict(f0,times=1:10)
+#+END_SRC   
+
+#+RESULTS:
+:  [1] 0.00000000 0.01500000 0.03500000 0.08027388 0.11603055 0.15184802 0.19316488 0.22951154
+:  [9] 0.26611785 0.31420510
+
+*** plot
+#+BEGIN_SRC R :results graphics :file "~/research/SoftWare/prodlim/test/f0.png" :exports both :session *R* :cache no 
+plot(f0)
+#+END_SRC   
+
+#+RESULTS[<2014-07-13 10:45:24> 5dc298061fec7e1e4353a69d8ff7d1bac39206dc]:
+[[file:~/research/SoftWare/prodlim/test/f0.png]]
+
+** A single binary covariate
+*** fit + print
+#+BEGIN_SRC R :exports both :results output   :session *R* 
+f1 <- prodlim(Hist(time,event)~X1,data=d)
+print(f1)
+#+END_SRC   
+
+#+RESULTS:
+#+begin_example
+
+Call: prodlim(formula = Hist(time, event) ~ X1, data = d)
+
+
+Discrete predictor variables: X1
+
+Right-censored response of a competing.risks model 
+
+No.Observations: 200 
+
+Pattern:
+         
+Cause     event right.censored
+  1         130              0
+  2          23              0
+  unknown     0             47
+#+end_example
+
+*** summary
+
+#+BEGIN_SRC R :exports both :results output  :session *R*  
+summary(f1,intervals=TRUE,newdata=data.frame(X1=c("medium survival","high survival","low survival")))
+#+END_SRC   
+
+#+RESULTS:
+#+begin_example
+
+
+----------> Cause:  1 
+
+X1=high survival   :
+  time0     time1 n.risk n.event n.lost    cuminc  se.cuminc     lower     upper
+1  0.00  1.262884    104       0      0 0.0000000 0.00000000 0.0000000 0.0000000
+2  1.26  7.114883    104      31      2 0.3025425 0.04541461 0.2135315 0.3915535
+3  7.11 11.432829     69      26      2 0.5637142 0.04952378 0.4666493 0.6607790
+4 11.43 19.315383     37      16      6 0.7469040 0.04524378 0.6582278 0.8355802
+5 19.32 62.077524     13       8      5        NA         NA        NA        NA
+
+X1=low survival    :
+  time0     time1 n.risk n.event n.lost     cuminc  se.cuminc      lower      upper
+1  0.00  1.262884     50       0      0 0.00000000 0.00000000 0.00000000 0.00000000
+2  1.26  7.114883     50       2      3 0.04041667 0.02799987 0.00000000 0.09529541
+3  7.11 11.432829     45       3      4 0.10699559 0.04534190 0.01812710 0.19586407
+4 11.43 19.315383     36       3      5 0.17767237 0.05723742 0.06548908 0.28985566
+5 19.32 62.077524     26      12      9 0.64395093 0.10111776 0.44576375 0.84213810
+
+X1=medium survival :
+  time0     time1 n.risk n.event n.lost     cuminc  se.cuminc      lower      upper
+1  0.00  1.262884     46       0      0 0.02173913 0.02150154 0.00000000 0.06388137
+2  1.26  7.114883     46       6      1 0.13255567 0.05042112 0.03373209 0.23137926
+3  7.11 11.432829     36       5      1 0.24599019 0.06449158 0.11958902 0.37239136
+4 11.43 19.315383     27       9      6 0.48368407 0.07983692 0.32720658 0.64016155
+5 19.32 62.077524     11       9      2         NA         NA         NA         NA
+
+
+
+----------> Cause:  2 
+
+X1=high survival   :
+  time0     time1 n.risk n.event n.lost     cuminc  se.cuminc      lower      upper
+1  0.00  1.262884    104       0      0 0.00000000 0.00000000 0.00000000 0.00000000
+2  1.26  7.114883    104       2      2 0.01923077 0.01346682 0.00000000 0.04562525
+3  7.11 11.432829     69       4      2 0.05960207 0.02360796 0.01333132 0.10587282
+4 11.43 19.315383     37       2      6 0.08378881 0.02847945 0.02797011 0.13960750
+5 19.32 62.077524     13       0      5         NA         NA         NA         NA
+
+X1=low survival    :
+  time0     time1 n.risk n.event n.lost     cuminc  se.cuminc       lower     upper
+1  0.00  1.262884     50       0      0 0.00000000 0.00000000 0.000000000 0.0000000
+2  1.26  7.114883     50       0      3 0.00000000 0.00000000 0.000000000 0.0000000
+3  7.11 11.432829     45       2      4 0.04488300 0.03106937 0.000000000 0.1057778
+4 11.43 19.315383     36       2      5 0.09514882 0.04542605 0.006115398 0.1841822
+5 19.32 62.077524     26       4      9 0.27012667 0.08762927 0.098376459 0.4418769
+
+X1=medium survival :
+  time0     time1 n.risk n.event n.lost     cuminc  se.cuminc      lower     upper
+1  0.00  1.262884     46       0      0 0.00000000 0.00000000 0.00000000 0.0000000
+2  1.26  7.114883     46       3      1 0.06574761 0.03669936 0.00000000 0.1376770
+3  7.11 11.432829     36       3      1 0.13394751 0.05094156 0.03410389 0.2337911
+4 11.43 19.315383     27       1      6 0.16030764 0.05577397 0.05099267 0.2696226
+5 19.32 62.077524     11       0      2         NA         NA         NA        NA
+#+end_example
+
+*** predict
+#+BEGIN_SRC R :exports both :results output   :session *R*  
+predict(f1,times=0:10,newdata=data.frame(X1=c("medium survival","low survival","high survival")))
+#+END_SRC   
+
+#+RESULTS:
+#+begin_example
+$`X1=medium survival`
+ [1] 0.00000000 0.00000000 0.04347826 0.04347826 0.04347826 0.11028632 0.13255567 0.13255567
+ [9] 0.13255567 0.15482503 0.17709438
+
+$`X1=low survival   `
+ [1] 0.00000000 0.00000000 0.00000000 0.00000000 0.02000000 0.02000000 0.04041667 0.04041667
+ [9] 0.06223665 0.06223665 0.08405663
+
+$`X1=high survival  `
+ [1] 0.000000000 0.000000000 0.009615385 0.048076923 0.125613748 0.164931241 0.214078108 0.292713095
+ [9] 0.351689335 0.411004519 0.482269017
+#+end_example
+
+*** plot
+#+BEGIN_SRC R :results graphics :file "~/research/SoftWare/prodlim/test/f1.png" :exports both :session *R* :cache no 
+plot(f1)
+#+END_SRC   
+
+#+RESULTS[<2014-07-13 10:45:24> 5dc298061fec7e1e4353a69d8ff7d1bac39206dc]:
+[[file:~/research/SoftWare/prodlim/test/f1.png]]
+
+** A single continuous covariate
+*** fit + print
+#+BEGIN_SRC R :exports both :results output   :session *R* 
+f2 <- prodlim(Hist(time,event)~X2,data=d)
+print(f2)
+#+END_SRC   
+
+#+RESULTS:
+#+begin_example
+
+Call: prodlim(formula = Hist(time, event) ~ X2, data = d)
+
+
+Continuous predictors: X2
+
+Right-censored response of a competing.risks model 
+
+No.Observations: 200 
+
+Pattern:
+         
+Cause     event right.censored
+  1         130              0
+  2          23              0
+  unknown     0             47
+#+end_example
+
+*** summary
+
+#+BEGIN_SRC R :exports both :results output  :session *R*  
+summary(f2,intervals=TRUE)
+#+END_SRC   
+
+#+RESULTS:
+#+begin_example
+Warning in summary.prodlim(f2, intervals = TRUE) :
+  
+Life tables are available for 200 different covariate constellations.
+Shown are only the first, the median and the last table ...
+to see other tables use arguments `X' and `max.tables'
+
+
+
+----------> Cause:  1 
+
+X2=-3.494 :
+  time0     time1 n.risk n.event n.lost    cuminc  se.cuminc      lower     upper
+1  0.00  1.262884     31       0      0 0.0000000 0.00000000 0.00000000 0.0000000
+2  1.26  7.114883     31       7      1 0.2295285 0.07625603 0.08006947 0.3789876
+3  7.11 11.432829     23       7      2 0.4808588 0.09359203 0.29742180 0.6642958
+4 11.43 19.315383     14       2      1 0.5581120 0.09433250 0.37322365 0.7430003
+5 19.32 62.077524     10       5      5        NA         NA         NA        NA
+
+X2=-0.066 :
+  time0     time1 n.risk n.event n.lost    cuminc  se.cuminc      lower     upper
+1  0.00  1.262884     61       0      0 0.0000000 0.00000000 0.00000000 0.0000000
+2  1.26  7.114883     61       9      2 0.1492974 0.04591581 0.05930409 0.2392908
+3  7.11 11.432829     49       8      3 0.2872597 0.05897545 0.17166997 0.4028495
+4 11.43 19.315383     36      13      4 0.5363532 0.06776756 0.40353124 0.6691752
+5 19.32 62.077524     17      12      5        NA         NA         NA        NA
+
+X2= 3.940 :
+  time0     time1 n.risk n.event n.lost     cuminc  se.cuminc     lower     upper
+1  0.00  1.262884     31       0      0 0.03225806 0.03173351 0.0000000 0.0944546
+2  1.26  7.114883     31      10      1 0.32959327 0.08551331 0.1619903 0.4971963
+3  7.11 11.432829     18       5      1 0.50631136 0.09250515 0.3250046 0.6876181
+4 11.43 19.315383      9       3      2 0.62791024 0.09310770 0.4454225 0.8103980
+5 19.32 62.077524      2       0      1         NA         NA        NA        NA
+
+
+
+----------> Cause:  2 
+
+X2=-3.494 :
+  time0     time1 n.risk n.event n.lost     cuminc  se.cuminc lower     upper
+1  0.00  1.262884     31       0      0 0.00000000 0.00000000     0 0.0000000
+2  1.26  7.114883     31       0      1 0.00000000 0.00000000     0 0.0000000
+3  7.11 11.432829     23       0      2 0.00000000 0.00000000     0 0.0000000
+4 11.43 19.315383     14       1      1 0.04017164 0.03925045     0 0.1171011
+5 19.32 62.077524     10       0      5         NA         NA    NA        NA
+
+X2=-0.066 :
+  time0     time1 n.risk n.event n.lost     cuminc  se.cuminc      lower      upper
+1  0.00  1.262884     61       0      0 0.00000000 0.00000000 0.00000000 0.00000000
+2  1.26  7.114883     61       1      2 0.01639344 0.01625851 0.00000000 0.04825955
+3  7.11 11.432829     49       2      3 0.05178016 0.02915900 0.00000000 0.10893075
+4 11.43 19.315383     36       2      4 0.09110411 0.03897256 0.01471929 0.16748893
+5 19.32 62.077524     17       0      5         NA         NA         NA         NA
+
+X2= 3.940 :
+  time0     time1 n.risk n.event n.lost     cuminc  se.cuminc      lower     upper
+1  0.00  1.262884     31       0      0 0.00000000 0.00000000 0.00000000 0.0000000
+2  1.26  7.114883     31       2      1 0.06451613 0.04412365 0.00000000 0.1509969
+3  7.11 11.432829     18       3      1 0.17180926 0.07002180 0.03456905 0.3090495
+4 11.43 19.315383      9       2      2 0.27194951 0.08796364 0.09954395 0.4443551
+5 19.32 62.077524      2       1      1         NA         NA         NA        NA
+#+end_example
+
+*** predict
+#+BEGIN_SRC R :exports both :results output   :session *R*  
+predict(f2,times=0:10,newdata=data.frame(X2=quantile(d$X2)))
+#+END_SRC   
+
+#+RESULTS:
+#+begin_example
+$`X2=-3.494`
+ [1] 0.00000000 0.00000000 0.06451613 0.06451613 0.06451613 0.12903226 0.12903226 0.19602978
+ [9] 0.22952854 0.26454997 0.40669577
+
+$`X2=-0.799`
+ [1] 0.00000000 0.00000000 0.00000000 0.00000000 0.03278689 0.06613906 0.08281515 0.15016089
+ [9] 0.16715767 0.18452395 0.22004588
+
+$`X2=-0.061`
+ [1] 0.00000000 0.00000000 0.00000000 0.01639344 0.04918033 0.06586651 0.13261124 0.14929742
+ [9] 0.21740429 0.23443101 0.26889973
+
+$`X2= 0.710`
+ [1] 0.00000000 0.00000000 0.00000000 0.01639344 0.04918033 0.08256334 0.13263785 0.16602086
+ [9] 0.19978323 0.26806666 0.30310684
+
+$`X2= 3.940`
+ [1] 0.00000000 0.00000000 0.03225806 0.12903226 0.22861150 0.26227209 0.29593268 0.32959327
+ [9] 0.36325386 0.39901823 0.39901823
+#+end_example
+
+*** plot
+#+BEGIN_SRC R :results graphics :file "~/research/SoftWare/prodlim/test/f2.png" :exports both :session *R* :cache no 
+plot(f2)
+#+END_SRC   
+
+#+RESULTS[<2014-07-13 10:45:24> 5dc298061fec7e1e4353a69d8ff7d1bac39206dc]:
+[[file:~/research/SoftWare/prodlim/test/f2.png]]
+
+** Combination of two categorical covariates
+*** fit + print
+#+BEGIN_SRC R :exports both :results output   :session *R* 
+f1a <- prodlim(Hist(time,event)~X1+X3,data=d)
+print(f1a)
+#+END_SRC   
+
+#+RESULTS:
+#+begin_example
+
+Call: prodlim(formula = Hist(time, event) ~ X1 + X3, data = d)
+
+
+Discrete predictor variables: X1, X3
+
+Right-censored response of a competing.risks model 
+
+No.Observations: 200 
+
+Pattern:
+         
+Cause     event right.censored
+  1         130              0
+  2          23              0
+  unknown     0             47
+#+end_example
+
+*** summary
+
+#+BEGIN_SRC R :exports both :results output  :session *R*  
+summary(f1a,intervals=TRUE)
+#+END_SRC   
+
+#+RESULTS:
+#+begin_example
+
+
+----------> Cause:  1 
+
+X1=high survival  , X3=0 :
+  time0     time1 n.risk n.event n.lost    cuminc  se.cuminc     lower     upper
+1  0.00  1.262884     53       0      0 0.0000000 0.00000000 0.0000000 0.0000000
+2  1.26  7.114883     53      14      1 0.2685668 0.06141308 0.1481994 0.3889343
+3  7.11 11.432829     36      10      2 0.4702529 0.07022963 0.3326054 0.6079004
+4 11.43 19.315383     21      10      5 0.7085962 0.06843480 0.5744664 0.8427259
+5 19.32 62.077524      6       3      3        NA         NA        NA        NA
+
+X1=high survival  , X3=1 :
+  time0     time1 n.risk n.event n.lost    cuminc  se.cuminc     lower     upper
+1  0.00  1.262884     51       0      0 0.0000000 0.00000000 0.0000000 0.0000000
+2  1.26  7.114883     51      17      1 0.3378933 0.06676008 0.2070459 0.4687406
+3  7.11 11.432829     33      16      0 0.6589147 0.06708823 0.5274242 0.7904052
+4 11.43 19.315383     16       6      1 0.7873233 0.05881640 0.6720453 0.9026013
+5 19.32 62.077524      7       5      2        NA         NA        NA        NA
+
+X1=low survival   , X3=0 :
+  time0     time1 n.risk n.event n.lost     cuminc  se.cuminc      lower     upper
+1  0.00  1.262884     31       0      0 0.00000000 0.00000000 0.00000000 0.0000000
+2  1.26  7.114883     31       2      1 0.06562848 0.04487704 0.00000000 0.1535859
+3  7.11 11.432829     28       1      3 0.10028237 0.05498750 0.00000000 0.2080559
+4 11.43 19.315383     22       3      3 0.21328418 0.07765929 0.06107477 0.3654936
+5 19.32 62.077524     15       7      5 0.62450716 0.12182880 0.38572711 0.8632872
+
+X1=low survival   , X3=1 :
+  time0     time1 n.risk n.event n.lost    cuminc  se.cuminc lower     upper
+1  0.00  1.262884     19       0      0 0.0000000 0.00000000     0 0.0000000
+2  1.26  7.114883     19       0      2 0.0000000 0.00000000     0 0.0000000
+3  7.11 11.432829     17       2      1 0.1176471 0.07814249     0 0.2708035
+4 11.43 19.315383     14       0      2 0.1176471 0.07814249     0 0.2708035
+5 19.32 62.077524     11       5      4        NA         NA    NA        NA
+
+X1=medium survival, X3=0 :
+  time0     time1 n.risk n.event n.lost     cuminc  se.cuminc      lower     upper
+1  0.00  1.262884     24       0      0 0.04166667 0.04078938 0.00000000 0.1216124
+2  1.26  7.114883     24       3      1 0.12708333 0.06862072 0.00000000 0.2615775
+3  7.11 11.432829     19       2      0 0.21458333 0.08517518 0.04764306 0.3815236
+4 11.43 19.315383     14       4      1 0.39753788 0.10348616 0.19470873 0.6003670
+5 19.32 62.077524      8       7      1         NA         NA         NA        NA
+
+X1=medium survival, X3=1 :
+  time0     time1 n.risk n.event n.lost    cuminc  se.cuminc      lower     upper
+1  0.00  1.262884     22       0      0 0.0000000 0.00000000 0.00000000 0.0000000
+2  1.26  7.114883     22       3      0 0.1363636 0.07316500 0.00000000 0.2797644
+3  7.11 11.432829     17       3      1 0.2759740 0.09606876 0.08768271 0.4642653
+4 11.43 19.315383     13       5      5 0.6114719 0.12831828 0.35997266 0.8629711
+5 19.32 62.077524      3       2      1        NA         NA         NA        NA
+
+
+
+----------> Cause:  2 
+
+X1=high survival  , X3=0 :
+  time0     time1 n.risk n.event n.lost     cuminc  se.cuminc      lower      upper
+1  0.00  1.262884     53       0      0 0.00000000 0.00000000 0.00000000 0.00000000
+2  1.26  7.114883     53       2      1 0.03773585 0.02617498 0.00000000 0.08903786
+3  7.11 11.432829     36       3      2 0.09811321 0.04173100 0.01632195 0.17990446
+4 11.43 19.315383     21       0      5 0.09811321 0.04173100 0.01632195 0.17990446
+5 19.32 62.077524      6       0      3         NA         NA         NA         NA
+
+X1=high survival  , X3=1 :
+  time0     time1 n.risk n.event n.lost     cuminc  se.cuminc lower     upper
+1  0.00  1.262884     51       0      0 0.00000000 0.00000000     0 0.0000000
+2  1.26  7.114883     51       0      1 0.00000000 0.00000000     0 0.0000000
+3  7.11 11.432829     33       1      0 0.02006384 0.01986081     0 0.0589903
+4 11.43 19.315383     16       2      1 0.06286670 0.03509106     0 0.1316439
+5 19.32 62.077524      7       0      2         NA         NA    NA        NA
+
+X1=low survival   , X3=0 :
+  time0     time1 n.risk n.event n.lost     cuminc  se.cuminc      lower     upper
+1  0.00  1.262884     31       0      0 0.00000000 0.00000000 0.00000000 0.0000000
+2  1.26  7.114883     31       0      1 0.00000000 0.00000000 0.00000000 0.0000000
+3  7.11 11.432829     28       2      3 0.07103768 0.04854756 0.00000000 0.1661892
+4 11.43 19.315383     22       1      3 0.11079758 0.06057334 0.00000000 0.2295191
+5 19.32 62.077524     15       2      5 0.26961473 0.11363416 0.04689587 0.4923336
+
+X1=low survival   , X3=1 :
+  time0     time1 n.risk n.event n.lost     cuminc  se.cuminc lower    upper
+1  0.00  1.262884     19       0      0 0.00000000 0.00000000     0 0.000000
+2  1.26  7.114883     19       0      2 0.00000000 0.00000000     0 0.000000
+3  7.11 11.432829     17       0      1 0.00000000 0.00000000     0 0.000000
+4 11.43 19.315383     14       1      2 0.07352941 0.07069958     0 0.212098
+5 19.32 62.077524     11       2      4         NA         NA    NA       NA
+
+X1=medium survival, X3=0 :
+  time0     time1 n.risk n.event n.lost     cuminc  se.cuminc      lower     upper
+1  0.00  1.262884     24       0      0 0.00000000 0.00000000 0.00000000 0.0000000
+2  1.26  7.114883     24       1      1 0.04166667 0.04078938 0.00000000 0.1216124
+3  7.11 11.432829     19       3      0 0.17291667 0.07868572 0.01869549 0.3271378
+4 11.43 19.315383     14       1      1 0.22064394 0.08737377 0.04939449 0.3918934
+5 19.32 62.077524      8       0      1         NA         NA         NA        NA
+
+X1=medium survival, X3=1 :
+  time0     time1 n.risk n.event n.lost     cuminc se.cuminc lower    upper
+1  0.00  1.262884     22       0      0 0.00000000 0.0000000     0 0.000000
+2  1.26  7.114883     22       2      0 0.09090909 0.0612909     0 0.211037
+3  7.11 11.432829     17       0      1 0.09090909 0.0612909     0 0.211037
+4 11.43 19.315383     13       0      5 0.09090909 0.0612909     0 0.211037
+5 19.32 62.077524      3       0      1         NA        NA    NA       NA
+#+end_example
+
+*** predict
+#+BEGIN_SRC R :exports both :results output   :session *R*  
+predict(f1a,times=0:10,newdata=expand.grid(X1=levels(d$X1),X3=unique(d$X3)))
+#+END_SRC   
+
+#+RESULTS:
+#+begin_example
+$`X1=low survival   , X3=0`
+ [1] 0.00000000 0.00000000 0.00000000 0.00000000 0.03225806 0.03225806 0.06562848 0.06562848
+ [9] 0.10028237 0.10028237 0.10028237
+
+$`X1=medium survival, X3=0`
+ [1] 0.00000000 0.00000000 0.08333333 0.08333333 0.08333333 0.12708333 0.12708333 0.12708333
+ [9] 0.12708333 0.12708333 0.12708333
+
+$`X1=high survival  , X3=0`
+ [1] 0.00000000 0.00000000 0.00000000 0.05660377 0.11441188 0.15295062 0.21075873 0.24929747
+ [9] 0.30710558 0.32637495 0.38803693
+
+$`X1=low survival   , X3=1`
+ [1] 0.00000000 0.00000000 0.00000000 0.00000000 0.00000000 0.00000000 0.00000000 0.00000000
+ [9] 0.00000000 0.00000000 0.05882353
+
+$`X1=medium survival, X3=1`
+ [1] 0.00000000 0.00000000 0.00000000 0.00000000 0.00000000 0.09090909 0.13636364 0.13636364
+ [9] 0.13636364 0.18181818 0.22727273
+
+$`X1=high survival  , X3=1`
+ [1] 0.00000000 0.00000000 0.01960784 0.03921569 0.13725490 0.17738258 0.21751026 0.33789330
+ [9] 0.39808482 0.49840401 0.57865937
+#+end_example
+
+*** plot
+#+BEGIN_SRC R :results graphics :file "~/research/SoftWare/prodlim/test/f1a.png" :exports both :session *R* :cache no 
+plot(f1a,confint=FALSE,atrisk=FALSE,legend.x="bottomleft",legend.cex=0.8)
+#+END_SRC   
+
+#+RESULTS:
+[[file:~/research/SoftWare/prodlim/test/f1a.png]]
+
+** Combination of one categorical and one continuous covariate
+*** fit + print
+#+BEGIN_SRC R :exports both :results output   :session *R* 
+f3 <- prodlim(Hist(time,event)~X1+X2,data=d)
+print(f3)
+#+END_SRC   
+
+#+RESULTS:
+#+begin_example
+
+Call: prodlim(formula = Hist(time, event) ~ X1 + X2, data = d)
+
+
+  Discrete predictor variables: X1
+Continuous predictor variables: X2
+
+Right-censored response of a competing.risks model 
+
+No.Observations: 200 
+
+Pattern:
+         
+Cause     event right.censored
+  1         130              0
+  2          23              0
+  unknown     0             47
+#+end_example
+
+*** summary
+
+#+BEGIN_SRC R :exports both :results output  :session *R*  
+summary(f3,intervals=TRUE)
+#+END_SRC   
+
+#+RESULTS:
+#+begin_example
+Warning in summary.prodlim(f3, intervals = TRUE) :
+  
+Life tables are available for 200 different covariate constellations.
+Shown are only the first, the median and the last table ...
+to see other tables use arguments `X' and `max.tables'
+
+
+
+----------> Cause:  1 
+
+X1=high survival  , X2=-3.5 :
+  time0     time1 n.risk n.event n.lost    cuminc  se.cuminc     lower     upper
+1  0.00  1.262884     20       0      0 0.0000000 0.00000000 0.0000000 0.0000000
+2  1.26  7.114883     20       5      0 0.2500000 0.09682458 0.0602273 0.4397727
+3  7.11 11.432829     15       6      1 0.5714286 0.11358202 0.3488119 0.7940452
+4 11.43 19.315383      8       4      0 0.7857143 0.09468376 0.6001375 0.9712910
+5 19.32 62.077524      3       1      2        NA         NA        NA        NA
+
+X1=high survival  , X2= 2.0 :
+  time0     time1 n.risk n.event n.lost    cuminc  se.cuminc     lower     upper
+1  0.00  1.262884     24       0      0 0.0000000 0.00000000 0.0000000 0.0000000
+2  1.26  7.114883     24      10      1 0.4305556 0.10306776 0.2285465 0.6325647
+3  7.11 11.432829     12       5      0 0.6504630 0.09954339 0.4553615 0.8455644
+4 11.43 19.315383      5       3      1 0.8043981 0.08699621 0.6338887 0.9749076
+5 19.32 62.077524      1       1      0        NA         NA        NA        NA
+
+X1=medium survival, X2= 3.3 :
+  time0     time1 n.risk n.event n.lost     cuminc  se.cuminc       lower     upper
+1  0.00  1.262884     12       0      0 0.08333333 0.07978559 0.000000000 0.2397102
+2  1.26  7.114883     12       2      0 0.16666667 0.10758287 0.000000000 0.3775252
+3  7.11 11.432829      7       1      0 0.25000000 0.12500000 0.005004502 0.4949955
+4 11.43 19.315383      5       2      2         NA         NA          NA        NA
+5 19.32 62.077524      0       0      0         NA         NA          NA        NA
+
+
+
+----------> Cause:  2 
+
+X1=high survival  , X2=-3.5 :
+  time0     time1 n.risk n.event n.lost     cuminc  se.cuminc lower     upper
+1  0.00  1.262884     20       0      0 0.00000000 0.00000000     0 0.0000000
+2  1.26  7.114883     20       0      0 0.00000000 0.00000000     0 0.0000000
+3  7.11 11.432829     15       0      1 0.00000000 0.00000000     0 0.0000000
+4 11.43 19.315383      8       1      0 0.05357143 0.05208394     0 0.1556541
+5 19.32 62.077524      3       0      2         NA         NA    NA        NA
+
+X1=high survival  , X2= 2.0 :
+  time0     time1 n.risk n.event n.lost     cuminc  se.cuminc lower     upper
+1  0.00  1.262884     24       0      0 0.00000000 0.00000000     0 0.0000000
+2  1.26  7.114883     24       1      1 0.04166667 0.04078938     0 0.1216124
+3  7.11 11.432829     12       2      0 0.12962963 0.06987180     0 0.2665758
+4 11.43 19.315383      5       0      1 0.12962963 0.06987180     0 0.2665758
+5 19.32 62.077524      1       0      0         NA         NA    NA        NA
+
+X1=medium survival, X2= 3.3 :
+  time0     time1 n.risk n.event n.lost    cuminc se.cuminc       lower     upper
+1  0.00  1.262884     12       0      0 0.0000000 0.0000000 0.000000000 0.0000000
+2  1.26  7.114883     12       3      0 0.2500000 0.1250000 0.005004502 0.4949955
+3  7.11 11.432829      7       1      0 0.3333333 0.1360828 0.066616018 0.6000506
+4 11.43 19.315383      5       1      2        NA        NA          NA        NA
+5 19.32 62.077524      0       0      0        NA        NA          NA        NA
+#+end_example
+
+*** predict
+#+BEGIN_SRC R :exports both :results output   :session *R*  
+predict(f3,times=0:10,newdata=expand.grid(X1=levels(d$X1),X2=c(quantile(d$X2,0.05),median(d$X2))))
+#+END_SRC   
+
+#+RESULTS:
+#+begin_example
+$`X1=low survival   , X2=-1.745`
+ [1] 0 0 0 0 0 0 0 0 0 0 0
+
+$`X1=medium survival, X2=-1.745`
+ [1] 0.00000000 0.00000000 0.07142857 0.07142857 0.07142857 0.14880952 0.14880952 0.14880952
+ [9] 0.14880952 0.14880952 0.22619048
+
+$`X1=high survival  , X2=-1.745`
+ [1] 0.0000000 0.0000000 0.0400000 0.0400000 0.0400000 0.1200000 0.1200000 0.2000000 0.2400000
+[10] 0.2822222 0.4088889
+
+$`X1=low survival   , X2=-0.061`
+ [1] 0.00000000 0.00000000 0.00000000 0.00000000 0.00000000 0.00000000 0.04000000 0.04000000
+ [9] 0.08173913 0.08173913 0.12347826
+
+$`X1=medium survival, X2=-0.061`
+ [1] 0.00000000 0.00000000 0.00000000 0.00000000 0.00000000 0.04545455 0.09090909 0.09090909
+ [9] 0.09090909 0.13636364 0.13636364
+
+$`X1=high survival  , X2=-0.061`
+ [1] 0.00000000 0.00000000 0.00000000 0.02564103 0.10256410 0.10256410 0.18181818 0.28749029
+ [9] 0.36674437 0.47241647 0.52836053
+#+end_example
+
+*** plot
+#+BEGIN_SRC R :results graphics :file "~/research/SoftWare/prodlim/test/f3.png" :exports both :session *R* :cache no 
+plot(f3,confint=FALSE,atrisk=FALSE,legend.x="bottomleft",legend.cex=0.8,newdata=expand.grid(X1=levels(d$X1),X2=c(quantile(d$X2,0.05),median(d$X2))))
+#+END_SRC   
+
+#+RESULTS:
+[[file:~/research/SoftWare/prodlim/test/f3.png]]
+
+
+
+* Special cases
+** Compare with survfit (survival)
+
+#+BEGIN_SRC R :results graphics :file "~/research/SoftWare/prodlim/test/compSurvival.png" :exports both :session *R* :cache yes 
 library(survival)
-library(prodlim)
-data(pbc, package="survival")
+data(pbc)
+prodlim.0 <- prodlim(Hist(time,status!=0)~1,data=pbc)
+survfit.0 <- survfit(Surv(time,status!=0)~1,data=pbc)
+plot(survfit.0)
+plot(prodlim.0,add=TRUE,col=2,lwd=3)
+#+END_SRC   
+
+#+RESULTS[<2014-07-14 08:18:28> 1d84de430eb24eaa66dcf01b51d70ea7876c3f17]:
+[[file:~/research/SoftWare/prodlim/test/compSurvival.png]]
+
+#+BEGIN_SRC R :exports both :results output   :session *R* :cache no :eval never
+ttt <- sort(unique(d$time)[d$event==1])
+ttt <- ttt[-length(ttt)]
+sum0.s <- summary(survfit.0,times=ttt)
+plot(survfit.0,lwd=6)
+plot(prodlim.0,add=TRUE,col=2)
+## FIXME: there is arounding issue with summary.survfit:
+library(survival)
+testdata <- data.frame(time=c(16.107812,3.657545,1.523978),event=c(0,1,1))
+sum0 <- summary(survfit(Surv(time,event)~1,data=testdata),times=sort(testdata$time))
+testdata$timeR <- round(testdata$time,1)
+sum1 <- summary(survfit(Surv(timeR,event)~1,data=testdata),times=sort(testdata$time))
+sum0
+sum1
+## sum0 != sum1
+## summary(survfit.0,times=c(0,0.1,0.2,0.3))
+result.survfit <- data.frame(time=sum0.s$time,n.risk=sum0.s$n.risk,n.event=sum0.s$n.event,surv=sum0.s$surv,std.err=sum0.s$std.err,lower=sum0.s$lower,upper=sum0.s$upper)
+result.prodlim <- data.frame(summary(prodlim.0,times=ttt)$table[,c("time","n.risk","n.event","n.lost","surv","se.surv","lower","upper")])
+cbind(result.survfit[,c("time","n.risk","n.event","surv")],result.prodlim[,c("time","n.risk","n.event","surv")])
+a <- round(result.survfit$surv,8)
+b <- round(result.prodlim$surv[!is.na(result.prodlim$se.surv)],8)
+if (all(a==b)){cat("\nOK\n")}else{cat("\nERROR\n")}
+if (all(round(result.survfit$std.err,8)==round(result.prodlim$se.surv[!is.na(result.prodlim$se.surv)],8))){cat("\nOK\n")}else{cat("\nERROR\n")}
+#+END_SRC   
+
+
+** Bootstrap weights
+
+#+BEGIN_SRC R :results graphics :file "~/research/SoftWare/prodlim/test/bw.png" :exports both :session *R* :cache yes 
 pbc <- pbc[order(pbc$time,-pbc$status),]
 set.seed(17)
 boot <- sample(1:NROW(pbc),size=NROW(pbc),replace=TRUE)
 boot.weights <- table(factor(boot,levels=1:NROW(pbc)))
 s1 <- prodlim(Hist(time,status>0)~1,data=pbc,caseweights=boot.weights)
-plot(s1,col=1,confint=FALSE)
+plot(s1,col=1,confint=FALSE,lwd=8)
 s2 <- prodlim(Hist(time,status>0)~1,data=pbc[sort(boot),])
-plot(s2,add=TRUE,col=2,confint=FALSE)
+plot(s2,add=TRUE,col=2,confint=FALSE,lwd=3)
 #+END_SRC   
-   
+
+#+RESULTS[<2014-07-14 07:54:13> 8b35866bf972c241101784892b6610e45b1ae12e]:
+[[file:~/research/SoftWare/prodlim/test/bw.png]]
+
 ** Case-weights 
 
-#+BEGIN_SRC R  :results output   :exports results  :session *R* :cache no 
+#+BEGIN_SRC R :results graphics :file "~/research/SoftWare/prodlim/test/compSurvey.png" :exports both :session *R* :cache yes 
 library(survey)
 library(survival)
 library(prodlim)
-data(pbc, package="survival")
 pbc <- pbc[order(pbc$time,-pbc$status),]
 ## pbc$randprob<-fitted(biasmodel)
 ## pbc$randprob <- as.numeric(pbc$sex=="m")+0.1
 set.seed(17)
 pbc$randprob <- abs(rnorm(NROW(pbc)))
 dpbc <- svydesign(id=~id, weights=~randprob, strata=NULL, data=pbc)
-s1<-svykm(Surv(time,status>0)~1, design=dpbc)
-plot(s1,lwd=8)
-s2 <- prodlim(Hist(time,status>0)~1,data=pbc,caseweights=pbc$randprob)
-plot(s2,add=TRUE,col=2,confint=FALSE)
+survey.1<-svykm(Surv(time,status>0)~1, design=dpbc)
+plot(survey.1,lwd=8)
+prodlim.1 <- prodlim(Hist(time,status>0)~1,data=pbc,caseweights=pbc$randprob)
+plot(prodlim.1,add=TRUE,col=2,confint=FALSE)
 #+END_SRC   
+
+#+RESULTS[<2014-07-14 07:54:48> dec8932742395595e2951caa82e65c23c49f5c76]:
+[[file:~/research/SoftWare/prodlim/test/compSurvey.png]]
 
 ** delayed entry 
 *** Without covariates
-    
-#+BEGIN_SRC R  :results output   :exports results  :session *R* :cache yes 
-library(survival)
-library(prodlim)
-data(pbc,package="survival")
-pbc$entry <- round(pbc$time/5)
-f <- survfit(Surv(entry,time,status!=0)~1,data=pbc)
-F <- prodlim(Hist(time,status!=0,entry=entry)~1,data=pbc)
-F2 <- prodlim(Surv(entry,time,status!=0)~1,data=pbc)
-plot(f,lwd=8)
-plot(F,lwd=4,col=2,add=TRUE)
-plot(F2,lwd=1,col=4,add=TRUE,confint=FALSE)
 
-F0 <- prodlim(Hist(time,status!=0,entry=entry)~1,data=pbc0)
-f0 <- survfit(Surv(entry,time,status!=0)~1,data=pbc0)
-plot(f0,lwd=5,xlim=c(0,1000))
-plot(F0,lwd=2,col=2,add=TRUE)
-plot(F0)
+#+BEGIN_SRC R :results graphics :file "~/research/SoftWare/prodlim/test/d0.png" :exports results :session *R* :cache yes 
+pbc$entry <- round(pbc$time/5)
+survfit.delay <- survfit(Surv(entry,time,status!=0)~1,data=pbc)
+prodlim.delay <- prodlim(Hist(time,status!=0,entry=entry)~1,data=pbc)
+plot(survfit.delay,lwd=8)
+plot(prodlim.delay,lwd=4,col=2,add=TRUE,confint=FALSE)
 #+END_SRC
 
+#+RESULTS[<2014-07-14 07:57:20> ef968754c92ada9a114bdb475ba1c4fc3127bb26]:
+[[file:~/research/SoftWare/prodlim/test/d0.png]]
+
+    
 *** With covariates
 
-
-#+BEGIN_SRC R  :results output   :exports results  :session *R* :cache yes 
-library(survival)
-library(prodlim)
-data(pbc,package="survival")
-pbc0 <- pbc[1:10,]
-data(pbc0,package="survival")
-pbc0$entry <- round(pbc0$time/5)
-f <- survfit(Surv(entry,time,status!=0)~edema,data=pbc0)
-f.0.5 <- survfit(Surv(entry,time,status!=0)~1,data=pbc0[pbc0$edema==0.5,])
-F <- prodlim(Hist(time,status!=0,entry=entry)~edema,data=pbc0)
-F.0.5 <- prodlim(Hist(time,status!=0,entry=entry)~1,data=pbc0[pbc0$edema==0.5,])
-summary(F)
+#+BEGIN_SRC R :results graphics :file "~/research/SoftWare/prodlim/test/compSurvDelayEdema.png" :exports both :session *R* :cache yes 
+  pbc0 <- pbc
+  pbc0$entry <- round(pbc0$time/5)
+  survfit.delay.edema <- survfit(Surv(entry,time,status!=0)~edema,data=pbc0)
+  ## survfit.delay.edema.0.5 <- survfit(Surv(entry,time,status!=0)~1,data=pbc0[pbc0$edema==0.5,])
+  prodlim.delay.edema <- prodlim(Hist(time,status!=0,entry=entry)~edema,data=pbc0)
+  ## prodlim.delay.edema.0.5 <- prodlim(Hist(time,status!=0,entry=entry)~1,data=pbc0[pbc0$edema==0.5,])
+  plot(survfit.delay.edema,conf.int=FALSE,col=1:3,lwd=8)
+  plot(prodlim.delay.edema,add=TRUE,confint=FALSE,col=c("gray88","orange",5),lwd=4)
 #+END_SRC    
 
-#+BEGIN_SRC R  :results output   :exports results  :session *R* :cache yes 
-library(survival)
-library(prodlim)
-data(pbc,package="survival")
-pbc$entry <- round(pbc$time/5)
-f <- survfit(Surv(entry,time,status!=0)~edema,data=pbc)
-f.0.5 <- survfit(Surv(entry,time,status!=0)~1,data=pbc[pbc$edema==0.5,])
-F <- prodlim(Hist(time,status!=0,entry=entry)~edema,data=pbc)
-F.0.5 <- prodlim(Hist(time,status!=0,entry=entry)~1,data=pbc[pbc$edema==0.5,])
-summary(F)
+#+RESULTS[<2014-07-14 08:18:28> f9a50518b02047f0f0eb6653bd8036c4210382b6]:
+[[file:~/research/SoftWare/prodlim/test/compSurvDelayEdema.png]]
 
-summary(F,newdata=data.frame(edema=c(0.5)))
 
-plot(f,lwd=5,col=1:3)
-lines(f.0.5,col=4)
-plot(F.0.5,add=TRUE,lwd=2,col=4)
-plot(F,lwd=2,col=1:3,lty=3,add=TRUE,confint=FALSE)
-#+END_SRC
-
-*** Illness-death model
-
-#+BEGIN_SRC R  :results output   :exports results  :session *R* :cache no 
-library(SmoothHazard)
-library(survival)
-library(prodlim)
-## simulate data from an illness-death model
-mod <- idmModel(K=10,schedule=0,punctuality=1,cens="interval")
-regression(mod,from="X",to="lifetime") <- log(2)
-regression(mod,from="X",to="waittime") <- log(2)
-regression(mod,from="X",to="illtime") <- log(2)
-set.seed(137)
-## we round the event times to have some ties
-testdata <- round(sim(mod,250),1)
-## the data enter with delay into the intermediate state (ill)
-## thus, to estimate the cumulative incidence of
-## the absorbing state (death) after illness we 
-## have left-truncated data
-illdata <- testdata[testdata$ill==1,]
-illdata <- illdata[order(illdata$lifetime,-illdata$status),]
-## sindex(jump.times=illdata$illtime,eval.times=illdata$lifetime)
-## F <- prodlim(Hist(lifetime,status,entry=illtime)~1,data=illdata[1:5,])
-## f <- survfit(Surv(illtime,lifetime,status)~1,data=illdata[1:5,],type="kaplan-meier")
-f <- survfit(Surv(illtime,lifetime,status)~1,data=illdata)
-F <- prodlim(Hist(lifetime,status,entry=illtime)~1,data=illdata)
-plot(f,lwd=5)
-plot(F,lwd=2,col=2,add=TRUE)
-#+END_SRC
-* Competing risks
+** Stacked plot
   
-#+BEGIN_SRC R :results graphics  :file "~/research/SoftWare/eventhistory/pkg/prodlim/test/aj.png" :exports results :session *R* :cache no 
+#+BEGIN_SRC R :results graphics  :file "~/research/SoftWare/prodlim/test/aj.png" :exports both :session *R* :cache no 
 library(riskRegression)
 data(Melanoma)
-aj <- prodlim(Hist(time,status)~thick,data=Melanoma)
-plot(aj)
+aj <- prodlim(Hist(time,Event)~1,data=d)
+plot(aj,cause="stacked")
 #+END_SRC
 
 #+RESULTS[<2013-04-28 09:14:42> 8d0af189a155e48de3bf70a0111c8f4e360f1b98]:
-[[file:~/research/SoftWare/eventhistory/pkg/prodlim/test/aj.png]]
+[[file:~/research/SoftWare/prodlim/test/aj.png]]
 
-** delayed entry 
+** Competing risks with delayed entry 
 *** Without covariates
-#+BEGIN_SRC R  :results output   :exports results  :session *R* :cache no 
+
+#+BEGIN_SRC R :results graphics :file "~/research/SoftWare/prodlim/test/compETM3.png" :exports both :session *R* :cache yes 
 library(etm)
 data(abortion)
 cif.ab.etm <- etmCIF(Surv(entry, exit, cause != 0) ~ 1,abortion,etype = cause,failcode = 3)
 cif.ab.prodlim <- prodlim(Hist(time=exit, event=cause,entry=entry) ~ 1,data=abortion)
-test <- etm:::ci.transfo(cif.ab.etm[[1]],tr.choice=c("0 3"),level=0.95,transfo="cloglog")[[1]][,c("time","n.risk","n.event","P","var","lower","upper")]
-test <- cbind(test,summary(cif.ab.prodlim,cause=3,times=test$time)$table[[1]][,c("time","n.risk","n.event","cuminc","se.cuminc","lower","upper")])
-tail(test)
+plot(cif.ab.etm,lwd=8,col=3)
+plot(cif.ab.prodlim,add=TRUE,lwd=4,col=5,cause=3)
 #+END_SRC   
 
-#+BEGIN_SRC R :results graphics  :file "~/research/SoftWare/prodlim/test/delayedEntryCompRisk-testgraph.png" :exports results :session *R* :cache no 
-library(prodlim)
+#+RESULTS[<2014-07-14 08:18:29> 2ac5105fe858184184203c412d8346d051568eff]:
+[[file:~/research/SoftWare/prodlim/test/compETM3.png]]
+
+#+BEGIN_SRC R :results graphics  :file "~/research/SoftWare/prodlim/test/compETM22.png" :exports both :session *R* :cache no 
 library(etm)
 data(abortion)
-abortion0 <- abortion[c(1,2,1178,1183,54,888,889,1000),]
-#abortion0 <- abortion0[1:3,]
-x <- prodlim(Hist(time=exit, event=cause,entry=entry) ~ 1,data=abortion0)
-x0 <- etmCIF(Surv(entry, exit, cause != 0) ~ 1,abortion0,etype = cause)
-
-
+x <- prodlim(Hist(time=exit, event=cause,entry=entry) ~ 1,data=abortion)
+x0 <- etmCIF(Surv(entry, exit, cause != 0) ~ 1,abortion,etype = cause)
 par(mfrow=c(2,2))
 cif.ab.etm <- etmCIF(Surv(entry, exit, cause != 0) ~ 1,abortion,etype = cause,failcode = 3)
 cif.ab.prodlim <- prodlim(Hist(time=exit, event=cause,entry=entry) ~ 1,data=abortion)
@@ -257,70 +1321,26 @@ plot(cif.ab.prodlim,add=TRUE,cause=1,confint=TRUE,col=2)
 #+END_SRC
 
 #+RESULTS[<2013-12-04 08:51:41> 72f89ca9f0ef9945801985667c3399c6cde21502]:
-[[file:~/research/SoftWare/prodlim/test/delayedEntryCompRisk-testgraph.png]]
+[[file:~/research/SoftWare/prodlim/test/compETM22.png]]
 
-    
-#+BEGIN_SRC R  :results output   :exports results  :session *R* :cache no 
-library(etm)
-data(abortion)
-head(abortion)
-# abortion <- abortion[order(abortion$exit),]
-cif.ab.etm <- etmCIF(Surv(entry, exit, cause != 0) ~ 1,abortion,etype = cause,failcode = 3)
-cif.ab.prodlim <- prodlim(Hist(time=exit, event=cause, entry=entry) ~ 1,data=abortion)
-plot(cif.ab.etm,lwd=6)
-plot(cif.ab.etm, ci.type = "bars", pos.ci = 24, col = c(1, 2), lty = 1, curvlab = c("Control", "Exposed"),lwd=8)
-plot(cif.ab.prodlim,add=TRUE,col=2,cause=3)
-
-
-u3 <- etm:::ci.transfo(cif.ab.etm[[1]],tr.choice=c("0 3"),level=0.95,transfo="cloglog")[[1]][,c("time","n.risk","n.event","P","var","lower","upper")]
-U3 <- cbind(u3,summary(cif.ab.prodlim,cause=3,times=u3$time)$table[[1]][,c("time","n.risk","n.event","cuminc","se.cuminc","lower","upper")])
-
-head(cbind(cif.ab.etm$""$time,cif.ab.etm$""$n.risk,cif.ab.etm$""$n.risk))
-head(cbind(cif.ab.prodlim$time,cif.ab.prodlim$n.risk,cause1=cif.ab.prodlim$cuminc[[1]],cause2=cif.ab.prodlim$cuminc[[2]],cause3=cif.ab.prodlim$cuminc[[3]]))
-
-
-names(cif.ab.etm[[1]])
-head(cbind(cif.ab.etm[[1]]$time,cif.ab.etm[[1]]$n.risk))
-plot(cif.ab.etm, ci.type = "bars", pos.ci = 24, col = c(1, 2), lty = 1, curvlab = c("Control", "Exposed"))
-plot(cif.ab.prodlim,add=TRUE,cause=3,confint=FALSE)
-plot(cif.ab.prodlim,add=FALSE,cause=3,confint=FALSE)
-plot(cif.ab.prodlim,add=TRUE,cause=2,confint=FALSE)
-plot(cif.ab.prodlim,add=TRUE,cause=1,confint=FALSE)
-#+END_SRC
     
 *** With covariates
-    
-#+BEGIN_SRC R  :results output   :exports results  :session *R* :cache no 
+
+#+BEGIN_SRC R :results graphics :file "~/research/SoftWare/prodlim/test/compETMcovariate.png" :exports results :session *R* :cache yes 
 library(etm)
 data(abortion)
 cif.ab.etm <- etmCIF(Surv(entry, exit, cause != 0) ~ group,abortion,etype = cause,failcode = 3)
 names(cif.ab.etm[[1]])
 head(cbind(cif.ab.etm[[1]]$time,cif.ab.etm[[1]]$n.risk))
 cif.ab.prodlim <- prodlim(Hist(time=exit, event=cause,entry=entry) ~ group,data=abortion)
-plot(cif.ab.etm, ci.type = "bars", pos.ci = 24, col = c(1, 2), lty = 1, curvlab = c("Control", "Exposed"))
-plot(cif.ab.prodlim,add=TRUE,cause=3,confint=FALSE)
-plot(cif.ab.prodlim,add=FALSE,cause=3,confint=FALSE)
-plot(cif.ab.prodlim,add=TRUE,cause=2,confint=FALSE)
-plot(cif.ab.prodlim,add=TRUE,cause=1,confint=FALSE)
+plot(cif.ab.etm, ci.type = "bars", pos.ci = 24, col = c(1, 2), lty = 1, curvlab = c("Control", "Exposed"),lwd=8)
+plot(cif.ab.prodlim,add=TRUE,cause=3,confint=FALSE,col="yellow")
 #+END_SRC
 
-#+BEGIN_SRC R  :results output   :exports results  :session *R* :cache no 
-library(survival)
-library(prodlim)
-library(etm)
-data(pbc,package="survival")
-pbc$entry <- round(pbc$time/5)
-cif.pbc.etm <- etmCIF(Surv(entry, time, status != 0) ~ 1,data=pbc,etype = status,failcode = 2)
-cif.pbc.prodlim <- prodlim(Hist(time, status, entry) ~ 1,data=pbc)
-ttt <- sort(unique(c(pbc$time,pbc$entry)))
-out <- cbind(cbind(ttt,sapply(ttt,function(u){sum(pbc$entry<=u)}))[1:20,],cbind(cif.pbc.etm[[1]]$time,cif.pbc.etm[[1]]$n.risk)[1:20,])
-out <- cbind(cif.pbc.etm[[1]]$time,cif.pbc.etm[[1]]$n.risk,cif.pbc.prodlim$time,cif.pbc.prodlim$n.risk)
-plot(cif.pbc.etm, ci.type = "bars", pos.ci = c(1300), lwd=5)
-plot(cif.pbc.prodlim,add=TRUE,cause=2,col=2,confint=TRUE)
-#+END_SRC
+#+RESULTS[<2014-07-14 08:11:51> 97f915ecd581609e1fe3fefa5cd1932a206259cd]:
+[[file:~/research/SoftWare/prodlim/test/compETMcovariate.png]]
 
-
-#+BEGIN_SRC R  :results output   :exports results  :session *R* :cache no 
+#+BEGIN_SRC R  :results output   :exports both  :session *R* :cache no :eval never
 library(survival)
 library(prodlim)
 library(etm)
@@ -332,3 +1352,59 @@ plot(cif.test.etm, ci.type = "bars", pos.ci = 24, lwd=5)
 plot(cif.test.etm, ci.type = "bars", pos.ci = 24, lwd=5)
 plot(cif.test.prodlim,add=TRUE,cause=2,col=2,confint=TRUE,type="cuminc")
 #+END_SRC
+
+* Interval censored data and illness-death model
+
+** Delayed entry into illstate
+   
+#+BEGIN_SRC R :results graphics :file "~/research/SoftWare/prodlim/test/compSurvDelayedIDM.png" :exports results :session *R* :cache yes 
+library(SmoothHazard)
+library(survival)
+library(prodlim)
+## simulate data from an illness-death model
+mod <- idmModel(K=10,schedule=0,punctuality=1)
+regression(mod,from="X",to="lifetime") <- log(2)
+regression(mod,from="X",to="waittime") <- log(2)
+regression(mod,from="X",to="illtime") <- log(2)
+set.seed(137)
+## we round the event times to have some ties
+testdata <- round(sim(mod,250),1)
+## the data enter with delay into the intermediate state (ill)
+## thus, to estimate the cumulative incidence of
+## the absorbing state (death) after illness we 
+## have left-truncated data
+illdata <- testdata[testdata$illstatus==1,]
+illdata <- illdata[order(illdata$lifetime,-illdata$seen.exit),]
+## sindex(jump.times=illdata$illtime,eval.times=illdata$lifetime)
+## F <- prodlim(Hist(lifetime,status,entry=illtime)~1,data=illdata[1:5,])
+## f <- survfit(Surv(illtime,lifetime,status)~1,data=illdata[1:5,],type="kaplan-meier")
+survfit.delayed.ill <- survfit(Surv(illtime,lifetime,seen.exit)~1,data=illdata)
+prodlim.delayed.ill <- prodlim(Hist(lifetime,seen.exit,entry=illtime)~1,data=illdata)
+plot(survfit.delayed.ill,lwd=5)
+plot(prodlim.delayed.ill,lwd=2,col=2,add=TRUE)
+#+END_SRC
+
+#+RESULTS[<2014-07-14 08:14:23> b2533f1e7196ff6cc6a036d9ea72fff57c3370a0]:
+[[file:~/research/SoftWare/prodlim/test/compSurvDelayedIDM.png]]
+
+** Interval censored data
+
+#+BEGIN_SRC R :results graphics :file "~/research/SoftWare/prodlim/test/compNMLE.png" :exports results :session *R* :cache yes 
+icens <- prodlim(Hist(time=list(L,R),event=seen.ill)~1,data=illdata)
+plot(icens)
+#+END_SRC
+
+#+RESULTS[<2014-07-14 08:18:30> c6ccfbe3317db857b4a59c8cfb46a546ab51d31e]:
+[[file:~/research/SoftWare/prodlim/test/compNMLE.png]]
+
+* COMMENT HEADER
+
+#+TITLE: Testing the prodlim package
+#+LANGUAGE:  en
+#+OPTIONS:   H:3 num:t toc:t \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:t todo:t pri:nil tags:not-in-toc author:nil
+#+LaTeX_CLASS: org-article
+#+LaTeX_HEADER:\usepackage{authblk}
+#+LaTeX_HEADER:\author{Thomas Alexander Gerds}
+#+PROPERTY: session *R*
+#+PROPERTY: cache no

@@ -2,8 +2,9 @@
 \alias{prodlim}
 \title{product limit method}
 \usage{
-prodlim(formula, data = parent.frame(), subset, na.action, reverse = FALSE,
-  conf.int = 0.95, bandwidth = NULL, caseweights, discrete.level = 3,
+prodlim(formula, data = parent.frame(), subset = NULL,
+  na.action = options()$na.action, reverse = FALSE, conf.int = 0.95,
+  bandwidth = NULL, caseweights, discrete.level = 3, x = TRUE,
   maxiter = 1000, grid, tol = 7, method = c("npmle", "one.step",
   "impute.midpoint", "impute.right"), exact = TRUE)
 }
@@ -51,17 +52,23 @@ prodlim(formula, data = parent.frame(), subset, na.action, reverse = FALSE,
   is applied, in overlapping neighborhoods according to the
   bandwidth.}
 
+  \item{x}{logical value: if \code{TRUE}, the full
+  covariate matrix with is returned in component
+  \code{model.matrix}. The reduced matrix contains unique
+  rows of the full covariate matrix and is always returned
+  in component \code{X}.}
+
   \item{maxiter}{For interval censored data only.  Maximal
   number of iterations to obtain the nonparametric maximum
   likelihood estimate. Defaults to 1000.}
 
-  \item{grid}{For interval censored data only.  When
+  \item{grid}{For interval censored data only. When
   method=one.step grid for one-step product limit estimate.
   Defaults to sorted list of unique left and right
   endpoints of the observed intervals.}
 
-  \item{tol}{For interval censored data only.  Numeric
-  value whose negative exponential is used as convergence
+  \item{tol}{For interval censored data only. Numeric value
+  whose negative exponential is used as convergence
   criterion for finding the nonparametric maximum
   likelihood estimate.  Defaults to 7 meaning exp(-7).}
 
@@ -75,8 +82,9 @@ prodlim(formula, data = parent.frame(), subset, na.action, reverse = FALSE,
   observed intervals.}
 }
 \value{
-Object of class "prodlim" for which there are print,
-predict, life.table, summary and plot methods.
+Object of class "prodlim". See \code{\link{print.prodlim}},
+\code{\link{predict.prodlim}}, predict,
+\code{\link{summary.prodlim}}, \code{\link{plot.prodlim}}.
 }
 \description{
 Nonparametric estimation in event history analysis.

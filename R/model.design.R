@@ -4,98 +4,155 @@
 ##' @title Extract a design matrix and specials from a model.frame 
 ##' @param data A model.frame
 ##' @param xlev Passed to model.matrix
-##' @param drop.intercept If TRUE drop intercept term from the design
+##' @param dropIntercept If TRUE drop intercept term from the design
 ##' matrix
-##' @param max.order An error is produced if special variables are
+##' @param maxOrder An error is produced if special variables are
 ##' involved in interaction terms of order higher than max.order.
-##' @param specials.to.factor A character vector containing special variables which should be coerced into a single factor.
+##' @param unspecialsDesign A logical value: if \code{TRUE} apply \code{\link{model.matrix}}
+##' to unspecial covariates. If \code{FALSE} extract unspecial covariates from data.
+##' @param specialsFactor A character vector containing special
+##' variables which should be coerced into a single factor. If
+##' \code{TRUE} all specials are treated in this way.
+##' @param specialsDesign A character vector containing special
+##' variables which should be transformed into a design matrix via
+##' \code{\link{model.matrix}}.  If \code{TRUE} all specials are
+##' treated in this way.
+##' @param stripSpecialNames If TRUE strip the special from variable
+##' name, i.e., use X instead of strata(X).
 ##' @return A list which contains
-##'   - the design matrix X
-##'   - the xlevels of X
-##'   - separate data.frames with the values
-##'     of the special variables.
-##' @seealso model.frame terms model.matrix .getXlevels
+##'   - the design matrix with the levels of the variables stored in attribute 'levels' 
+##'   - separate data.frames which contain the values of the special variables.
+##' @seealso \code{\link{EventHistory.frame}} model.frame terms model.matrix .getXlevels  
 ##' @examples
 ##'
 ##' f <- formula(y~x+ID(z))
-##' d <- data.frame(y=rnorm(5),x=factor(rbinom(5,1,0.3)+3),z=c(2,2,7,7,7))
+##' set.seed(8)
+##' d <- data.frame(y=rnorm(5),x=factor(c("a","b","b","a","c")),z=c(2,2,7,7,7))
 ##' ID <- function(x)x
 ##' t <- terms(f,special="ID",data=d)
 ##' m <- model.frame(t,d)
-##' md <- model.design(m,specials.to.factor=TRUE)
+##' md <- model.design(m,specialsFactor=TRUE)
 ##' md
+##' md <- model.design(m,specialsFactor=TRUE,unspecialsDesign=FALSE)
 ##' 
 ##' library(survival)
 ##' data(pbc)
-##' tt <- terms(Surv(time,status!=0)~factor(edema)*age+I(log(bili)>1)+strata(sex)+cluster(id),special=c("strata","cluster"),data=pbc[1:10,])
+##' tt <- terms(Surv(time,status!=0)~factor(edema)*age+strata(I(log(bili)>1))+strata(sex)+cluster(id),
+##' special=c("strata","cluster"),data=pbc[1:10,])
 ##' dd <- model.frame(tt,data=pbc[1:10,])
 ##' model.design(dd)
-##' model.design(dd,drop.intercept=TRUE)
+##' model.design(dd,dropIntercept=TRUE)
+##' 
 ##' 
 ##' @export 
 ##' @author Thomas A. Gerds <tag@@biostat.ku.dk>
 model.design <- function(data,
                          xlev,
-                         drop.intercept=FALSE,
-                         max.order=1,
-                         specials.to.factor=TRUE){
+                         dropIntercept=FALSE,
+                         maxOrder=1,
+                         unspecialsDesign=TRUE,
+                         specialsFactor=TRUE,
+                         specialsDesign=FALSE,
+                         stripSpecialNames=TRUE){
+    # {{{ analyse the terms
     terms <- attr(data,"terms")
-    if (drop.intercept) attr(terms, "intercept") <- 1
+    if (dropIntercept) attr(terms, "intercept") <- 1
     design <- attr(terms,"factor")
     varnames <- rownames(design)
-    terms.order <- attr(terms,"order")
-    wanted.specials <- attr(terms,"specials")
-    existing.specials <- wanted.specials[!sapply(wanted.specials,is.null)]
-    specials <- names(existing.specials)
+    termsOrder <- attr(terms,"order")
+    wantedSpecials <- attr(terms,"specials")
+    existingSpecials <- wantedSpecials[!sapply(wantedSpecials,is.null)]
+    specials <- names(existingSpecials)
     names(specials) <- specials
-    if (is.logical(specials.to.factor) && (specials.to.factor==TRUE)){
-        specials.to.factor <-specials
+    if (is.logical(specialsDesign) && (specialsDesign==TRUE)){
+        specialsDesign <- specials
     }
+    if (is.logical(specialsFactor) && (specialsFactor==TRUE)){
+        specialsFactor <- specials
+    }
+    # }}}
     if (length(specials)>0){
-        special.info <- lapply(specials,function(spc){
-            pos <- existing.specials[[spc]]
+        # {{{ extrac information about specials
+        specialInfo <- lapply(specials,function(spc){
+            pos <- existingSpecials[[spc]]
             ff <- apply(design[pos,,drop=FALSE],2,sum)
             terms <- seq(ff)[ff>0]
-            if (any(terms.order[terms]>max.order))
-                stop(paste(spc," can not be used in an interaction of order higher than ",max.order,sep=""),call.=FALSE)
-            list(vars=varnames[pos],terms=terms)
+            if (any(termsOrder[terms]>maxOrder))
+                stop(paste(spc,
+                           " can not be used in an interaction of order higher than ",
+                           maxOrder,
+                           sep=""),call.=FALSE)
+            list(vars=varnames[pos],terms=as.vector(terms))
         })
-        special.terms <- sapply(special.info,function(x)x$terms)
-        ## FIXME: there must be a better way to check if there are no
-        ##        terms left after removing the specials
-        tryx <- try(xterms <- drop.terms(terms,special.terms),silent=TRUE)
-        if (class(tryx)[1]=="try-error")
-            xterms <- NULL
-        special.frames <- lapply(specials,function(sp){
-            x <- special.info[[sp]]
-            sp.data <- data[,x$vars,drop=FALSE]
-            if (sp %in% specials.to.factor){
-                if (NCOL(sp.data)>1) sp.data <- apply(sp.data,1,paste,collapse=".")
-                ## force into factor
-                cname <- colnames(sp.data)
-                sp.data[[1]] <- data.frame(factor(sp.data[[1]]))
-                colnames(sp.data[[1]]) <- cname
-                sp.data[[1]]
+        specialTerms <- unlist(lapply(specialInfo,function(x)x$terms))
+        termLabels <- attr(terms,"term.labels")
+        ## only specials
+        if (length(termLabels) == length(specialTerms))
+            unspecialTerms <- NULL
+        else
+            unspecialTerms <- drop.terms(terms,specialTerms)
+        # }}}
+        # {{{ loop over specials
+        specialFrames <- lapply(specials,function(sp){
+            Info <- specialInfo[[sp]]
+            spTerms <- terms[Info$terms]
+            spLevels <- .getXlevels(spTerms,data)
+            if (stripSpecialNames==TRUE)
+                names(spLevels) <- sub("[^(]*\\((.*)\\)","\\1",names(spLevels))
+            if (sp %in% specialsDesign){
+                spMatrix <- model.matrix(spTerms,data=data,xlev=spLevels)[,-1,drop=FALSE]
+                if (stripSpecialNames==TRUE)
+                    colnames(spMatrix) <- sub("[^(]*\\((.*)\\)","\\1",colnames(spMatrix))
+                attr(spMatrix,"levels") <- spLevels
+                spMatrix
             }else{
-                sp.data
+                spData <- data[,Info$vars,drop=FALSE]
+                cnames <- colnames(spData)
+                if (stripSpecialNames==TRUE)
+                    cnames <- sub("[^(]*\\((.*)\\)","\\1",cnames)
+                colnames(spData) <- cnames
+                if (sp %in% specialsFactor){
+                    ## force into a single factor
+                    if (NCOL(spData)>1) {
+                        spData <- data.frame(apply(spData,1,paste,collapse=", "))
+                        names(spData) <- paste(cnames,collapse=", ")
+                    }
+                }
+                attr(spData,"levels") <- spLevels
+                spData
             }
         })
-        if (!is.null(xterms)){
+        # }}}
+        # {{{ unspecials
+        if (!is.null(unspecialTerms)){
             if(missing(xlev))
-                xlev <- .getXlevels(xterms,data)
-            X <- model.matrix(xterms,data,xlev=xlev)
-            if (drop.intercept) X <- X[,-1,drop=FALSE]
+                xlev <- .getXlevels(unspecialTerms,data)
+            if (unspecialsDesign==TRUE){
+                X <- model.matrix(unspecialTerms,data,xlev=xlev)
+                if (dropIntercept) X <- X[,-1,drop=FALSE]
+            }
+            else{
+                X <- model.frame(unspecialTerms,data)
+            }
         } else {
             X <- NULL
             xlev <- NULL
         }
-        c(list(X=X,xlevels=xlev),special.frames)
-
+        attr(X,"levels") <- xlev
+        c(list(design=X),specialFrames)
+        # }}}
     }else{
-        X <- model.matrix(terms,data,xlev=xlev)
+        # {{{ no specials
+        if (unspecialsDesign==TRUE){
+            X <- model.matrix(terms,data,xlev=xlev)
+            if (dropIntercept) X <- X[,-1,drop=FALSE]
+        }else {
+            X <- model.frame(delete.response(terms),data)
+        }
         if (missing(xlev))
             xlev <- .getXlevels(terms,data)
-        if (drop.intercept) X <- X[,-1,drop=FALSE]
-        list(X=X,xlevels=xlev)
+        attr(X,"levels") <- xlev
+        list(design=X)
+        # }}}
     }
 }

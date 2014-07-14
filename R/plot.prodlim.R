@@ -351,7 +351,7 @@ plot.prodlim <- function(x,
                                  bg="white",
                                  fg="gray88")
   axis1.DefaultArgs <- list()
-  axis2.DefaultArgs <- list(at=seq(0,1,.25),side=2)
+  axis2.DefaultArgs <- list(at=seq(0,ylim[2],ylim[2]/4),side=2)
   lines.DefaultArgs <- list(type="s")
   plot.DefaultArgs <- list(x=0,y=0,type = "n",ylim = ylim,xlim = xlim,xlab = xlab,ylab = ylab)
   marktime.DefaultArgs <- list(x=Y,nlost=lapply(sumX,function(x)x[,"n.lost"]),times=plot.times,pch="I",col=col)

@@ -15,8 +15,7 @@
 
   \item{newdata}{A data frame with the same variable names
   as those that appear on the right hand side of the
-  'prodlim' formula.  Defaults to
-  \code{object$model.matrix}.}
+  'prodlim' formula.  Defaults to \code{object$X}.}
 
   \item{max.tables}{Integer. If \code{newdata} is not given
   the value of \code{max.tables} decides about the maximal

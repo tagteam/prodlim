@@ -1,6 +1,6 @@
 \name{quantile.prodlim}
 \alias{quantile.prodlim}
-\title{Quantiles for Kaplan-Meier and Aalen-Johannsen estimates.}
+\title{Quantiles for Kaplan-Meier and Aalen-Johansen estimates.}
 \usage{
 \method{quantile}{prodlim}(x, q, ...)
 }
@@ -12,9 +12,10 @@
   \item{...}{not used}
 }
 \description{
-Quantiles for Kaplan-Meier and Aalen-Johannsen estimates.
+Quantiles for Kaplan-Meier and Aalen-Johansen estimates.
 }
 \examples{
+set.seed(1)
 d=SimSurv(30)
 f=prodlim(Hist(time,status)~X1,data=d)
 # median
