@@ -22,8 +22,8 @@
 #' is correctly estimated when there are ties between event and censoring
 #' times.
 #' 
-#' (1) A conditional version of the Kaplan-Meier estimator for at most one
-#' continuous predictors using symmetrical nearest neighborhoods (Beran 1981,
+#' (1) A conditional version of the kernel smoothed Kaplan-Meier estimator for at most one
+#' continuous predictors using nearest neighborhoods (Beran 1981,
 #' Stute 1984, Akritas 1994).
 #' 
 #' (2) For cluster-correlated data the right hand side of \code{formula} may
@@ -69,7 +69,7 @@
 #' distribution is estimated.
 #' @param conf.int The level (between 0 and 1) for two-sided pointwise
 #' confidence intervals. Defaults to 0.95.
-#' @param bandwidth Smoothing parameter for symmetric nearest neighborhoods
+#' @param bandwidth Smoothing parameter for nearest neighborhoods
 #' based on the values of a continuous covariate. See function
 #' \code{neighborhood} for details.
 #' @param caseweights Weights applied to the contribution of each subject to

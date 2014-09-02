@@ -58,6 +58,16 @@ m <- model.frame(t,d)
 md <- model.design(m,specialsFactor=TRUE)
 md
 md <- model.design(m,specialsFactor=TRUE,unspecialsDesign=FALSE)
+md
+
+# special function with argument
+treat <- function(x,...) x
+f2 <- formula(y~x+treat(z,arg=2)+treat(u,arg=-1))
+set.seed(8)
+d <- data.frame(y=rnorm(5),u=1:5,x=factor(c("a","b","b","a","c")),z=c(2,2,7,7,7))
+t2 <- terms(f2,special="treat",data=d)
+m2 <- model.frame(t2,d)
+md2 <- model.design(m2,specialsFactor=TRUE)
 
 library(survival)
 data(pbc)

@@ -79,7 +79,7 @@ e$event.history
 with(dsurv,Hist(time,status))
 ## to see the structure do
 colnames(e$event.history)
-head(e$event.history)
+unclass(e$event.history)
 ## in case of competing risks there will be an additional column called event,
 ## see help(Hist) for more details
 

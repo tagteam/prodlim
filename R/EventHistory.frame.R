@@ -52,7 +52,7 @@
 ##' with(dsurv,Hist(time,status))
 ##' ## to see the structure do 
 ##' colnames(e$event.history)
-##' head(e$event.history)
+##' unclass(e$event.history)
 ##' ## in case of competing risks there will be an additional column called event,
 ##' ## see help(Hist) for more details
 ##' 
@@ -100,8 +100,7 @@
 ##' form2 <- Hist(time,outcome)~prop(X1)+cluster(X3)+X4
 ##' ff <- list(form1,form2)
 ##' lapply(ff,function(f){SampleRegression(f,dsurv)})
-##' 
- 
+##'  
 ##' @export 
 ##' @author Thomas A. Gerds <tag@@biostat.ku.dk>
 EventHistory.frame <- function(formula,
@@ -123,6 +122,7 @@ EventHistory.frame <- function(formula,
         if (!(formula.names[2] %in% c("Surv","Hist"))) stop("formula is NOT a proper survival formula,\nwhich must have a `Surv' or `Hist' object as response.")
     # }}}
     # {{{call model.frame
+    ## data argument is used to resolve '.' see help(terms.formula)
     Terms <- terms(x=formula, specials=specials, data = data)
     if (sum(sapply(c("Surv","Hist"),function(x) length(grep(x,Terms[[2]])>0)))==0)
         stop("Expected a 'Surv'-object or a 'Hist'-object on the left hand side of the formula.")
@@ -156,5 +156,13 @@ EventHistory.frame <- function(formula,
     out <- c(list(event.history=event.history),
              design[sapply(design,length)>0])
     attr(out,"na.action") <- attr(m,"na.action")
+    class(out) <- "EventHistory.frame"
     out
+}
+##' @S3method as.data.frame EventHistory.frame
+##' @method as.data.frame EventHistory.frame
+as.data.frame.EventHistory.frame <- function(x,...){
+    Y <- data.frame(unclass(x$event.history))
+    X <- do.call("cbind",x[-1])
+    cbind(Y,X)
 }

@@ -36,8 +36,8 @@ prodlim(formula, data = parent.frame(), subset = NULL,
   \item{conf.int}{The level (between 0 and 1) for two-sided
   pointwise confidence intervals. Defaults to 0.95.}
 
-  \item{bandwidth}{Smoothing parameter for symmetric
-  nearest neighborhoods based on the values of a continuous
+  \item{bandwidth}{Smoothing parameter for nearest
+  neighborhoods based on the values of a continuous
   covariate. See function \code{neighborhood} for details.}
 
   \item{caseweights}{Weights applied to the contribution of
@@ -112,9 +112,10 @@ version of the survival package:
 \code{reverse=TRUE} is correctly estimated when there are
 ties between event and censoring times.
 
-(1) A conditional version of the Kaplan-Meier estimator for
-at most one continuous predictors using symmetrical nearest
-neighborhoods (Beran 1981, Stute 1984, Akritas 1994).
+(1) A conditional version of the kernel smoothed
+Kaplan-Meier estimator for at most one continuous
+predictors using nearest neighborhoods (Beran 1981, Stute
+1984, Akritas 1994).
 
 (2) For cluster-correlated data the right hand side of
 \code{formula} may identify a \code{\link{cluster}}

@@ -1180,28 +1180,28 @@ plot(prodlim.0,add=TRUE,col=2,lwd=3)
 [[file:~/research/SoftWare/prodlim/test/compSurvival.png]]
 
 #+BEGIN_SRC R :exports both :results output   :session *R* :cache no :eval never
-ttt <- sort(unique(d$time)[d$event==1])
-ttt <- ttt[-length(ttt)]
-sum0.s <- summary(survfit.0,times=ttt)
-plot(survfit.0,lwd=6)
-plot(prodlim.0,add=TRUE,col=2)
-## FIXME: there is arounding issue with summary.survfit:
-library(survival)
-testdata <- data.frame(time=c(16.107812,3.657545,1.523978),event=c(0,1,1))
-sum0 <- summary(survfit(Surv(time,event)~1,data=testdata),times=sort(testdata$time))
-testdata$timeR <- round(testdata$time,1)
-sum1 <- summary(survfit(Surv(timeR,event)~1,data=testdata),times=sort(testdata$time))
-sum0
-sum1
-## sum0 != sum1
-## summary(survfit.0,times=c(0,0.1,0.2,0.3))
-result.survfit <- data.frame(time=sum0.s$time,n.risk=sum0.s$n.risk,n.event=sum0.s$n.event,surv=sum0.s$surv,std.err=sum0.s$std.err,lower=sum0.s$lower,upper=sum0.s$upper)
-result.prodlim <- data.frame(summary(prodlim.0,times=ttt)$table[,c("time","n.risk","n.event","n.lost","surv","se.surv","lower","upper")])
-cbind(result.survfit[,c("time","n.risk","n.event","surv")],result.prodlim[,c("time","n.risk","n.event","surv")])
-a <- round(result.survfit$surv,8)
-b <- round(result.prodlim$surv[!is.na(result.prodlim$se.surv)],8)
-if (all(a==b)){cat("\nOK\n")}else{cat("\nERROR\n")}
-if (all(round(result.survfit$std.err,8)==round(result.prodlim$se.surv[!is.na(result.prodlim$se.surv)],8))){cat("\nOK\n")}else{cat("\nERROR\n")}
+  ttt <- sort(unique(d$time)[d$event==1])
+  ttt <- ttt[-length(ttt)]
+  sum0.s <- summary(survfit.0,times=ttt)
+  plot(survfit.0,lwd=6)
+  plot(prodlim.0,add=TRUE,col=2)
+  ## There is arounding issue:
+  library(survival)
+  testdata <- data.frame(time=c(16.107812,3.657545,1.523978),event=c(0,1,1))
+  sum0 <- summary(survfit(Surv(time,event)~1,data=testdata),times=sort(testdata$time))
+  testdata$timeR <- round(testdata$time,1)
+  sum1 <- summary(survfit(Surv(timeR,event)~1,data=testdata),times=sort(testdata$time))
+  sum0
+  sum1
+  ## sum0 != sum1
+  ## summary(survfit.0,times=c(0,0.1,0.2,0.3))
+  result.survfit <- data.frame(time=sum0.s$time,n.risk=sum0.s$n.risk,n.event=sum0.s$n.event,surv=sum0.s$surv,std.err=sum0.s$std.err,lower=sum0.s$lower,upper=sum0.s$upper)
+  result.prodlim <- data.frame(summary(prodlim.0,times=ttt)$table[,c("time","n.risk","n.event","n.lost","surv","se.surv","lower","upper")])
+  cbind(result.survfit[,c("time","n.risk","n.event","surv")],result.prodlim[,c("time","n.risk","n.event","surv")])
+  a <- round(result.survfit$surv,8)
+  b <- round(result.prodlim$surv[!is.na(result.prodlim$se.surv)],8)
+  if (all(a==b)){cat("\nOK\n")}else{cat("\nERROR\n")}
+  if (all(round(result.survfit$std.err,8)==round(result.prodlim$se.surv[!is.na(result.prodlim$se.surv)],8))){cat("\nOK\n")}else{cat("\nERROR\n")}
 #+END_SRC   
 
 

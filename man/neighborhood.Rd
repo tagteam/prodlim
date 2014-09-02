@@ -1,6 +1,6 @@
 \name{neighborhood}
 \alias{neighborhood}
-\title{Symmetric neighborhoods for kernel smoothing}
+\title{Nearest neighborhoods for kernel smoothing}
 \usage{
 neighborhood(x, bandwidth = NULL, kernel = "box")
 }

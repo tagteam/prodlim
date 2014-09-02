@@ -1,4 +1,4 @@
-#' Symmetric neighborhoods for kernel smoothing
+#' Nearest neighborhoods for kernel smoothing
 #' 
 #' Nearest neighborhoods for the values of a continuous predictor. The result
 #' is used for the conditional Kaplan-Meier estimator and other conditional
