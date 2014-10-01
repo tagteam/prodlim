@@ -167,7 +167,7 @@ summary.prodlim <- function(object,
             if (is.list(x)) {
                 lapply(x,data.frame) }
             else{
-                data.frame(matrix(x))
+                data.frame(as.matrix(x))
             }
         })
     }

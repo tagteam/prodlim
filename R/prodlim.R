@@ -265,7 +265,7 @@
     # {{{  covariates
 
     covariates <- EHF[-1]
-    ##  `factor', 'Strata' and 'dummy' are aliases for `strata'
+    ##  `factor' and 'Strata' are aliases for `strata'
     strata.pos <- match(c("strata","factor","Strata"),names(covariates),nomatch=0)
     if (sum(strata.pos)>0)
         strata <- do.call("cbind",covariates[strata.pos])

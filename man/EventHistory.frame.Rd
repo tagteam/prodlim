@@ -4,7 +4,7 @@
 \usage{
 EventHistory.frame(formula, data, unspecialsDesign = TRUE, specials,
   specialsFactor = TRUE, specialsDesign = FALSE, stripSpecialNames = TRUE,
-  subset = NULL, na.action = options()$na.action)
+  dropIntercept = TRUE, subset = NULL, na.action = options()$na.action)
 }
 \arguments{
   \item{formula}{Formula whose left hand side specifies the
@@ -28,6 +28,9 @@ EventHistory.frame(formula, data, unspecialsDesign = TRUE, specials,
   \code{\link{model.design}}}
 
   \item{stripSpecialNames}{Passed as is to
+  \code{\link{model.design}}}
+
+  \item{dropIntercept}{Passed as is to
   \code{\link{model.design}}}
 
   \item{subset}{Passed as is to \code{\link{model.frame}}}

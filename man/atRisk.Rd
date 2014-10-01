@@ -3,8 +3,8 @@
 \title{Drawing numbers of subjects at-risk of experiencing an event below
 Kaplan-Meier and Aalen-Johannsen plots.}
 \usage{
-atRisk(x, newdata, times, line, col, interspace, cex, labels, title = "", pos,
-  adj, dist, adjust.labels = TRUE, ...)
+atRisk(x, newdata, times, line, col, labelcol = NULL, interspace, cex, labels,
+  title = "", pos, adj, dist, adjust.labels = TRUE, ...)
 }
 \arguments{
   \item{x}{an object of class `prodlim' as returned by the
@@ -18,6 +18,9 @@ atRisk(x, newdata, times, line, col, interspace, cex, labels, title = "", pos,
   plot.}
 
   \item{col}{The color of the text.}
+
+  \item{labelcol}{The color for the labels. Defaults to
+  col.}
 
   \item{interspace}{Distance between rows of atrisk
   numbers.}

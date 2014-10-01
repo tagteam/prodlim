@@ -7,14 +7,17 @@
 ##' @param formula Formula whose left hand side specifies the event
 ##' history, i.e., either via Surv() or Hist().
 ##' @param data Data frame in which the formula is interpreted
-##' @param unspecialsDesign Passed as is to \code{\link{model.design}}.
+##' @param unspecialsDesign Passed as is to
+##' \code{\link{model.design}}.
 ##' @param specials Character vector of special function names.
 ##' Usually the body of the special functions is function(x)x but
 ##' e.g., \code{\link{strata}} from the survival package does treat
 ##' the values
 ##' @param specialsFactor Passed as is to \code{\link{model.design}}.
 ##' @param specialsDesign Passed as is to \code{\link{model.design}}
-##' @param stripSpecialNames Passed as is to \code{\link{model.design}}
+##' @param stripSpecialNames Passed as is to
+##' \code{\link{model.design}}
+##' @param dropIntercept Passed as is to \code{\link{model.design}}
 ##' @param subset Passed as is to \code{\link{model.frame}}
 ##' @param na.action Passed as is to \code{\link{model.frame}}
 ##' na.action.
@@ -110,6 +113,7 @@ EventHistory.frame <- function(formula,
                                specialsFactor=TRUE,
                                specialsDesign=FALSE,
                                stripSpecialNames=TRUE,
+                               dropIntercept=TRUE,
                                subset=NULL,
                                na.action=options()$na.action){
     # {{{  check if formula is a formula 
@@ -147,7 +151,7 @@ EventHistory.frame <- function(formula,
     # {{{ design
     design <- model.design(data=m,
                            maxOrder=1,
-                           dropIntercept=TRUE,
+                           dropIntercept=dropIntercept,
                            unspecialsDesign=unspecialsDesign,
                            specialsFactor=specialsFactor,
                            specialsDesign=specialsDesign,

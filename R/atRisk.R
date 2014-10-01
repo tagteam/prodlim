@@ -12,6 +12,7 @@
 #' @param times Where to compute the atrisk numbers.
 #' @param line Distance of the atrisk numbers from the inner plot.
 #' @param col The color of the text.
+#' @param labelcol The color for the labels. Defaults to col.
 #' @param interspace Distance between rows of atrisk numbers.
 #' @param cex Passed on to \code{mtext} for both atrisk numbers and
 #' labels.
@@ -24,7 +25,8 @@
 #' @param dist If \code{line} is missing, the distance of the upper
 #' most atrisk row from the inner plotting region: par()$mgp[2].
 #' @param adjust.labels If \code{TRUE} the labels are left adjusted.
-#' @param ... Further arguments that are passed to the function \code{mtext}.
+#' @param ... Further arguments that are passed to the function
+#' \code{mtext}.
 #' @return Nil
 #' @author Thomas Alexander Gerds <tag@@biostat.ku.dk>
 #' @seealso \code{\link{plot.prodlim}}, \code{\link{confInt}},
@@ -36,6 +38,7 @@ atRisk <- function(x,
                    times,
                    line,
                    col,
+                   labelcol=NULL,
                    interspace,
                    cex,
                    labels,
@@ -109,10 +112,19 @@ atRisk <- function(x,
           outer=FALSE,
           xpd=NA,
           ...)
+    if (is.null(labelcol)){
+        lcol <- col[y]
+    } else {
+        if (is.na(labelcol[y]))
+            lcol <- labelcol[1]
+        else
+            lcol <- labelcol[y]
+    }
     mtext(text=labels[y],
           side=1,
           at=pos,
-          col=col[y],
+          col=labelcol[y],
+          ## col=1,
           line=line[y],
           adj=adj,
           cex=cex,
