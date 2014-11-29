@@ -18,6 +18,7 @@
 #' labels.
 #' @param labels Labels for the at-risk rows.
 #' @param title Title for the at-risk labels
+#' @param titlecol The color for the title. Defaults to 1 (black).
 #' @param pos The value is passed on to the \code{mtext} argument
 #' \code{at} for the labels (not the atriks numbers).
 #' @param adj Passed on to \code{mtext} for the labels (not the atriks
@@ -43,93 +44,102 @@ atRisk <- function(x,
                    cex,
                    labels,
                    title="",
+                   titlecol=NULL,
                    pos,
                    adj,
                    dist,
                    adjust.labels=TRUE,
                    ...){
-  if (missing(times)) times <- seq(0,x$maxtime,x$maxtime/10)
-  if (x$model=="competing.risks")
-    px <- lifeTab(object=x,times=times,newdata=newdata,stats=NULL)[[1]]
-  else if (x$model=="survival"){
-    px <- lifeTab(object=x,times=times,newdata=newdata,stats=NULL)
-  }
-  if (is.matrix(px) || is.data.frame(px))
-    sumx <- lapply(data.frame(px)[,grep("n.risk",colnames(px)),drop=FALSE],function(x)x)
-  else
-    sumx <- lapply(px,function(v){
-      u <- v[,grep("n.risk",colnames(v)),drop=FALSE]
-      if (NCOL(u)>1){
-        ulist <- lapply(1:NCOL(u),function(i)u[,i])
-        names(ulist) <- colnames(u)
-        ulist
-      }
-      else
-        u
-    })
-  if (is.list(sumx[[1]]))
-    sumx <- unlist(sumx,recursive=FALSE)
-  if (all(sapply(sumx,NCOL))==1)
-    nlines <- length(sumx)
-  if (missing(line)){
-    line <- par()$mgp[2] + dist +
-      (0:(2*nlines-1)) *interspace -(nlines-1)
-  }
-  if (missing(cex)) cex <- 1
-  if (missing(pos)) pos <- min(times)
-  if (missing(adj)) adj <- 1.5
-  if (missing(labels))
-    if (length(names(sumx)==nlines))
-      labels <- paste("[",names(sumx),"]",sep="")
-    else
-      labels <- c("No.   \nat-risk",rep("",nlines-1))
-  # title for no. at-risk below plot
-  # --------------------------------------------------------------------
-  if (!is.null(title))
-      mtext(title,
-            side=1,
-            at=pos,
-            col=col[1],
-            line=line[1]-1,
-            adj=adj,
-            cex=cex,
-            outer=FALSE,
-            xpd=NA,
-            ...)
-  # labeling the no. at-risk below plot
-  # --------------------------------------------------------------------
-  if (is.null(adjust.labels) || adjust.labels==TRUE){
-    labels <- format(labels,justify="left")}
-  if (length(col)==nlines/2) ## 1 cluster level
-    col <- c(col,col)
-  lapply(1:nlines,function(y){
-    mtext(text=as.character(sumx[[y]]),
-          side=1,
-          at=times,
-          line=rep(line[y],length(times)),
-          col=rep(col[y],length(times)),
-          cex=cex,
-          outer=FALSE,
-          xpd=NA,
-          ...)
-    if (is.null(labelcol)){
-        lcol <- col[y]
-    } else {
-        if (is.na(labelcol[y]))
-            lcol <- labelcol[1]
-        else
-            lcol <- labelcol[y]
+    if (missing(times)) times <- seq(0,x$maxtime,x$maxtime/10)
+    if (x$model=="competing.risks")
+        px <- lifeTab(object=x,times=times,newdata=newdata,stats=NULL)[[1]]
+    else if (x$model=="survival"){
+        px <- lifeTab(object=x,times=times,newdata=newdata,stats=NULL)
     }
-    mtext(text=labels[y],
-          side=1,
-          at=pos,
-          col=labelcol[y],
-          ## col=1,
-          line=line[y],
-          adj=adj,
-          cex=cex,
-          outer=FALSE,
-          xpd=NA,
-          ...)
-  })
+    if (is.matrix(px) || is.data.frame(px))
+        sumx <- lapply(data.frame(px)[,grep("n.risk",colnames(px)),drop=FALSE],function(x)x)
+    else
+        sumx <- lapply(px,function(v){
+            u <- v[,grep("n.risk",colnames(v)),drop=FALSE]
+            if (NCOL(u)>1){
+                ulist <- lapply(1:NCOL(u),function(i)u[,i])
+                names(ulist) <- colnames(u)
+                ulist
+            }
+            else
+                u
+        })
+    if (is.list(sumx[[1]]))
+        sumx <- unlist(sumx,recursive=FALSE)
+    if (all(sapply(sumx,NCOL))==1)
+        nlines <- length(sumx)
+    if (missing(line)){
+        line <- par()$mgp[2] + dist +
+            (0:(2*nlines-1)) *interspace -(nlines-1)
+    }
+    if (missing(cex)) cex <- 1
+    if (missing(pos)) pos <- min(times)
+    if (missing(adj)) adj <- 1.5
+    if (missing(labels))
+        if (length(names(sumx)==nlines))
+            labels <- paste("[",names(sumx),"]",sep="")
+        else
+            labels <- c("No.   \nat-risk",rep("",nlines-1))
+    # title for no. at-risk below plot
+    # --------------------------------------------------------------------
+    if (is.null(titlecol)){
+        tcol <- 1
+    } else {
+        if (is.na(titlecol[1]))
+            tcol <- 1
+        else
+            tcol <- titlecol[1]
+    }
+    if (!is.null(title))
+        mtext(title,
+              side=1,
+              at=pos,
+              col=tcol,
+              line=line[1]-1,
+              adj=adj,
+              cex=cex,
+              outer=FALSE,
+              xpd=NA,
+              ...)
+    # labeling the no. at-risk below plot
+    # --------------------------------------------------------------------
+    if (is.null(adjust.labels) || adjust.labels==TRUE){
+        labels <- format(labels,justify="left")}
+    if (length(col)==nlines/2) ## 1 cluster level
+        col <- c(col,col)
+    lapply(1:nlines,function(y){
+        mtext(text=as.character(sumx[[y]]),
+              side=1,
+              at=times,
+              line=rep(line[y],length(times)),
+              col=rep(col[y],length(times)),
+              cex=cex,
+              outer=FALSE,
+              xpd=NA,
+              ...)
+        if (is.null(labelcol)){
+            lcol <- col[y]
+        } else {
+            if (is.na(labelcol[y]))
+                lcol <- labelcol[1]
+            else
+                lcol <- labelcol[y]
+        }
+        mtext(text=labels[y],
+              side=1,
+              at=pos,
+              col=labelcol[y],
+              ## col=1,
+              line=line[y],
+              adj=adj,
+              cex=cex,
+              outer=FALSE,
+              xpd=NA,
+              ...)
+    })
 }

@@ -12,7 +12,7 @@ SpecialFrame <- function(call,special,...){
     ## drop.intercept=TRUE,
     ## specials.to.factor="strata")
     Y <- model.extract(m, "response")
-    if (NCOL(Y)>1) stop("Response must be one-dimensional.")
+    ## if (NCOL(Y)>1) stop("Response must be one-dimensional.")
     Y <- data.frame(Y)
     colnames(Y) <- "response"
     out <- c(Y,design)

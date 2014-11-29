@@ -8,7 +8,7 @@
 ##' names of the special arguments.
 ##' @param specialArgumentNames A named list with one element for each
 ##' special of argument
-##' @return List with two elements: the name and 
+##' @return A named list of parsed arguments. The names of the list are the variable names.
 ##' @seealso model.design
 ##' @examples
 ##' parseSpecialNames("treat(Z)",specials="treat")
@@ -72,7 +72,12 @@ parseSpecialNames <- function(x,specials,specialArgumentNames){
                 thismatch <- match(realnames,wantednames,nomatch=0)
                 if (length(realnames)>0)
                     if (!all(thismatch))
-                        stop("Argument(s) ",realnames," is not an argument of  ",spc, ". Allowed are\n\n",paste(wantednames,collapse=", "))
+                        stop("Argument(s) ",
+                             realnames,
+                             " is not an argument of  ",
+                             spc,
+                             ". Valid argument(s): ",
+                             paste(wantednames,collapse=", "))
                 names(values) <- givennames
                 nadd <- length(wantednames)-length(values)
                 if (nadd>0){

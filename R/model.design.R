@@ -71,7 +71,7 @@ model.design <- function(data,
     varnames <- rownames(design)
     termsOrder <- attr(terms,"order")
     wantedSpecials <- attr(terms,"specials")
-    existingSpecials <- wantedSpecials[!sapply(wantedSpecials,is.null)]
+    existingSpecials <- wantedSpecials[sapply(wantedSpecials,length)!=0]
     specials <- names(existingSpecials)
     names(specials) <- specials
     if (is.logical(specialsDesign) && (specialsDesign==TRUE)){

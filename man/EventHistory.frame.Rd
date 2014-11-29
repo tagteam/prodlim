@@ -4,7 +4,7 @@
 \usage{
 EventHistory.frame(formula, data, unspecialsDesign = TRUE, specials,
   specialsFactor = TRUE, specialsDesign = FALSE, stripSpecialNames = TRUE,
-  dropIntercept = TRUE, subset = NULL, check.formula = TRUE,
+  dropIntercept = TRUE, check.formula = TRUE,
   na.action = options()$na.action)
 }
 \arguments{
@@ -33,8 +33,6 @@ EventHistory.frame(formula, data, unspecialsDesign = TRUE, specials,
 
   \item{dropIntercept}{Passed as is to
   \code{\link{model.design}}}
-
-  \item{subset}{Passed as is to \code{\link{model.frame}}}
 
   \item{check.formula}{If TRUE check if formula is a Surv
   or Hist thing.}

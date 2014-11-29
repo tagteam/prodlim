@@ -158,7 +158,7 @@ plot(kmfit,
      xlab="Months",
      axis2.las=2,
      atrisk.at=seq(0,100,30.25),
-     atrisk.label="Patients")
+     atrisk.title="Patients")
 
 # change background color
 plot(kmfit,
@@ -170,7 +170,7 @@ plot(kmfit,
      xlab="Months",
      axis2.las=2,
      atrisk.at=seq(0,100,30.25),
-     atrisk.label="Patients",
+     atrisk.title="Patients",
      background=TRUE,
      background.fg="white",
      background.horizontal=seq(0,1,.25/2),

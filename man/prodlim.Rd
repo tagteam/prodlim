@@ -2,11 +2,11 @@
 \alias{prodlim}
 \title{product limit method}
 \usage{
-prodlim(formula, data = parent.frame(), subset = NULL,
-  na.action = options()$na.action, reverse = FALSE, conf.int = 0.95,
-  bandwidth = NULL, caseweights, discrete.level = 3, x = TRUE,
-  maxiter = 1000, grid, tol = 7, method = c("npmle", "one.step",
-  "impute.midpoint", "impute.right"), exact = TRUE)
+prodlim(formula, data = parent.frame(), na.action = options()$na.action,
+  reverse = FALSE, conf.int = 0.95, bandwidth = NULL, caseweights,
+  discrete.level = 3, x = TRUE, maxiter = 1000, grid, tol = 7,
+  method = c("npmle", "one.step", "impute.midpoint", "impute.right"),
+  exact = TRUE)
 }
 \arguments{
   \item{formula}{A formula whose left hand side is a
@@ -23,18 +23,16 @@ prodlim(formula, data = parent.frame(), subset = NULL,
   \item{data}{A data.frame in which all the variables of
   \code{formula} can be interpreted.}
 
-  \item{subset}{Expression identifying a subset of the rows
-  of the data for the fitting process.}
-
   \item{na.action}{A missing-data filter function, applied
-  to the model.frame, after any subset argument has been
-  used.  Default is \code{options()$na.action}.}
+  to the model.frame, Default is
+  \code{options()$na.action}.}
 
   \item{reverse}{For right censored data, if reverse=TRUE
   then the censoring distribution is estimated.}
 
   \item{conf.int}{The level (between 0 and 1) for two-sided
-  pointwise confidence intervals. Defaults to 0.95.}
+  pointwise confidence intervals. Defaults to 0.95. Remark:
+  only plain Wald-type confidence limits are available.}
 
   \item{bandwidth}{Smoothing parameter for nearest
   neighborhoods based on the values of a continuous

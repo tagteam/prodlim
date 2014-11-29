@@ -60,15 +60,12 @@
 #' to specify clusters, see the details section.
 #' @param data A data.frame in which all the variables of \code{formula} can be
 #' interpreted.
-#' @param subset Expression identifying a subset of the rows of the data for
-#' the fitting process.
 #' @param na.action A missing-data filter function, applied to the model.frame,
-#' after any subset argument has been used.  Default is
-#' \code{options()$na.action}.
+#' Default is \code{options()$na.action}.
 #' @param reverse For right censored data, if reverse=TRUE then the censoring
 #' distribution is estimated.
 #' @param conf.int The level (between 0 and 1) for two-sided pointwise
-#' confidence intervals. Defaults to 0.95.
+#' confidence intervals. Defaults to 0.95. Remark: only plain Wald-type confidence limits are available.
 #' @param bandwidth Smoothing parameter for nearest neighborhoods
 #' based on the values of a continuous covariate. See function
 #' \code{neighborhood} for details.
@@ -220,7 +217,6 @@
 ## --> import From KernSmooth dpik
 "prodlim" <- function(formula,
                       data = parent.frame(),
-                      subset=NULL,
                       na.action=options()$na.action,
                       reverse=FALSE,
                       conf.int=.95,
@@ -243,7 +239,6 @@
                               data=data,
                               unspecialsDesign=FALSE,
                               specials=c("Strata","strata","factor", "NN","cluster"),
-                              subset =subset,
                               na.action=na.action)
     event.history <- EHF$event.history
     response <- EHF$event.history

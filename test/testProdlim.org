@@ -100,6 +100,13 @@ plot(s0)
 #+RESULTS:
 [[file:~/research/SoftWare/prodlim/test/s0.png]]
 
+** Subset
+#+BEGIN_SRC R :exports both :results output   :session *R* 
+su <- prodlim(Hist(time,status)~1,data=d,subset=d$X1==1)
+su <- prodlim(Hist(time,status)~1,data=d,na.action="na.omit")
+print(s0)
+#+END_SRC   
+
 ** A single binary covariate
 *** fit + print
 #+BEGIN_SRC R :exports both :results output   :session *R* 
@@ -1170,7 +1177,6 @@ plot(f3,confint=FALSE,atrisk=FALSE,legend.x="bottomleft",legend.cex=0.8,newdata=
 
 #+RESULTS:
 [[file:~/research/SoftWare/prodlim/test/f3.png]]
-
 
 
 * Special cases

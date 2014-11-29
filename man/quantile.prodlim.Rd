@@ -2,12 +2,14 @@
 \alias{quantile.prodlim}
 \title{Quantiles for Kaplan-Meier and Aalen-Johansen estimates.}
 \usage{
-\method{quantile}{prodlim}(x, q, ...)
+\method{quantile}{prodlim}(x, q, cause = 1, ...)
 }
 \arguments{
   \item{x}{Object of class \code{"prodlim"}.}
 
   \item{q}{Quantiles. Vector of values between 0 and 1.}
+
+  \item{cause}{For competing risks the cause of interest.}
 
   \item{...}{not used}
 }

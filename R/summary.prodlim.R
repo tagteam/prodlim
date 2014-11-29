@@ -82,7 +82,10 @@ summary.prodlim <- function(object,
         times <- quantile(sort(unique(jump.times)))
     times <- sort(unique(times))
     if (any(times>max(jump.times)))
-        warning(call.=TRUE,immediate.=TRUE,paste("\n","Time(s) ",paste(times[times>max(jump.times)],collapse=", ")," are beyond the maximal follow-up time ",max(jump.times),"\n"))
+        warning(call.=TRUE,
+                immediate.=TRUE,
+                paste("\n","Time(s) ",paste(times[times>max(jump.times)],collapse=", "),
+                      " are beyond the maximal follow-up time ",max(jump.times),"\n"))
     ntimes <- length(times)
     # }}}
     # {{{ interval-censored
