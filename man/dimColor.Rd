@@ -1,0 +1,33 @@
+\name{dimColor}
+\alias{dimColor}
+\title{Dim a given color to a specified density}
+\usage{
+dimColor(col, density = 55)
+}
+\arguments{
+  \item{col}{Color name or number passed to
+  \code{\link{col2rgb}}.}
+
+  \item{density}{Integer value passed as alpha coefficient
+  to \code{\link{rgb}} between 0 and 255}
+}
+\value{
+A character vector with the color code. See \code{rgb} for
+details.
+}
+\description{
+This function calls first \code{\link{col2rgb}} on a color
+name and then uses \code{\link{rgb}} to adjust the
+intensity of the result.
+}
+\examples{
+dimColor(2,33)
+dimColor("green",133)
+}
+\author{
+Thomas A. Gerds <tag@biostat.ku.dk>
+}
+\seealso{
+rgb col2rgb
+}
+
