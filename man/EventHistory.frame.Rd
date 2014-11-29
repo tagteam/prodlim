@@ -4,7 +4,8 @@
 \usage{
 EventHistory.frame(formula, data, unspecialsDesign = TRUE, specials,
   specialsFactor = TRUE, specialsDesign = FALSE, stripSpecialNames = TRUE,
-  dropIntercept = TRUE, subset = NULL, na.action = options()$na.action)
+  dropIntercept = TRUE, subset = NULL, check.formula = TRUE,
+  na.action = options()$na.action)
 }
 \arguments{
   \item{formula}{Formula whose left hand side specifies the
@@ -34,6 +35,9 @@ EventHistory.frame(formula, data, unspecialsDesign = TRUE, specials,
   \code{\link{model.design}}}
 
   \item{subset}{Passed as is to \code{\link{model.frame}}}
+
+  \item{check.formula}{If TRUE check if formula is a Surv
+  or Hist thing.}
 
   \item{na.action}{Passed as is to
   \code{\link{model.frame}} na.action.}

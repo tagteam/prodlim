@@ -19,6 +19,7 @@
 ##' \code{\link{model.design}}
 ##' @param dropIntercept Passed as is to \code{\link{model.design}}
 ##' @param subset Passed as is to \code{\link{model.frame}}
+##' @param check.formula If TRUE check if formula is a Surv or Hist thing.
 ##' @param na.action Passed as is to \code{\link{model.frame}}
 ##' na.action.
 ##' @return A list which contains
@@ -115,28 +116,33 @@ EventHistory.frame <- function(formula,
                                stripSpecialNames=TRUE,
                                dropIntercept=TRUE,
                                subset=NULL,
+                               check.formula=TRUE,
                                na.action=options()$na.action){
-    # {{{  check if formula is a formula 
-    formula.names <- try(all.names(formula),silent=TRUE)
-    if (!(formula.names[1]=="~")
-        ||
-        (match("$",formula.names,nomatch=0)+match("[",formula.names,nomatch=0)>0)){
-        stop("Invalid specification of formula. Perhaps forgotten right hand side?\nNote that any subsetting, ie data$var or data[,\"var\"], is invalid for this function.")}
-    else
-        if (!(formula.names[2] %in% c("Surv","Hist"))) stop("formula is NOT a proper survival formula,\nwhich must have a `Surv' or `Hist' object as response.")
+    # {{{  check if formula is a formula
+    if (check.formula){
+        formula.names <- try(all.names(formula),silent=TRUE)
+        if (!(formula.names[1]=="~")
+            ||
+            (match("$",formula.names,nomatch=0)+match("[",formula.names,nomatch=0)>0)){
+            stop("Invalid specification of formula. Perhaps forgotten right hand side?\nNote that any subsetting, ie data$var or data[,\"var\"], is invalid for this function.")}
+        else
+            if (!(formula.names[2] %in% c("Surv","Hist"))) stop("formula is NOT a proper survival formula,\nwhich must have a `Surv' or `Hist' object as response.")
+    }
     # }}}
     # {{{call model.frame
     ## data argument is used to resolve '.' see help(terms.formula)
     Terms <- terms(x=formula, specials=specials, data = data)
-    if (sum(sapply(c("Surv","Hist"),function(x) length(grep(x,Terms[[2]])>0)))==0)
-        stop("Expected a 'Surv'-object or a 'Hist'-object on the left hand side of the formula.")
+    if (check.formula){
+        if (sum(sapply(c("Surv","Hist"),function(x) length(grep(x,Terms[[2]])>0)))==0)
+            stop("Expected a 'Surv'-object or a 'Hist'-object on the left hand side of the formula.")
+    }
     if (is.null(subset))
         m <- model.frame(formula=Terms,data=data,subset=NULL,na.action=na.action)
     else
         m <- model.frame(formula=Terms,data=data,subset=subset,na.action=na.action)
     if (NROW(m) == 0) stop("No (non-missing) observations")
     # }}}
-    # {{{ extract response 
+    # {{{ extract response
     event.history <- model.extract(m, "response")
     # }}}
     # {{{ Fix for those who use `Surv' instead of `Hist' 
