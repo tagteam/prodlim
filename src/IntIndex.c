@@ -55,7 +55,7 @@ void Turnb(int *Mstrata,
   
   int i,l,u,j,Iind, Mind;
   double Ilast, ZI, ZM, Mlast, Zlast, ZMI;
-  
+  Mlast=0;
   for(i=0;i<*M;i++){
 
   Zlast=0;

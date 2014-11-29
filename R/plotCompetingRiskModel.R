@@ -8,7 +8,7 @@
 #' @param \dots Arguments passed to \code{\link{plot.Hist}}.
 #' @author Thomas Alexander Gerds <tag@@biostat.ku.dk>
 #' @seealso \code{\link{plotIllnessDeathModel}}, \code{\link{plot.Hist}}
-#' @keywords ~kwd1 ~kwd2
+#' @keywords survival
 #' @examples
 #' 
 #' plotCompetingRiskModel()

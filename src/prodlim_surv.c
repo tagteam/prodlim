@@ -81,6 +81,7 @@ void prodlimSurvPlus(double *y,
   int i,e,s,entered;
   double surv_temp,hazard_temp,varhazard_temp,atrisk;
   
+  e=0;
   s=(*t);
   surv_temp=1; 
   hazard_temp=0;

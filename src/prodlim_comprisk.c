@@ -33,7 +33,7 @@ void prodlim_comprisk(double* y,
 		      int stop) {
   
   
-  int i,j,s,d,d1,d2;
+  int i,j,s,d,d1;
   double S,S_lag,H,varH,n;
 
   /* }}} */
@@ -90,7 +90,7 @@ void prodlim_comprisk(double* y,
       /* {{{ variance estimate Marubini & Valsecchi (1995), Wiley, chapter 10, page 341 */
       for (j=0; j < (*NS); ++j){
 	d1 = event[s * (*NS) + j];
-	d2 = d - d1;
+	/* d2 = d - d1; */
 	v1[j] += I[j] * (d / (n * (n - d))) + (S_lag * d1) / (n * n);
 	v2[j] += (I[j] * I[j]) * (d / (n * (n - d)))
 	  + ((S_lag * S_lag) * (n - d1) * d1) / (n * n * n)
@@ -144,14 +144,16 @@ void prodlimCompriskPlus(double* y,
 			 ) {
   
   
-  int i,e,j,s,d,d1,d2,entered;
+  int i,e,j,s,d,d1,entered;
   double S,S_lag,H,varH,atrisk;
 
   /* }}} */
 
   /* {{{ initialization */
   s=(*t);
+  e=0;
   S=1;
+  S_lag=1;
   H=0;
   for(j=0; j < (*NS); ++j) {
     I[j]=0;
@@ -277,7 +279,7 @@ void prodlimCompriskPlus(double* y,
       /* {{{ variance estimate Marubini & Valsecchi (1995), Wiley, chapter 10, page 341 */
       for (j=0; j < (*NS); ++j){
 	d1 = event[s * (*NS) + j];
-	d2 = d - d1;
+	/* d2 = d - d1; */
 	v1[j] += I[j] * (d / (atrisk * (atrisk - d))) + (S_lag * d1) / (atrisk * atrisk);
 	v2[j] += (I[j] * I[j]) * (d / (atrisk * (atrisk - d)))
 	  + ((S_lag * S_lag) * (atrisk - d1) * d1) / (atrisk * atrisk * atrisk)
