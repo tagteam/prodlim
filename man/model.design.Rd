@@ -2,14 +2,20 @@
 \alias{model.design}
 \title{Extract a design matrix and specials from a model.frame}
 \usage{
-model.design(data, xlev, dropIntercept = FALSE, maxOrder = 1,
-  unspecialsDesign = TRUE, specialsFactor = TRUE, specialsDesign = FALSE,
-  stripSpecialNames = TRUE)
+model.design(terms, data, xlev = NULL, dropIntercept = FALSE,
+  maxOrder = 1, unspecialsDesign = TRUE, specialsFactor = FALSE,
+  specialsDesign = FALSE)
 }
 \arguments{
-  \item{data}{A model.frame}
+  \item{terms}{terms object as obtained either with
+  function \code{terms} or \code{strip.terms}.}
 
-  \item{xlev}{Passed to model.matrix}
+  \item{data}{A data set in which terms are defined.}
+
+  \item{xlev}{a named list of character vectors giving the
+  full set of levels to be assumed for the factors. Can
+  have less elements, in which case the other levels are
+  learned from the \code{data}.}
 
   \item{dropIntercept}{If TRUE drop intercept term from the
   design matrix}
@@ -25,15 +31,13 @@ model.design(data, xlev, dropIntercept = FALSE, maxOrder = 1,
   \item{specialsFactor}{A character vector containing
   special variables which should be coerced into a single
   factor. If \code{TRUE} all specials are treated in this
-  way.}
+  way, if \code{FALSE} none of the specials is treated in
+  this way.}
 
   \item{specialsDesign}{A character vector containing
   special variables which should be transformed into a
   design matrix via \code{\link{model.matrix}}.  If
   \code{TRUE} all specials are treated in this way.}
-
-  \item{stripSpecialNames}{If TRUE strip the special from
-  variable name, i.e., use X instead of strata(X).}
 }
 \value{
 A list which contains - the design matrix with the levels
@@ -45,37 +49,75 @@ variables.
 Extract design matrix and data specials from a model.frame
 }
 \details{
-The function \code{untangle.specials} of the survival
-function does a similar job.
+The function separates special terms from the unspecial
+terms and returns a list of design matrices, one for
+unspecial terms and one for each special. Some special
+specials cannot or should not be evaluated in data. E.g.,
+\code{y~a+dummy(x)+strata(v)} the function strata can and
+should be evaluated, but in order to have
+\code{model.frame} also evaluate dummy(x) one would be to
+define and export the function \code{dummy}. Still the term
+\code{dummy(x)} can be used to identify a special treatment
+of the variable \code{x}. To deal with this case, one can
+specify \code{stripSpecials="dummy"}. In addition, the data
+should include variables \code{strata(z)} and \code{x}, not
+\code{dummy(x)}. See examples. The function
+\code{untangle.specials} of the survival function does a
+similar job.
 }
 \examples{
-f <- formula(y~x+ID(z))
+# specials that are evaluated. here ID needs to be defined
 set.seed(8)
-d <- data.frame(y=rnorm(5),x=factor(c("a","b","b","a","c")),z=c(2,2,7,7,7))
+d <- data.frame(y=rnorm(5),x=factor(c("a","b","b","a","c")),z=c(2,2,7,7,7),v=sample(letters)[1:5])
+d$z <- factor(d$z,levels=c(1:8))
 ID <- function(x)x
+f <- formula(y~x+ID(z))
 t <- terms(f,special="ID",data=d)
-m <- model.frame(t,d)
-md <- model.design(m,specialsFactor=TRUE)
-md
-md <- model.design(m,specialsFactor=TRUE,unspecialsDesign=FALSE)
-md
+mda <- model.design(terms(t),data=d,specialsFactor=TRUE)
+mda$ID
+mda$design
+##
+mdb <- model.design(terms(t),data=d,specialsFactor=TRUE,unspecialsDesign=FALSE)
+mdb$ID
+mdb$design
+
+# special specials (avoid define function SP)
+f <- formula(y~x+SP(z)+factor(v))
+t <- terms(f,specials="SP",data=d)
+st <- strip.terms(t,specials="SP",arguments=NULL)
+md2a <- model.design(st,data=d,specialsFactor=TRUE,specialsDesign="SP")
+md2a$SP
+md2b <- model.design(st,data=d,specialsFactor=TRUE,specialsDesign=FALSE)
+md2b$SP
 
 # special function with argument
-treat <- function(x,...) x
-f2 <- formula(y~x+treat(z,arg=2)+treat(u,arg=-1))
-set.seed(8)
-d <- data.frame(y=rnorm(5),u=1:5,x=factor(c("a","b","b","a","c")),z=c(2,2,7,7,7))
-t2 <- terms(f2,special="treat",data=d)
-m2 <- model.frame(t2,d)
-md2 <- model.design(m2,specialsFactor=TRUE)
+f2 <- formula(y~x+treat(z,power=2)+treat(v,power=-1))
+t2 <- terms(f2,special="treat")
+st2 <- strip.terms(t2,specials="treat",arguments=list("treat"=list("power")))
+model.design(st2,data=d,specialsFactor=FALSE)
+model.design(st2,data=d,specialsFactor=TRUE)
+model.design(st2,data=d,specialsDesign=TRUE)
 
 library(survival)
 data(pbc)
-tt <- terms(Surv(time,status!=0)~factor(edema)*age+strata(I(log(bili)>1))+strata(sex)+cluster(id),
-special=c("strata","cluster"),data=pbc[1:10,])
-dd <- model.frame(tt,data=pbc[1:10,])
-model.design(dd)
-model.design(dd,dropIntercept=TRUE)
+t3 <- terms(Surv(time,status!=0)~factor(edema)*age+strata(I(log(bili)>1))+strata(sex),
+            specials=c("strata","cluster"))
+st3 <- strip.terms(t3,specials=c("strata"),arguments=NULL)
+md3 <- model.design(terms=st3,data=pbc[1:4,])
+md3$strata
+md3$cluster
+
+f4 <- Surv(time,status)~age+const(factor(edema))+strata(sex,test=0)+prop(bili,power=1)+tp(albumin)
+t4 <- terms(f4,specials=c("prop","timevar","strata","tp","const"))
+st4 <- strip.terms(t4,
+                   specials=c("prop","timevar"),
+                   unspecials="prop",
+                   alias.names=list("timevar"="strata","prop"=c("const","tp")),
+                   arguments=list("prop"=list("power"=0),"timevar"=list("test"=0)))
+formula(st4)
+md4 <- model.design(st4,data=pbc[1:4,],specialsDesign=TRUE)
+md4$prop
+md4$timevar
 }
 \author{
 Thomas A. Gerds <tag@biostat.ku.dk>

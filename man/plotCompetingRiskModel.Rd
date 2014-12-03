@@ -27,6 +27,5 @@ Thomas Alexander Gerds <tag@biostat.ku.dk>
 \code{\link{plotIllnessDeathModel}},
 \code{\link{plot.Hist}}
 }
-\keyword{~kwd1}
-\keyword{~kwd2}
+\keyword{survival}
 
