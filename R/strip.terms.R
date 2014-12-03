@@ -83,7 +83,10 @@ strip.terms <- function(terms,
     termLabels <- attr(terms,"term.labels")
     terms.specials <- attr(terms,"specials")
     intercept <- attr(terms, "intercept")
-    response <- if (keep.response) terms[[2L]] else NULL
+    if (attr(terms,"response") && keep.response)
+        response <- terms[[2L]]
+    else
+        response <- NULL
     # resolve unspecials
     do.unspecials <- length(unspecials)>0
     if (do.unspecials){
@@ -144,6 +147,7 @@ strip.terms <- function(terms,
         strippedFormula <- reformulate(termLabels,response,intercept)
         environment(strippedFormula) <- environment(terms)
         out <- terms(strippedFormula, specials = names(terms.specials))
+        ## reset specials
         attr(out,"stripped.specials") <- strippedTerms
         attr(out,"stripped.arguments") <- strippedArguments
         out

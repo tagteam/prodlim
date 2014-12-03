@@ -60,8 +60,8 @@
 #' to specify clusters, see the details section.
 #' @param data A data.frame in which all the variables of \code{formula} can be
 #' interpreted.
-#' @param na.action A missing-data filter function, applied to the model.frame,
-#' Default is \code{options()$na.action}.
+#' @param subset Passed as argument \code{subset} to function \code{subset} which applied to \code{data} before the formula is processed.
+#' @param na.action All lines in data with any missing values in the variables of formula are removed.
 #' @param reverse For right censored data, if reverse=TRUE then the censoring
 #' distribution is estimated.
 #' @param conf.int The level (between 0 and 1) for two-sided pointwise
@@ -99,7 +99,6 @@
 #' @seealso \code{\link{predictSurv}}, \code{\link{predictSurvIndividual}},
 #' \code{\link{predictCuminc}}, \code{\link{Hist}}, \code{\link{neighborhood}},
 #' \code{\link{Surv}}, \code{\link{survfit}}, \code{\link{strata}},
-#' \code{\link{cluster}}, \code{\link{NN}}
 #' @references Andersen, Borgan, Gill, Keiding (1993) Springer `Statistical
 #' Models Based on Counting Processes'
 #' 
@@ -125,6 +124,10 @@
 ##' plot(fit)
 ##' summary(fit)
 ##' quantile(fit)
+##'
+##' ## Subset
+##' fit1a <- prodlim(Hist(time,status)~1,data=dat,subset=dat$X1==1)
+##' fit1b <- prodlim(Hist(time,status)~1,data=dat,subset=dat$X1==1 & dat$X2>0)
 ##' 
 ##' ## --------------------clustered data---------------------
 ##' library(survival)
@@ -217,7 +220,8 @@
 ## --> import From KernSmooth dpik
 "prodlim" <- function(formula,
                       data = parent.frame(),
-                      na.action=options()$na.action,
+                      subset,
+                      na.action=NULL,
                       reverse=FALSE,
                       conf.int=.95,
                       bandwidth=NULL,
@@ -234,6 +238,8 @@
 
     # {{{  find the data
     call <- match.call()
+    if (!missing(subset))
+        data <- subset(data,subset=subset)
     EHF <- EventHistory.frame(formula=formula,
                               data=data,
                               unspecialsDesign=FALSE,

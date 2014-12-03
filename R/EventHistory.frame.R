@@ -26,6 +26,7 @@
 ##' @param dropIntercept Passed as is to \code{\link{model.design}}
 ##' @param check.formula If TRUE check if formula is a Surv or Hist
 ##' thing.
+##' @param response If FALSE do not get response data (event.history).
 ##' @return A list which contains
 ##' - the event.history (see \code{\link{Hist}})
 ##' - the design matrix (see \code{\link{model.design}})
@@ -111,7 +112,7 @@
 ##' form2 <- Hist(time,outcome)~prop(X1)+cluster(X3)+X4
 ##' ff <- list(form1,form2)
 ##' lapply(ff,function(f){SampleRegression(f,dsurv)})
-##' 
+ 
 ##' @export 
 ##' @author Thomas A. Gerds <tag@@biostat.ku.dk>
 EventHistory.frame <- function(formula,
@@ -143,7 +144,7 @@ EventHistory.frame <- function(formula,
     # }}}
     # {{{call model.frame
     ## data argument is used to resolve '.' see help(terms.formula)
-    Terms <- terms(x=formula,specials=specials,data=data)    
+    Terms <- terms(x=formula,specials=specials,data=data)
     if (!is.null(stripSpecials)){
         ## Terms <- terms(x=formula, specials=specials)
         if (length(attr(Terms,"term.labels"))>0)

@@ -45,6 +45,9 @@ EventHistory.frame(formula, data, unspecialsDesign = TRUE, specials,
 
   \item{check.formula}{If TRUE check if formula is a Surv
   or Hist thing.}
+
+  \item{response}{If FALSE do not get response data
+  (event.history).}
 }
 \value{
 A list which contains - the event.history (see
