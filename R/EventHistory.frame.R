@@ -83,7 +83,7 @@
 ##'                          unspecialsDesign=FALSE)
 ##' e3$design
 ##' 
-##' ## the idea is that the function is used to parse the combination of
+##' ## the general idea is that the function is used to parse the combination of
 ##' ## formula and data inside another function. Here is an example with
 ##' ## competing risks
 ##' SampleRegression <- function(formula,data=parent.frame()){
@@ -112,7 +112,33 @@
 ##' form2 <- Hist(time,outcome)~prop(X1)+cluster(X3)+X4
 ##' ff <- list(form1,form2)
 ##' lapply(ff,function(f){SampleRegression(f,dsurv)})
- 
+##' 
+##' 
+##' ## here is what the riskRegression package uses to
+##' ## distinguish between covariates with
+##' ## time-proportional effects and covariates with
+##' ## time-varying effects:
+##' \dontrun{
+##' library(riskRegression)
+##' data(Melanoma)
+##' f <- Hist(time,status)~prop(thick)+strata(sex)+age+prop(ulcer,power=1)+timevar(invasion,test=1)
+##' ## here the unspecial terms, i.e., the term age is treated as prop
+##' ## also, strata is an alias for timvar
+##' 
+##' EHF <- prodlim::EventHistory.frame(formula,
+##'                                    Melanoma[1:10],
+##'                                    specials=c("timevar","strata","prop","const","tp"),
+##'                                    stripSpecials=c("timevar","prop"),
+##'                                    stripArguments=list("prop"=list("power"=0),
+##'                                        "timevar"=list("test"=0)),
+##'                                    stripAlias=list("timevar"=c("strata"),
+##'                                        "prop"=c("tp","const")),
+##'                                    stripUnspecials="prop",
+##'                                    specialsDesign=TRUE,
+##'                                    dropIntercept=TRUE)       
+##' EHF$prop
+##' EHF$timevar
+##' }
 ##' @export 
 ##' @author Thomas A. Gerds <tag@@biostat.ku.dk>
 EventHistory.frame <- function(formula,
@@ -164,8 +190,9 @@ EventHistory.frame <- function(formula,
     # }}}
 
     # {{{ extract response
-    if (response==TRUE){
-        event.history <- model.response(model.frame(update(formula,".~1"),data=mm))
+    if (response==TRUE && attr(Terms,"response")!=0){
+        event.history <- model.response(model.frame(update(formula,".~1"),
+                                                    data=mm))
         # }}}
         # {{{ Fix for those who use `Surv' instead of `Hist' 
         if (match("Surv",class(event.history),nomatch=0)!=0){
