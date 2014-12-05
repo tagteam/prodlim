@@ -144,9 +144,12 @@
                    id=NULL,
                    cens.code="0",
                    addInitialState=FALSE) {
-  
-  # {{{ resolving the `time' argument
 
+    ## package Cprob provides a vector, 
+    ## to avoid problems we pick the first element 
+    cens.code <- as.character(cens.code[[1]])
+    
+  # {{{ resolving the `time' argument
   if (is.matrix(time)) time <- data.frame(time)
   if (class(time)=="list"){
     if (length(time) !=2 || length(time[[1]])!=length(time[[2]]))
@@ -221,86 +224,89 @@
   # {{{ resolving the argument `event' 
 
   if (missing(event)){
-    model <- "onejump"
-    event <-  rep(1,N)
-    warning("Argument event is missing:\nassume observations of a survival model\nand only one event per subject")
+      model <- "onejump"
+      event <-  rep(1,N)
+      warning("Argument event is missing:\nassume observations of a survival model\nand only one event per subject")
   }
   else{
-    if (is.matrix(event)) event <- data.frame(event)
-    if ((is.vector(event) & class(event)!="list")|| is.factor(event))
-      stopifnot(length(event)==N)
-    if (class(event)=="list"){
-      if (length(event) !=2 || length(event[[1]])!=length(event[[2]]))
-        stop("Argument event has a wrong format")
-      event <- data.frame(event)
-    }
-    if (!is.data.frame(event)){
-      if (is.null(id)){
-        model <- "onejump"
-        if (is.logical(event)) event <- as.numeric(event)
-        status[is.na(event) | is.infinite(event) | as.character(event)==cens.code] <- 0
+      if (is.matrix(event)) event <- data.frame(event)
+      ## event can be an ordered factor
+      ## in which case class has two elements
+      ## to avoid warnings we need [[1]]
+      if ((is.vector(event) & class(event)[[1]]!="list")|| is.factor(event))
+          stopifnot(length(event)==N)
+      if (class(event)[[1]]=="list"){
+          if (length(event) !=2 || length(event[[1]])!=length(event[[2]]))
+              stop("Argument event has a wrong format")
+          event <- data.frame(event)
+      }
+      if (!is.data.frame(event)){
+          if (is.null(id)){
+              model <- "onejump"
+              if (is.logical(event)) event <- as.numeric(event)
+              status[is.na(event) | is.infinite(event) | as.character(event)==cens.code] <- 0
+          }
+          else{
+              ## inFormat <- "longitudinal"
+              stopifnot(is.numeric(id) || is.factor(id))
+              model <- "multi.states"
+              if (cens.type=="intervalCensored"){
+                  stop("Dont know the order of transitions for interval censored observations.")
+              }
+              else{
+                  if (addInitialState==TRUE){
+                      time <- c(rep(0,length(unique(id))),time)
+                      if (is.factor(event)){
+                          event <- factor(c(rep("initial",length(unique(id))),as.character(event)),levels=c("initial",levels(event)))
+                      }
+                      else{
+                          stopifnot(match("initial",unique(event),nomatch=0)==0)
+                          event <- c(rep("initial",length(unique(id))),event)
+                      }
+                      id <- c(unique(id),id)
+                      ## status <- c(rep(cens.code,length(unique(id))),status)
+                  }
+                  # 1. sort the observations by id and time
+                  sorted <- order(id,time)
+                  time <- time[sorted]
+                  ## status <- status[sorted] consists only of 1's
+                  id <- id[sorted]
+                  event <- event[sorted]
+                  # time <- time[duplicated(id)] ## remove the resp. first time
+                  # status <- status[duplicated(id)]
+                  if (length(unique(id))!=sum(time==0))
+                      stop("There are ",length(unique(id))," different individuals (id's), but the state at time 0 is available for ",sum(time==0)," id's.")
+                  initialState <- event[time==0]
+                  last.id <- c(diff(id) != 0, 1)
+                  first.id <- c(1, diff(id) != 0)
+                  from <- factor(event[last.id!=1])
+                  to <- factor(event[first.id!=1])
+                  id <- id[time!=0]
+                  time <- time[time!=0]
+                  # 2. get back to the original order
+                  ### cannot easily get back since
+                  ### length(time) < sorted
+                  ## time <- time[sorted]
+                  ## id <- id[sorted]
+                  ## event <- event[sorted]
+                  status <- rep(1,length(to))
+                  status[is.na(to) | is.infinite(to) | as.character(to)==cens.code] <- 0
+              }
+          }
       }
       else{
-        ## inFormat <- "longitudinal"
-        stopifnot(is.numeric(id) || is.factor(id))
-        model <- "multi.states"
-        if (cens.type=="intervalCensored"){
-          stop("Dont know the order of transitions for interval censored observations.")
-        }
-        else{
-          if (addInitialState==TRUE){
-            time <- c(rep(0,length(unique(id))),time)
-            if (is.factor(event)){
-              event <- factor(c(rep("initial",length(unique(id))),as.character(event)),levels=c("initial",levels(event)))
-            }
-            else{
-              stopifnot(match("initial",unique(event),nomatch=0)==0)
-              event <- c(rep("initial",length(unique(id))),event)
-            }
-            id <- c(unique(id),id)
-            ## status <- c(rep(cens.code,length(unique(id))),status)
-          }
-          # 1. sort the observations by id and time
-          sorted <- order(id,time)
-          time <- time[sorted]
-          ## status <- status[sorted] consists only of 1's
-          id <- id[sorted]
-          event <- event[sorted]
-          # time <- time[duplicated(id)] ## remove the resp. first time
-          # status <- status[duplicated(id)]
-          if (length(unique(id))!=sum(time==0))
-            stop("There are ",length(unique(id))," different individuals (id's), but the state at time 0 is available for ",sum(time==0)," id's.")
-          initialState <- event[time==0]
-          last.id <- c(diff(id) != 0, 1)
-          first.id <- c(1, diff(id) != 0)
-          from <- factor(event[last.id!=1])
-          to <- factor(event[first.id!=1])
-          id <- id[time!=0]
-          time <- time[time!=0]
-          # 2. get back to the original order
-          ### cannot easily get back since
-          ### length(time) < sorted
-          ## time <- time[sorted]
-          ## id <- id[sorted]
-          ## event <- event[sorted]
-          status <- rep(1,length(to))
+          ## inFormat <- "from2to"
+          model <- "multi.states"
+          from <- event[[1]]
+          to <- event[[2]]
           status[is.na(to) | is.infinite(to) | as.character(to)==cens.code] <- 0
-        }
+          if (length(unique(from))==1){
+              model <- "onejump"
+              event <- to
+              if (is.logical(to)) to <- as.numeric(to)
+              status[is.na(to) | is.infinite(to) | as.character(event)==cens.code] <- 0
+          }
       }
-    }
-    else{
-      ## inFormat <- "from2to"
-      model <- "multi.states"
-      from <- event[[1]]
-      to <- event[[2]]
-      status[is.na(to) | is.infinite(to) | as.character(to)==cens.code] <- 0
-      if (length(unique(from))==1){
-        model <- "onejump"
-        event <- to
-        if (is.logical(to)) to <- as.numeric(to)
-        status[is.na(to) | is.infinite(to) | as.character(event)==cens.code] <- 0
-      }
-    }
   }
   ## if (all(status==0)) warning("All observations are censored")
   if (all(status==1)) cens.type <- "uncensored"
@@ -325,34 +331,51 @@
       model <- "survival"
     
     if (cens.type=="intervalCensored"){
-      if (model=="survival"){
-        if (entry.type=="intervalCensored")
-          history <- cbind(U=U,V=V,L=L,R=R,status=status)
-        else
-          history <- cbind(entry = entry,L=L,R=R,status=status)
-      }
-      else{
-        if (entry.type=="intervalCensored")
-          history <- cbind(U=U,V=V,L=L,R=R,status=status,event=as.integer(factor(event,levels=c(states,cens.code))))
-        else
-          history <- cbind(entry = entry,L=L,R=R,status=status,event=as.integer(factor(event,levels=c(states,cens.code))))
-      }
+        if (model=="survival"){
+            if (entry.type=="intervalCensored")
+                history <- cbind(U=U,V=V,L=L,R=R,status=status)
+            else
+                history <- cbind(entry = entry,L=L,R=R,status=status)
+        }
+        else{
+            if (entry.type=="intervalCensored")
+                history <- cbind(U=U,
+                                 V=V,
+                                 L=L,
+                                 R=R,
+                                 status=status,
+                                 event=as.integer(factor(event,levels=c(states,cens.code))))
+            else
+                history <- cbind(entry = entry,
+                                 L=L,
+                                 R=R,
+                                 status=status,
+                                 event=as.integer(factor(event,levels=c(states,cens.code))))
+        }
     }
     else{
-      if (model=="survival"){
-        if (entry.type=="intervalCensored")
-          history <- cbind(U=U,V=V,time=time,status=status)
-        else
-          history <- cbind(entry = entry,time=time,status=status)
-      }
-      else{
-        if (entry.type=="intervalCensored")
-          history <- cbind(U=U,V=V,time=time,status=status,event=as.integer(factor(event,levels=c(states,cens.code))))
-        else
-          history <- cbind(entry = entry,time=time,status=status,event=as.integer(factor(event,levels=c(states,cens.code))))
-      }
+        if (model=="survival"){
+            if (entry.type=="intervalCensored")
+                history <- cbind(U=U,V=V,time=time,status=status)
+            else
+                history <- cbind(entry = entry,time=time,status=status)
+        }
+        else{
+            if (entry.type=="intervalCensored")
+                history <- cbind(U=U,
+                                 V=V,
+                                 time=time,
+                                 status=status,
+                                 event=as.integer(factor(event,levels=c(states,cens.code))))
+            else{
+                history <- cbind(entry = entry,
+                                 time=time,
+                                 status=status,
+                                 event=as.integer(factor(event,levels=c(states,cens.code))))
+            }
+        }
     }
-  } else{
+} else{
     # }}}
     # {{{  multi.state models
 
@@ -375,16 +398,36 @@
     } 
     if (cens.type=="intervalCensored"){
       if (entry.type=="intervalCensored")
-        history <- cbind(U=U,V=V,L=L,R=R,status=status,from=as.integer(factor(from,levels=c(states,cens.code))),to=as.integer(factor(to,levels=c(states,cens.code))))
+          history <- cbind(U=U,
+                           V=V,
+                           L=L,
+                           R=R,
+                           status=status,
+                           from=as.integer(factor(from,levels=c(states,cens.code))),
+                           to=as.integer(factor(to,levels=c(states,cens.code))))
       else{
-        history <- cbind(entry = entry,L=L,R=R,status=status,from=as.integer(factor(from,levels=c(states,cens.code))),to=as.integer(factor(to,levels=c(states,cens.code))))
+          history <- cbind(entry = entry,
+                           L=L,
+                           R=R,
+                           status=status,
+                           from=as.integer(factor(from,levels=c(states,cens.code))),
+                           to=as.integer(factor(to,levels=c(states,cens.code))))
       }
     }
     else{
       if (entry.type=="intervalCensored")
-        history <- cbind(U=U,V=V,time=time,status=status,from=as.integer(factor(from,levels=c(states,cens.code))),to=as.integer(factor(to,levels=c(states,cens.code))))
+          history <- cbind(U=U,
+                           V=V,
+                           time=time,
+                           status=status,
+                           from=as.integer(factor(from,levels=c(states,cens.code))),
+                           to=as.integer(factor(to,levels=c(states,cens.code))))
       else{
-        history <- cbind(entry = entry,time=time,status=status,from=as.integer(factor(from,levels=c(states,cens.code))),to=as.integer(factor(to,levels=c(states,cens.code))))
+          history <- cbind(entry = entry,
+                           time=time,
+                           status=status,
+                           from=as.integer(factor(from,levels=c(states,cens.code))),
+                           to=as.integer(factor(to,levels=c(states,cens.code))))
       }
     }
   }
