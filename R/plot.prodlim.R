@@ -76,8 +76,7 @@
 #' in element \code{X} of object \code{x} exceeds limits, only the results for
 #' covariate constellations of the first, the middle and the last row in \code{X}
 #' are shown. Otherwise all lines of \code{X} are shown.
-#' @param ...
-#' @param \dots Parameters that are filtered by
+#' @param ...  Parameters that are filtered by
 #' \code{\link{SmartControl}} and then passed to the functions
 #' \code{\link{plot}}, \code{\link{legend}}, \code{\link{axis}},
 #' \code{\link{atRisk}}, \code{\link{confInt}},
@@ -156,12 +155,15 @@
 ##' ## Control the order of strata
 ##' ## since version 1.5.1 prodlim does  obey the order of
 ##' ## factor levels
-##' dat$group <- factor(cut(dat$X2,c(-Inf,0,0.5,Inf)),labels=c("High","Intermediate","Low"))
+##' dat$group <- factor(cut(dat$X2,c(-Inf,0,0.5,Inf)),
+##'                     labels=c("High","Intermediate","Low"))
 ##' kmfitG <- prodlim(Hist(time, status) ~ group, data = dat)
 ##' plot(kmfitG)
 ##' 
 ##' ## relevel 
-##' dat$group2 <- factor(cut(dat$X2,c(-Inf,0,0.5,Inf)),levels=c("(0.5, Inf]","(0,0.5]","(-Inf,0]"),labels=c("Low","Intermediate","High"))
+##' dat$group2 <- factor(cut(dat$X2,c(-Inf,0,0.5,Inf)),
+##'                      levels=c("(0.5, Inf]","(0,0.5]","(-Inf,0]"),
+##'                      labels=c("Low","Intermediate","High"))
 ##' kmfitG2 <- prodlim(Hist(time, status) ~ group2, data = dat)
 ##' plot(kmfitG2)
 ##' 
@@ -192,11 +194,11 @@
 ##' kmfitC <- prodlim(Hist(time, status) ~ cluster(patnr), data = cdat)
 ##' plot(kmfitC)
 ##' plot(kmfitC,atrisk.labels=c("Units","Patients"))
-##'
+##' 
 ##' kmfitC2 <- prodlim(Hist(time, status) ~ X1+cluster(patnr), data = cdat)
 ##' plot(kmfitC2)
 ##' plot(kmfitC2,atrisk.labels=c("Teeth","Patients","Teeth","Patients"),
-##'              atrisk.col=c(1,1,2,2))
+##'      atrisk.col=c(1,1,2,2))
 ##' 
 ##' ## simulate right censored data from a competing risk model 
 ##' datCR <- SimCompRisk(100)
@@ -216,7 +218,7 @@
 ##' ### stacked plot
 ##' 
 ##' plot(ajfit,cause="stacked")
-##'
+##' 
 ##' ### conditional Aalen-Johansen estimator
 ##' ajfitX1 <- prodlim(Hist(time, event) ~ X1, data = datCR)
 ##' plot(ajfitX1)
@@ -233,7 +235,6 @@
 ##'      legend.title="X1=0,X2=0.1",
 ##'      legend.legend=paste("cause:",getStates(ajfitX$model.response)),
 ##'      plot.main="Subject specific stacked plot")
-##'
 ##' 
 #' @method plot prodlim
 #' @S3method plot prodlim

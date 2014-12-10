@@ -104,9 +104,7 @@
   the first, the middle and the last row in \code{X} are
   shown. Otherwise all lines of \code{X} are shown.}
 
-  \item{...}{}
-
-  \item{\dots}{Parameters that are filtered by
+  \item{...}{Parameters that are filtered by
   \code{\link{SmartControl}} and then passed to the
   functions \code{\link{plot}}, \code{\link{legend}},
   \code{\link{axis}}, \code{\link{atRisk}},
@@ -208,12 +206,15 @@ plot(kmfitX,legend.x="bottomleft",atRisk.cex=1.3,
 ## Control the order of strata
 ## since version 1.5.1 prodlim does  obey the order of
 ## factor levels
-dat$group <- factor(cut(dat$X2,c(-Inf,0,0.5,Inf)),labels=c("High","Intermediate","Low"))
+dat$group <- factor(cut(dat$X2,c(-Inf,0,0.5,Inf)),
+                    labels=c("High","Intermediate","Low"))
 kmfitG <- prodlim(Hist(time, status) ~ group, data = dat)
 plot(kmfitG)
 
 ## relevel
-dat$group2 <- factor(cut(dat$X2,c(-Inf,0,0.5,Inf)),levels=c("(0.5, Inf]","(0,0.5]","(-Inf,0]"),labels=c("Low","Intermediate","High"))
+dat$group2 <- factor(cut(dat$X2,c(-Inf,0,0.5,Inf)),
+                     levels=c("(0.5, Inf]","(0,0.5]","(-Inf,0]"),
+                     labels=c("Low","Intermediate","High"))
 kmfitG2 <- prodlim(Hist(time, status) ~ group2, data = dat)
 plot(kmfitG2)
 
@@ -248,7 +249,7 @@ plot(kmfitC,atrisk.labels=c("Units","Patients"))
 kmfitC2 <- prodlim(Hist(time, status) ~ X1+cluster(patnr), data = cdat)
 plot(kmfitC2)
 plot(kmfitC2,atrisk.labels=c("Teeth","Patients","Teeth","Patients"),
-             atrisk.col=c(1,1,2,2))
+     atrisk.col=c(1,1,2,2))
 
 ## simulate right censored data from a competing risk model
 datCR <- SimCompRisk(100)
