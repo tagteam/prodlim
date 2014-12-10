@@ -78,13 +78,15 @@ atRisk <- function(x,
             (0:(2*nlines-1)) *interspace -(nlines-1)
     }
     if (missing(cex)) cex <- 1
-    if (missing(pos)) pos <- min(times)
-    if (missing(adj)) adj <- 1.5
+    ## if (missing(pos)) pos <- min(times)
+    if (missing(pos)) pos <- par()$usr[1]
+    if (missing(adj)) adj <- 1
     if (missing(labels))
         if (length(names(sumx)==nlines))
             labels <- paste("",names(sumx),"",sep="")
         else
-            labels <- c("No.   \nsubjects",rep("",nlines-1))
+            labels <- rep("",nlines)
+    ## c("No.   \nsubjects",rep("",nlines-1))
     # title for no. at-risk below plot
     # --------------------------------------------------------------------
     if (is.null(titlecol)){
@@ -95,6 +97,7 @@ atRisk <- function(x,
         else
             tcol <- titlecol[1]
     }
+    ##
     if (!is.null(title))
         mtext(title,
               side=1,
@@ -108,10 +111,10 @@ atRisk <- function(x,
               ...)
     # labeling the no. at-risk below plot
     # --------------------------------------------------------------------
-    if (is.null(adjust.labels) || adjust.labels==TRUE){
-        labels <- format(labels,justify="left")}
+    ## if (is.null(adjust.labels) || adjust.labels==TRUE){
+    ## labels <- format(labels,justify="left")}
     if (length(col)==nlines/2) ## 1 cluster level
-        col <- c(col,col)
+        col <- rep(col,rep(nlines/2,length(col)))
     lapply(1:nlines,function(y){
         mtext(text=as.character(sumx[[y]]),
               side=1,
@@ -130,6 +133,7 @@ atRisk <- function(x,
             else
                 lcol <- labelcol[y]
         }
+        ## print(labels[y])
         mtext(text=labels[y],
               side=1,
               at=pos,
