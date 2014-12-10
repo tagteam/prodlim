@@ -58,26 +58,81 @@ are are also given. Confidence intervals are displayed when
 they are part of the fitted object.
 }
 \examples{
-SurvFrame <- data.frame(time=1:10,status=rbinom(10,1,.5))
- x <- prodlim(formula=Hist(time=time,status!=0)~1,data=SurvFrame)
- summary(x)
- summary(x,times=c(1,5,10,12),percent=TRUE,intervals=TRUE,digits=3)
-\donttest{
-library(survival)
-data(pbc)
-f <- prodlim(Hist(time,status!=1)~sex,data=pbc)
-summary(f)
-summary(f,newdata=data.frame(sex=c("m","f")))
+library(lava)
+set.seed(17)
+m <- survModel()
+distribution(m,~age) <- uniform.lvm(30,80)
+distribution(m,~sex) <- binomial.lvm()
+m <- categorical(m,~z,K=3)
+regression(m,eventtime~age) <- 0.01
+regression(m,eventtime~sex) <- -0.4
+d <- sim(m,50)
+d$sex <- factor(d$sex,levels=c(0,1),labels=c("female","male"))
+d$Z <- factor(d$z,levels=c(1,0,2),labels=c("B","A","C"))
 
-summary(f,newdata=data.frame(sex=c("m","f","f","m")))
+# Univariate Kaplan-Meier
+# -----------------------------------------------------------------------------------------
+fit0 <- prodlim(Hist(time,event)~1,data=d)
+summary(fit0)
 
-fa <- prodlim(Hist(time,status!=1)~sex+age,data=pbc)
-summary(fa)
+## show survival probabilities as percentage and
+## count number of events within intervals of a
+## given time-grid:
+summary(fit0,times=c(1,5,10,12),percent=TRUE,intervals=TRUE)
 
-x <- summary(fa,times=1000,newdata=expand.grid(age=c(60,40,50),sex=c("m","f")))
+## the result of summary has a print function
+## which passes ... to print and print.listof
+sx <- summary(fit0,times=c(1,5,10,12),percent=TRUE,intervals=TRUE)
+print(sx,digits=3)
+
+## show cumulative incidences (1-survival)
+summary(fit0,times=c(1,5,10,12),surv=FALSE,percent=TRUE,intervals=TRUE)
+
+# Stratified Kaplan-Meier
+# -----------------------------------------------------------------------------------------
+
+fit1 <- prodlim(Hist(time,event)~sex,data=d)
+print(summary(fit1,times=c(1,5,10),intervals=TRUE,percent=TRUE),digits=3)
+
+fit2 <- prodlim(Hist(time,event)~Z,data=d)
+print(summary(fit2,times=c(1,5,10),intervals=TRUE,percent=TRUE),digits=3)
+
+## Beran estimator
+# -----------------------------------------------------------------------------------------
+fit3 <- prodlim(Hist(time,event)~age,data=d)
+print(summary(fit3,
+              times=c(1,5,10),
+              newdata=data.frame(age=c(20,50,70)),
+              intervals=TRUE,
+              percent=TRUE),digits=3)
+
+## stratified Beran estimator
+# -----------------------------------------------------------------------------------------
+fit4 <- prodlim(Hist(time,event)~age+sex,data=d)
+print(summary(fit4,
+              times=c(1,5,10),
+              newdata=data.frame(age=c(20,50,70),sex=c("female","male","male")),
+              intervals=TRUE,
+              percent=TRUE),digits=3)
+
+## assess results from summary
+x <- summary(fit4,times=10,newdata=expand.grid(age=c(60,40,50),sex=c("male","female")))
 cbind(names(x$table),do.call("rbind",lapply(x$table,round,2)))
 
-}
+## Competing risks: Aalen-Johansen
+# -----------------------------------------------------------------------------------------
+d <- SimCompRisk(30)
+crfit <- prodlim(Hist(time,event)~X1,data=d)
+summary(crfit,times=c(1,2,5))
+summary(crfit,times=c(1,2,5),cause=1,intervals=TRUE)
+
+# extract the results
+sumfit <- summary(crfit,times=c(1,2,5),print=FALSE)
+sumfit$table[[1]] # cause 1
+sumfit$table[[2]] # cause 2
+
+
+# '
 }
 \author{
 Thomas A. Gerds \email{tag@biostat.ku.dk}

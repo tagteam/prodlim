@@ -179,20 +179,24 @@
       else{
           # strata
           # --------------------------------------------------------------------
-          requested.strata <- do.call("paste",c(requested.X[,strata.vars,drop=FALSE],sep="\r"))
-          ## fit.strata <- factor(do.call("paste",c(fit.X[,paste("strata",strata.vars,sep="."),drop=FALSE],sep="\r")))
-          fit.strata <- factor(do.call("paste",c(fit.X[,strata.vars,drop=FALSE],sep="\r")))
-          ## changed Tue Sep 16 10:45:01 CEST 2008
-          ## fit.levels <- unique(fit.strata)
+          ## changed 09 Dec 2014 (16:44) -->
+          ## requested.strata <- do.call("paste",c(requested.X[,strata.vars,drop=FALSE],sep="\r"))
+          fit.strata <- interaction(fit.X[,strata.vars,drop=FALSE],sep=":")
+          requested.strata <- interaction(requested.X[,strata.vars,drop=FALSE],sep=":")
           fit.levels <- as.character(unique(fit.strata))
-          ## changed Tue Sep 16 10:45:01 CEST 2008
-          if (!all(unique(requested.strata) %in% (fit.levels)))
+          ## <-- changed 09 Dec 2014 (16:44)          
+          ## before version 1.5.1
+          ## fit.strata <- factor(do.call("paste",c(fit.X[,strata.vars,drop=FALSE],sep="\r")))
+          ## fit.levels <- unique(fit.strata)
+          if (!all(unique(requested.strata) %in% (fit.levels))){
               stop(paste("Not all values of newdata strata variables occur in fit:\nrequested:",
                          paste(unique(requested.strata),collapse=","),
                          "\nfitted:",
                          paste(fit.levels,collapse=",")))
+          }
           NS <- length(fit.levels)
-          fit.strata <- factor(fit.strata,levels=unique(fit.strata),labels=1:NS)    
+          ## fit.strata <- factor(fit.strata,levels=unique(fit.strata),labels=1:NS)
+          fit.strata <- factor(fit.strata,levels=levels(fit.strata),labels=1:NS)
           requested.strata <- factor(requested.strata,levels=fit.levels,labels=1:NS)
           freq.strata <- cumsum(tabulate(fit.strata))
       }

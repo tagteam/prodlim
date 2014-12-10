@@ -7,7 +7,7 @@
   lwd, ylim, xlim, xlab = "Time", ylab, legend = TRUE, logrank = FALSE,
   marktime = FALSE, confint = TRUE, automar, atrisk = ifelse(add, FALSE,
   TRUE), timeOrigin = 0, axes = TRUE, background = TRUE, percent = TRUE,
-  minAtrisk = 0, ...)
+  minAtrisk = 0, limit = 10, ...)
 }
 \arguments{
   \item{x}{an object of class `prodlim' as returned by the
@@ -21,12 +21,13 @@
   models}
 
   \item{cause}{determines the cause of the cumulative
-  incidence function. Currently one cause is allowed at a
+  incidence function.  Currently one cause is allowed at a
   time, but you may call the function again with add=TRUE
   to add the lines of the other causes.}
 
   \item{newdata}{a data frame containing strata for which
-  plotted curves are desired.}
+  plotted curves are desired. When omitted element \code{X}
+  of object \code{x} is used.}
 
   \item{add}{if 'TRUE' curves are added to an existing
   plot.}
@@ -41,12 +42,12 @@
 
   \item{xlim}{limits of the x-axis}
 
-  \item{ylab}{label for the y-axis}
-
   \item{xlab}{label for the x-axis}
 
+  \item{ylab}{label for the y-axis}
+
   \item{legend}{if TRUE a legend is plotted by calling the
-  function legend. Optional arguments of the function
+  function legend.  Optional arguments of the function
   \code{legend} can be given in the form
   \code{legend.x=val} where x is the name of the argument
   and val the desired value. See also Details.}
@@ -65,7 +66,7 @@
   \item{confint}{if TRUE pointwise confidence intervals are
   plotted by invoking the function \code{confInt}. Optional
   arguments of the function \code{confInt} can be given in
-  the form \code{confint.x=val} as with legend. See also
+  the form \code{confint.x=val} as with legend.  See also
   Details.}
 
   \item{automar}{If TRUE the function trys to get good
@@ -96,6 +97,14 @@
 
   \item{minAtrisk}{Integer. Show the curve only until the
   number at-risk is at least \code{minAtrisk}}
+
+  \item{limit}{When newdata is not specified and the number
+  of lines in element \code{X} of object \code{x} exceeds
+  limits, only the results for covariate constellations of
+  the first, the middle and the last row in \code{X} are
+  shown. Otherwise all lines of \code{X} are shown.}
+
+  \item{...}{}
 
   \item{\dots}{Parameters that are filtered by
   \code{\link{SmartControl}} and then passed to the

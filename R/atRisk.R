@@ -1,5 +1,5 @@
 #' Drawing numbers of subjects at-risk of experiencing an event below
-#' Kaplan-Meier and Aalen-Johannsen plots.
+#' Kaplan-Meier and Aalen-Johansen plots.
 #' 
 #' This function is invoked and controlled by \code{plot.prodlim}.
 #' 
@@ -82,9 +82,9 @@ atRisk <- function(x,
     if (missing(adj)) adj <- 1.5
     if (missing(labels))
         if (length(names(sumx)==nlines))
-            labels <- paste("[",names(sumx),"]",sep="")
+            labels <- paste("",names(sumx),"",sep="")
         else
-            labels <- c("No.   \nat-risk",rep("",nlines-1))
+            labels <- c("No.   \nsubjects",rep("",nlines-1))
     # title for no. at-risk below plot
     # --------------------------------------------------------------------
     if (is.null(titlecol)){

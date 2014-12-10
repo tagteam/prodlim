@@ -1,7 +1,7 @@
 # {{{  plot.Hist
 
-pdf("/tmp/testPlot.pdf")
-
+## pdf("/tmp/testPlot.pdf")
+pdf("~/tmp/testPlot.pdf")
 library(prodlim)
 
 ## or simply create some data
@@ -90,4 +90,5 @@ plot(y,stateLabels=c("Healthy","Pre-diagnosed","Demented","Dead"),cex=1.3,ncol=3
 
 # }}}
 dev.off()
-system(paste("evince ","/tmp/testPlot.pdf&"),intern=FALSE)
+## system(paste("evince ","/tmp/testPlot.pdf&"),intern=FALSE)
+system(paste("evince ","~/tmp/testPlot.pdf&"),intern=FALSE)

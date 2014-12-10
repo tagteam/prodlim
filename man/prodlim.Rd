@@ -126,7 +126,7 @@ replaced by the formula of Ying \& Wei (1994).
 (3) Competing risk models can be specified via
 \code{\link{Hist}} response objects in \code{formula}.
 
-The Aalen-Johannsen estimator is applied for estimating the
+The Aalen-Johansen estimator is applied for estimating the
 cumulative incidence functions for all causes.  The
 advantage over the function \code{cuminc} of the cmprsk
 package are user-friendly model specification via

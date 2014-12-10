@@ -18,59 +18,69 @@
 #' arguments can be found in the help pages of the corresponding functions.
 #' 
 #' @aliases plot.prodlim lines.prodlim
-#' @param x an object of class `prodlim' as returned by the \code{prodlim}
-#' function.
-#' @param type controls what part of the object is plotted.  Defaults to
-#' \code{"survival"} for the Kaplan-Meier estimate of the survival function in
-#' two state models and to \code{"incidence"} for the Aalen-Johansen estimate
-#' of the cumulative incidence function in competing risk models
-#' @param cause determines the cause of the cumulative incidence function.
-#' Currently one cause is allowed at a time, but you may call the function
-#' again with add=TRUE to add the lines of the other causes.
-#' @param newdata a data frame containing strata for which plotted curves are
-#' desired.
+#' @param x an object of class `prodlim' as returned by the
+#' \code{prodlim} function.
+#' @param type controls what part of the object is plotted.  Defaults
+#' to \code{"survival"} for the Kaplan-Meier estimate of the survival
+#' function in two state models and to \code{"incidence"} for the
+#' Aalen-Johansen estimate of the cumulative incidence function in
+#' competing risk models
+#' @param cause determines the cause of the cumulative incidence
+#' function.  Currently one cause is allowed at a time, but you may
+#' call the function again with add=TRUE to add the lines of the other
+#' causes.
+#' @param newdata a data frame containing strata for which plotted
+#' curves are desired. When omitted element \code{X} of object \code{x} is used.
 #' @param add if 'TRUE' curves are added to an existing plot.
 #' @param col color for curves defaults to 1:number(curves)
 #' @param lty line type for curves defaults to 1
 #' @param lwd line width for all curves
 #' @param ylim limits of the y-axis
 #' @param xlim limits of the x-axis
-#' @param ylab label for the y-axis
 #' @param xlab label for the x-axis
-#' @param legend if TRUE a legend is plotted by calling the function legend.
-#' Optional arguments of the function \code{legend} can be given in the form
-#' \code{legend.x=val} where x is the name of the argument and val the desired
-#' value. See also Details.
-#' @param logrank If TRUE, the logrank p-value will be extracted from a call to
-#' \code{survdiff} and added to the legend. This works only for survival
-#' models, i.e. Kaplan-Meier with discrete predictors.
-#' @param marktime if TRUE the curves are tick-marked at right censoring times
-#' by invoking the function \code{markTime}. Optional arguments of the function
-#' \code{markTime} can be given in the form \code{confint.x=val} as with
-#' legend. See also Details.
-#' @param confint if TRUE pointwise confidence intervals are plotted by
-#' invoking the function \code{confInt}. Optional arguments of the function
-#' \code{confInt} can be given in the form \code{confint.x=val} as with legend.
-#' See also Details.
-#' @param automar If TRUE the function trys to get good values for figure
-#' margins around the main plotting region.
-#' @param atrisk if TRUE display numbers of subjects at risk by invoking the
-#' function \code{atRisk}. Optional arguments of the function \code{atRisk} can
-#' be given in the form \code{atrisk.x=val} as with legend. See also Details.
+#' @param ylab label for the y-axis
+#' @param legend if TRUE a legend is plotted by calling the function
+#' legend.  Optional arguments of the function \code{legend} can be
+#' given in the form \code{legend.x=val} where x is the name of the
+#' argument and val the desired value. See also Details.
+#' @param logrank If TRUE, the logrank p-value will be extracted from
+#' a call to \code{survdiff} and added to the legend. This works only
+#' for survival models, i.e. Kaplan-Meier with discrete predictors.
+#' @param marktime if TRUE the curves are tick-marked at right
+#' censoring times by invoking the function \code{markTime}. Optional
+#' arguments of the function \code{markTime} can be given in the form
+#' \code{confint.x=val} as with legend. See also Details.
+#' @param confint if TRUE pointwise confidence intervals are plotted
+#' by invoking the function \code{confInt}. Optional arguments of the
+#' function \code{confInt} can be given in the form
+#' \code{confint.x=val} as with legend.  See also Details.
+#' @param automar If TRUE the function trys to get good values for
+#' figure margins around the main plotting region.
+#' @param atrisk if TRUE display numbers of subjects at risk by
+#' invoking the function \code{atRisk}. Optional arguments of the
+#' function \code{atRisk} can be given in the form \code{atrisk.x=val}
+#' as with legend. See also Details.
 #' @param timeOrigin Start of the time axis
 #' @param axes If true axes are drawn. See details.
-#' @param background If \code{TRUE} the background color and grid color can be
-#' controlled using smart arguments SmartControl, such as
-#' background.bg="yellow" or background.bg=c("gray66","gray88").  The following
-#' defaults are passed to \code{background} by \code{plot.prodlim}:
-#' horizontal=seq(0,1,.25), vertical=NULL, bg="gray77", fg="white".  See
-#' \code{background} for all arguments, and the examples below.
+#' @param background If \code{TRUE} the background color and grid
+#' color can be controlled using smart arguments SmartControl, such as
+#' background.bg="yellow" or background.bg=c("gray66","gray88").  The
+#' following defaults are passed to \code{background} by
+#' \code{plot.prodlim}: horizontal=seq(0,1,.25), vertical=NULL,
+#' bg="gray77", fg="white".  See \code{background} for all arguments,
+#' and the examples below.
 #' @param percent If true the y-axis is labeled in percent.
-#' @param minAtrisk Integer. Show the curve only until the number at-risk is at
-#' least \code{minAtrisk}
-#' @param \dots Parameters that are filtered by \code{\link{SmartControl}} and
-#' then passed to the functions \code{\link{plot}}, \code{\link{legend}},
-#' \code{\link{axis}}, \code{\link{atRisk}}, \code{\link{confInt}},
+#' @param minAtrisk Integer. Show the curve only until the number
+#' at-risk is at least \code{minAtrisk}
+#' @param limit  When newdata is not specified and the number of lines
+#' in element \code{X} of object \code{x} exceeds limits, only the results for
+#' covariate constellations of the first, the middle and the last row in \code{X}
+#' are shown. Otherwise all lines of \code{X} are shown.
+#' @param ...
+#' @param \dots Parameters that are filtered by
+#' \code{\link{SmartControl}} and then passed to the functions
+#' \code{\link{plot}}, \code{\link{legend}}, \code{\link{axis}},
+#' \code{\link{atRisk}}, \code{\link{confInt}},
 #' \code{\link{markTime}}, \code{\link{backGround}}
 #' @return The (invisible) object.
 #' @note Similar functionality is provided by the function
@@ -240,6 +250,7 @@ plot.prodlim <- function(x,
                          background=TRUE,
                          percent=TRUE,
                          minAtrisk=0,
+                         limit=10,
                          ...){
 
   # }}}
@@ -288,7 +299,8 @@ plot.prodlim <- function(x,
       plot.times <- plot.times[plot.times<criticalTime]
   }
   if (missing(newdata)) newdata <- x$X
-  if (NROW(newdata)>10) newdata <- newdata[c(1,round(median(1:NROW(newdata))),NROW(newdata)),,drop=FALSE]
+  if (missing(newdata) && NROW(newdata)>limit)
+      newdata <- newdata[c(1,round(median(1:NROW(newdata))),NROW(newdata)),,drop=FALSE]
   stacked <- cause=="stacked"
   if (stacked){
       confint <- FALSE
@@ -392,17 +404,21 @@ plot.prodlim <- function(x,
 # {{{  backward compatibility
 
   if (match("legend.args",names(allArgs),nomatch=FALSE)){
-    legend.DefaultArgs <- c(args[[match("legend.args",names(allArgs),nomatch=FALSE)]],legend.DefaultArgs)
-    legend.DefaultArgs <- legend.DefaultArgs[!duplicated(names(legend.DefaultArgs))]
+      legend.DefaultArgs <- c(args[[match("legend.args",names(allArgs),nomatch=FALSE)]],legend.DefaultArgs)
+      legend.DefaultArgs <- legend.DefaultArgs[!duplicated(names(legend.DefaultArgs))]
   }
   if (match("confint.args",names(allArgs),nomatch=FALSE)){
-    confint.DefaultArgs <- c(args[[match("confint.args",names(allArgs),nomatch=FALSE)]],confint.DefaultArgs)
-    confint.DefaultArgs <- confint.DefaultArgs[!duplicated(names(confint.DefaultArgs))]
+      confint.DefaultArgs <- c(args[[match("confint.args",names(allArgs),nomatch=FALSE)]],confint.DefaultArgs)
+      confint.DefaultArgs <- confint.DefaultArgs[!duplicated(names(confint.DefaultArgs))]
   }
   if (match("atrisk.args",names(allArgs),nomatch=FALSE)){
-    atrisk.DefaultArgs <- c(args[[match("atrisk.args",names(allArgs),nomatch=FALSE)]],atrisk.DefaultArgs)
-    atrisk.DefaultArgs <- atrisk.DefaultArgs[!duplicated(names(atrisk.DefaultArgs))]
+      atrisk.DefaultArgs <- c(args[[match("atrisk.args",names(allArgs),nomatch=FALSE)]],atrisk.DefaultArgs)
+      atrisk.DefaultArgs <- atrisk.DefaultArgs[!duplicated(names(atrisk.DefaultArgs))]
   }
+  if (length(list(...)) && match("legend.legend",names(list(...)),nomatch=FALSE) && any(sapply(newdata,is.factor))){
+      message("Since version 1.5.1 prodlim obeys the order of factor levels.\nThis may break old code which explicitly defines the legend labels.")
+  }
+
   smartA <- SmartControl(call=  list(...),
                          keys=c("plot","lines","atrisk","legend","confint","background","marktime","axis1","axis2"),
                          ignore=c("x","type","cause","newdata","add","col","lty","lwd","ylim","xlim","xlab","ylab","legend","marktime","confint","automar","atrisk","timeOrigin","percent","axes","atrisk.args","confint.args","legend.args"),
@@ -412,8 +428,9 @@ plot.prodlim <- function(x,
                          replaceDefaults=FALSE,
                          verbose=TRUE)
 
-# }}}
-# {{{  setting margin parameters 
+
+  # }}}
+  # {{{  setting margin parameters 
 
   if (atrisk==TRUE){
       oldmar <- par()$mar

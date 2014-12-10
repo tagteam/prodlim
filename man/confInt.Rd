@@ -1,7 +1,7 @@
 \name{confInt}
 \alias{confInt}
 \title{Add point-wise confidence limits to the graphs of Kaplan-Meier and
-Aalen-Johannsen estimates of survival and cumulative incidence.}
+Aalen-Johansen estimates of survival and cumulative incidence.}
 \usage{
 confInt(x, times, newdata, type, citype, cause, col, lty, lwd, density = 55,
   ...)

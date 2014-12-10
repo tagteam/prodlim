@@ -33,7 +33,7 @@
 #' (3) Competing risk models can be specified via \code{\link{Hist}} response
 #' objects in \code{formula}.
 #' 
-#' The Aalen-Johannsen estimator is applied for estimating the cumulative
+#' The Aalen-Johansen estimator is applied for estimating the cumulative
 #' incidence functions for all causes.  The advantage over the function
 #' \code{cuminc} of the cmprsk package are user-friendly model specification
 #' via \code{\link{Hist}} and sophisticated print, summary, predict and plot
@@ -292,9 +292,9 @@
             })
             if (any(!discrete.p)){ ## continuous covariates
                 NN <- if (is.null(NN))
-                    rest[,!discrete.p,drop=FALSE]
-                else
-                    cbind(NN,rest[,!discrete.p,drop=FALSE])
+                          rest[,!discrete.p,drop=FALSE]
+                      else
+                          cbind(NN,rest[,!discrete.p,drop=FALSE])
             }
             if (any(discrete.p)){ ## discrete covariates
                 strata <- if (is.null(strata)){
@@ -325,9 +325,14 @@
     # }}}
     # {{{  disjunct strata (discrete covariates)
     if (cotype %in% c(2,4)){
-        S <- do.call("paste", c(data.frame(strata), sep = "\r"))
+        ## changed 09 Dec 2014 (16:57)-->
+        ## S <- do.call("paste", c(data.frame(strata), sep = "\r"))
+        S <- interaction(data.frame(strata), sep = ":")
+        ## <-- changed 09 Dec 2014 (16:57) 
         NS <- length(unique(S))
-        Sfactor <- factor(S,labels=1:NS)
+        ## changed 09 Dec 2014 (16:57) -->
+        Sfactor <- factor(S,levels=levels(S),labels=1:NS)
+        ## <-- changed 09 Dec 2014 (16:57)
         if (cens.type!="intervalCensored"){
             sorted <- order(Sfactor, response[,"time"],-response[,"status"])
         }
@@ -462,7 +467,11 @@
     else {
         weighted <- 1
         if(length(caseweights)!=NROW(response))
-            stop(paste("The length of caseweights is: ", length(caseweights), "\nthis is not the same as the number of subjects\nwith no missing values, which is ",  NROW(response),sep=""))
+            stop(paste("The length of caseweights is: ",
+                       length(caseweights),
+                       "\nthis is not the same as the number of subjects\nwith no missing values, which is ",
+                       NROW(response),
+                       sep=""))
         caseweights <- caseweights[event.time.order]
     }
     # }}}

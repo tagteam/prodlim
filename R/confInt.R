@@ -1,5 +1,5 @@
 #' Add point-wise confidence limits to the graphs of Kaplan-Meier and
-#' Aalen-Johannsen estimates of survival and cumulative incidence.
+#' Aalen-Johansen estimates of survival and cumulative incidence.
 #' 
 #' This function is invoked and controlled by \code{plot.prodlim}.
 #' 
