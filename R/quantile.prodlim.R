@@ -63,6 +63,7 @@
             out}
         if (sumx$cotype==1) out <- list("quantiles.survival"=getQ(sumx$table))
         else out <- lapply(sumx$table,getQ)
+        attr(out,"model") <- x$model
         class(out) <- "quantile.prodlim"
         out
     } else{
