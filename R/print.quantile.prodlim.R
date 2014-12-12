@@ -1,8 +1,8 @@
 ##' @S3method print quantile.prodlim
 ##' @method print quantile.prodlim
-print.quantile.prodlim <- function(x,digits=2,...){
+print.quantile.prodlim <- function(x,digits=2,na.val="--",...){
     printx <- function(u){
-        ifelse(is.na(u),"NA",round(u,digits))
+        ifelse(is.na(u),na.val,round(u,digits))
     }
     lapply(1:length(x),function(i){
         tab <- x[[i]]
@@ -20,13 +20,23 @@ print.quantile.prodlim <- function(x,digits=2,...){
                     "\n",sep="")
             }
             if(all(c(0.25,0.75) %in% tab$q)){
-                cat("IQR (time):",
-                    " (",
-                    printx(tab[tab$q==0.75,"quantile"]),
-                    ";",
-                    printx(tab[tab$q==0.25,"quantile"]),
-                    ")",
-                    "\n")
+                if (attr(x,"model")=="survival")
+                    cat("IQR (time):",
+                        " (",
+                        printx(tab[tab$q==0.75,"quantile"]),
+                        ";",
+                        printx(tab[tab$q==0.25,"quantile"]),
+                        ")",
+                        "\n")
+                else
+                    cat("IQR (time):",
+                        " (",
+                        printx(tab[tab$q==0.25,"quantile"]),
+                        ";",
+                        printx(tab[tab$q==0.75,"quantile"]),
+                        ")",
+                        "\n")
+                    
             }
         }
         else{
