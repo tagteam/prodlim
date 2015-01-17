@@ -327,7 +327,7 @@
     if (cotype %in% c(2,4)){
         ## changed 09 Dec 2014 (16:57)-->
         ## S <- do.call("paste", c(data.frame(strata), sep = "\r"))
-        S <- interaction(data.frame(strata), sep = ":")
+        S <- interaction(data.frame(strata), sep = ":",drop=TRUE)
         ## <-- changed 09 Dec 2014 (16:57) 
         NS <- length(unique(S))
         ## changed 09 Dec 2014 (16:57) -->

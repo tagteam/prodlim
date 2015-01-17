@@ -3,11 +3,11 @@
 \alias{plot.prodlim}
 \title{Plotting event probabilities over time}
 \usage{
-\method{plot}{prodlim}(x, type, cause = 1, newdata, add = FALSE, col, lty,
-  lwd, ylim, xlim, xlab = "Time", ylab, legend = TRUE, logrank = FALSE,
-  marktime = FALSE, confint = TRUE, automar, atrisk = ifelse(add, FALSE,
-  TRUE), timeOrigin = 0, axes = TRUE, background = TRUE, percent = TRUE,
-  minAtrisk = 0, limit = 10, ...)
+\method{plot}{prodlim}(x, type, cause = 1, select, newdata, add = FALSE,
+  col, lty, lwd, ylim, xlim, xlab = "Time", ylab, legend = TRUE,
+  logrank = FALSE, marktime = FALSE, confint = TRUE, automar,
+  atrisk = ifelse(add, FALSE, TRUE), timeOrigin = 0, axes = TRUE,
+  background = TRUE, percent = TRUE, minAtrisk = 0, limit = 10, ...)
 }
 \arguments{
   \item{x}{an object of class `prodlim' as returned by the
@@ -24,6 +24,13 @@
   incidence function.  Currently one cause is allowed at a
   time, but you may call the function again with add=TRUE
   to add the lines of the other causes.}
+
+  \item{select}{Select which lines to plot. This can be
+  used when there are many strata coming out by default to
+  quickly select a subset of the lines (however, perhaps
+  better to use newdata argument). Useful also for stacked
+  plot when there are many events and one wants to stack
+  only a subset of the cumulative incidence functions.}
 
   \item{newdata}{a data frame containing strata for which
   plotted curves are desired. When omitted element \code{X}
@@ -232,6 +239,11 @@ plot(kmfitX,
      atrisk.cex=0.9,
      atrisk.labels=c("X1=0","X1=1"))
 
+# multiple categorical factors
+
+kmfitXG <- prodlim(Hist(time,status)~X1+group2,data=dat)
+plot(kmfitXG,select=1:2)
+
 ### Kaplan-Meier in continuous strata
 kmfitX2 <- prodlim(Hist(time, status) ~ X2, data = dat)
 plot(kmfitX2,xlim=c(0,10))
@@ -268,7 +280,7 @@ plot(ajfit,cause=2,add=TRUE,col=2)
 
 ### stacked plot
 
-plot(ajfit,cause="stacked")
+plot(ajfit,cause="stacked",select=2)
 
 ### conditional Aalen-Johansen estimator
 ajfitX1 <- prodlim(Hist(time, event) ~ X1, data = datCR)

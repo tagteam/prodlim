@@ -181,8 +181,8 @@
           # --------------------------------------------------------------------
           ## changed 09 Dec 2014 (16:44) -->
           ## requested.strata <- do.call("paste",c(requested.X[,strata.vars,drop=FALSE],sep="\r"))
-          fit.strata <- interaction(fit.X[,strata.vars,drop=FALSE],sep=":")
-          requested.strata <- interaction(requested.X[,strata.vars,drop=FALSE],sep=":")
+          fit.strata <- interaction(fit.X[,strata.vars,drop=FALSE],sep=":",drop=TRUE)
+          requested.strata <- interaction(requested.X[,strata.vars,drop=FALSE],sep=":",drop=TRUE)
           fit.levels <- as.character(unique(fit.strata))
           ## <-- changed 09 Dec 2014 (16:44)          
           ## before version 1.5.1

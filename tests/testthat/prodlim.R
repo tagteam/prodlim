@@ -1,4 +1,10 @@
 context("Prodlim")
+test_that("strata",{
+    ## bug in version 1.5.1
+    library(prodlim)
+    d <- data.frame(time=1:3,status=c(1,0,1),a=c(1,9,9),b=factor(c(0,1,0)))
+    expect_output(prodlim(Hist(time,status)~b+factor(a),data=d))
+}
 test_that("prodlim",{
     library(lava)
     library(prodlim)
@@ -208,3 +214,4 @@ test_that("interval censored",{
     icens <- prodlim(Hist(time=list(L,R),event=seen.ill)~1,data=d)
     ## plot(icens)
 })
+

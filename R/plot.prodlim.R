@@ -29,8 +29,10 @@
 #' function.  Currently one cause is allowed at a time, but you may
 #' call the function again with add=TRUE to add the lines of the other
 #' causes.
+#' @param select Select which lines to plot. This can be used when there are many strata coming out by default to quickly select a subset of the lines (however, perhaps better to use newdata argument). Useful also for stacked plot when there are many events and one wants to stack only a subset of the cumulative incidence functions. 
 #' @param newdata a data frame containing strata for which plotted
-#' curves are desired. When omitted element \code{X} of object \code{x} is used.
+#' curves are desired. When omitted element \code{X} of object
+#' \code{x} is used.
 #' @param add if 'TRUE' curves are added to an existing plot.
 #' @param col color for curves defaults to 1:number(curves)
 #' @param lty line type for curves defaults to 1
@@ -54,8 +56,8 @@
 #' by invoking the function \code{confInt}. Optional arguments of the
 #' function \code{confInt} can be given in the form
 #' \code{confint.x=val} as with legend.  See also Details.
-#' @param automar If TRUE the function trys to find suitable values for
-#' the figure margins around the main plotting region.
+#' @param automar If TRUE the function trys to find suitable values
+#' for the figure margins around the main plotting region.
 #' @param atrisk if TRUE display numbers of subjects at risk by
 #' invoking the function \code{atRisk}. Optional arguments of the
 #' function \code{atRisk} can be given in the form \code{atrisk.x=val}
@@ -72,11 +74,12 @@
 #' @param percent If true the y-axis is labeled in percent.
 #' @param minAtrisk Integer. Show the curve only until the number
 #' at-risk is at least \code{minAtrisk}
-#' @param limit  When newdata is not specified and the number of lines
-#' in element \code{X} of object \code{x} exceeds limits, only the results for
-#' covariate constellations of the first, the middle and the last row in \code{X}
-#' are shown. Otherwise all lines of \code{X} are shown.
-#' @param ...  Parameters that are filtered by
+#' @param limit When newdata is not specified and the number of lines
+#' in element \code{X} of object \code{x} exceeds limits, only the
+#' results for covariate constellations of the first, the middle and
+#' the last row in \code{X} are shown. Otherwise all lines of \code{X}
+#' are shown.
+#' @param ... Parameters that are filtered by
 #' \code{\link{SmartControl}} and then passed to the functions
 #' \code{\link{plot}}, \code{\link{legend}}, \code{\link{axis}},
 #' \code{\link{atRisk}}, \code{\link{confInt}},
@@ -180,6 +183,11 @@
 ##'      atrisk.title="Patients",
 ##'      atrisk.cex=0.9,
 ##'      atrisk.labels=c("X1=0","X1=1"))
+##'
+##' # multiple categorical factors
+##' 
+##' kmfitXG <- prodlim(Hist(time,status)~X1+group2,data=dat)
+##' plot(kmfitXG,select=1:2)
 ##' 
 ##' ### Kaplan-Meier in continuous strata
 ##' kmfitX2 <- prodlim(Hist(time, status) ~ X2, data = dat)
@@ -217,7 +225,7 @@
 ##' 
 ##' ### stacked plot
 ##' 
-##' plot(ajfit,cause="stacked")
+##' plot(ajfit,cause="stacked",select=2)
 ##' 
 ##' ### conditional Aalen-Johansen estimator
 ##' ajfitX1 <- prodlim(Hist(time, event) ~ X1, data = datCR)
@@ -241,6 +249,7 @@
 plot.prodlim <- function(x,
                          type,
                          cause=1,
+                         select,
                          newdata,
                          add = FALSE,
                          col,
@@ -353,9 +362,17 @@ plot.prodlim <- function(x,
 
   if (model=="survival" && type=="cuminc"){
       Y <- lapply(sumX,function(x)1-x[,"surv"])
+      names(Y) <- names(sumX)
       nlines <- length(Y)
   } else{
       Y <- lapply(sumX,function(x)x[,type])
+      names(Y) <- names(sumX)
+      if (!missing(select)){
+          if (length(select)==1)
+              Y <- Y[select]
+          else
+              Y <- Y[select]
+      }
       nlines <- length(Y)
   }
   
@@ -415,6 +432,9 @@ plot.prodlim <- function(x,
                              title=atriskDefaultTitle,
                              labels=atriskDefaultLabels,
                              times=seq(0,min(x$maxtime,xlim[2]),min(x$maxtime,xlim[2])/10))
+  if (!missing(select)){
+      atrisk.DefaultArgs$newdata <- atrisk.DefaultArgs$newdata[select,,drop=FALSE]
+  }
   legend.DefaultArgs <- list(legend=names(Y),
                              lwd=lwd,
                              col=col,
@@ -471,7 +491,6 @@ plot.prodlim <- function(x,
 
   # }}}
   # {{{  setting margin parameters 
-
   if (atrisk==TRUE){
       oldmar <- par()$mar
       if (missing(automar) || automar==TRUE){
@@ -527,9 +546,13 @@ plot.prodlim <- function(x,
   # {{{  adding the lines 
   lines.type <- smartA$lines$type
   if (stacked==TRUE){
-      Y <- apply(do.call("rbind",Y),2,cumsum)
-      Y <- lapply(1:nlines,function(i)Y[i,])
-      names(Y) <- attr(x$model.response,"states")
+      if (length(Y)>1){
+          nY <- names(Y)
+          Y <- apply(do.call("rbind",Y),2,cumsum)
+          Y <- lapply(1:nlines,function(i)cumsum(Y[[i]]))
+          names(Y) <- nY
+      }
+      ## names(Y) <- attr(x$model.response,"states")
       nix <- lapply(1:nlines, function(s) {
           yyy <- Y[[s]]
           ppp <- plot.times
