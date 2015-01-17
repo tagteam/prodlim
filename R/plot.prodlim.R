@@ -549,7 +549,7 @@ plot.prodlim <- function(x,
       if (length(Y)>1){
           nY <- names(Y)
           Y <- apply(do.call("rbind",Y),2,cumsum)
-          Y <- lapply(1:nlines,function(i)cumsum(Y[[i]]))
+          Y <- lapply(1:nlines,function(i)Y[i,])
           names(Y) <- nY
       }
       ## names(Y) <- attr(x$model.response,"states")
