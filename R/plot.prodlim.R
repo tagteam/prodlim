@@ -108,7 +108,7 @@
 ##' 
 ##' # change scale of y-axis
 ##' plot(kmfit,percent=FALSE)
-##'
+##' 
 ##' # mortality instead of survival
 ##' plot(kmfit,type="cuminc")
 ##' 
@@ -186,7 +186,7 @@
 ##'      atrisk.title="Patients",
 ##'      atrisk.cex=0.9,
 ##'      atrisk.labels=c("X1=0","X1=1"))
-##'
+##' 
 ##' # multiple categorical factors
 ##' 
 ##' kmfitXG <- prodlim(Hist(time,status)~X1+group2,data=dat)
@@ -210,6 +210,18 @@
 ##' plot(kmfitC2)
 ##' plot(kmfitC2,atrisk.labels=c("Teeth","Patients","Teeth","Patients"),
 ##'      atrisk.col=c(1,1,2,2))
+##' 
+##' 
+##' ### Cluster-correlated data with strata
+##' n = 50
+##' foo = runif(n)
+##' bar = rexp(n)
+##' baz = rexp(n,1/2)
+##' d = stack(data.frame(foo,bar,baz))
+##' d$cl = sample(10, 3*n, replace=TRUE)
+##' fit = prodlim(Surv(values) ~ ind + cluster(cl), data=d)
+##' plot(fit)
+##' 
 ##' 
 ##' ## simulate right censored data from a competing risk model 
 ##' datCR <- SimCompRisk(100)
@@ -246,7 +258,7 @@
 ##'      legend.title="X1=0,X2=0.1",
 ##'      legend.legend=paste("cause:",getStates(ajfitX$model.response)),
 ##'      plot.main="Subject specific stacked plot")
-##' 
+ 
 #' @export 
 plot.prodlim <- function(x,
                          type,
