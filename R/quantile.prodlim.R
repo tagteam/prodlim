@@ -34,8 +34,7 @@
 #' print(quantile(ff1),na.val="NA")
 #' print(quantile(ff1),na.val="Not reached")
 #' 
-#' @method quantile prodlim
-#' @S3method quantile prodlim
+#' @export 
 "quantile.prodlim" <- function(x,
                                q,
                                cause=1,

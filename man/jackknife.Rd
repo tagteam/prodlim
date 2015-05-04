@@ -38,11 +38,11 @@ samples. See examples.
 
 d=SimSurv(20)
 f=prodlim(Hist(time,status)~1,data=d)
-jackknife(f,times=c(30,50))
+jackknife(f,times=c(3,5))
 
 ## in some situations it may be useful to attach the
 ## the event time history to the result
-jackknife(f,times=c(30,50),keepResponse=TRUE)
+jackknife(f,times=c(3,5),keepResponse=TRUE)
 
 # pseudo-values for competing risk models
 d=SimCompRisk(10)

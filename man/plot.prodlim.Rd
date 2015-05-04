@@ -26,11 +26,12 @@
   to add the lines of the other causes.}
 
   \item{select}{Select which lines to plot. This can be
-  used when there are many strata coming out by default to
-  quickly select a subset of the lines (however, perhaps
-  better to use newdata argument). Useful also for stacked
-  plot when there are many events and one wants to stack
-  only a subset of the cumulative incidence functions.}
+  used when there are many strata or many competing risks
+  to select a subset of the lines. However, a more clean
+  way to select covariate stratat is to use newdata
+  argument. With many competing risks, it is useful for the
+  stacked plot to stack and show only a subset of the
+  cumulative incidence functions.}
 
   \item{newdata}{a data frame containing strata for which
   plotted curves are desired. When omitted element \code{X}
@@ -163,6 +164,9 @@ plot(kmfit,xlim=c(0,4))
 
 # change scale of y-axis
 plot(kmfit,percent=FALSE)
+
+# mortality instead of survival
+plot(kmfit,type="cuminc")
 
 # change axis label and position of ticks
 plot(kmfit,

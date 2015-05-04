@@ -15,20 +15,19 @@ prodlimIcensSurv <- function(response,
   # {{{ one-step idea
 
   if (ml==FALSE) {
-    # right censored observations
-    # are defined by status
-    R[status==0] <- L[status==0]
-    if (missing(grid))
-      grid <- sort(unique(c(L,R)))
-    else
-      if (exact)
-        grid <- sort(unique(c(min(L,R),grid)))
+      # right censored observations
+      # are defined by status
+      R[status==0] <- L[status==0]
+      if (missing(grid))
+          grid <- sort(unique(c(L,R)))
       else
-        grid <- sort(unique(grid))
-    
-    ## need an extra grid point before the smallest
-    ## `L' to catch right censored and exact
-    ## event times that match this smallest `L'
+          if (exact)
+              grid <- sort(unique(c(min(L,R),grid)))
+          else
+              grid <- sort(unique(grid))
+      ## need an extra grid point before the smallest
+      ## `L' to catch right censored and exact
+      ## event times that match this smallest `L'
     
     stopifnot(all(grid >= 0))
     if (grid[1]==0)

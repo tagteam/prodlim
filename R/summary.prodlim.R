@@ -111,8 +111,7 @@
 ##' 
 ##' 
 ##' # '
-#' @S3method summary prodlim
-#' @method summary prodlim
+#' @export 
 summary.prodlim <- function(object,
                             times,
                             newdata,

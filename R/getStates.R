@@ -11,14 +11,12 @@
 getStates <- function(object,...){
   UseMethod("getStates",object)
 }
-#' @method getStates Hist
-#' @S3method getStates Hist
+#' @export 
 getStates.Hist <- function(object,...){
   attr(object,"states")
 }
 
-#' @method getStates prodlim
-#' @S3method getStates prodlim
+#' @export 
 getStates.prodlim <- function(object,...){
   attr(object$model.response,"states")
 }

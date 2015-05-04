@@ -220,8 +220,7 @@ EventHistory.frame <- function(formula,
     class(out) <- "EventHistory.frame"
     out
 }
-##' @S3method as.data.frame EventHistory.frame
-##' @method as.data.frame EventHistory.frame
+##' @export 
 as.data.frame.EventHistory.frame <- function(x,...){
     Y <- data.frame(unclass(x$event.history))
     X <- do.call("cbind",x[-1])

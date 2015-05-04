@@ -11,8 +11,7 @@
 #' @author Thomas Gerds <tag@@biostat.ku.dk>
 #' @seealso \code{\link{summary.prodlim}}, \code{\link{predict.prodlim}}
 #' @keywords survival
-##' @S3method print prodlim
-##' @method print prodlim
+#' @export 
 "print.prodlim" <- function(x,...) {
     cat("\n")
     cat("Call: ")

@@ -8,10 +8,12 @@ Description: Fast and user friendly implementation of nonparametric estimators
 Depends:
     R (>= 2.9.0)
 Imports:
+    Rcpp (>= 0.11.5),
     stats,
     survival,
     KernSmooth,
     lava
+LinkingTo: Rcpp
 Maintainer: Thomas A. Gerds <tag@biostat.ku.dk>
 License: GPL (>= 2)
 Packaged: Wed Oct 3 20:15:28 2007; tag

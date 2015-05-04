@@ -80,8 +80,7 @@
 #' ## and even transposed
 #' predict(mfit,times=c(-1,0,10,100,1000,10000),newdata=dat[18:21,],mode="matrix",bytime=TRUE)
 #' 
-#' @method predict prodlim
-#' @S3method predict prodlim
+#' @export 
 "predict.prodlim" <- function(object,
                               times,
                               newdata,

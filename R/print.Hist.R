@@ -1,5 +1,4 @@
-##' @method print Hist
-##' @S3method print Hist
+##' @export 
 print.Hist <- function(x,...){
   summary(x)
 }

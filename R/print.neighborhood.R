@@ -1,5 +1,4 @@
-##' @S3method print neighborhood
-##' @method print neighborhood
+##' @export 
 "print.neighborhood" <- function(x,...){
     n <- x$n
     size <- x$size.nbh

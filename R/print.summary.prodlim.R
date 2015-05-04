@@ -1,5 +1,4 @@
-##' @S3method print summary.prodlim
-##' @method print summary.prodlim
+##' @export 
 print.summary.prodlim <- function(x,...){
     model <- x$model
     cotype <- x$cotype

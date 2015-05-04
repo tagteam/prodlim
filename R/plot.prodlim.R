@@ -29,7 +29,7 @@
 #' function.  Currently one cause is allowed at a time, but you may
 #' call the function again with add=TRUE to add the lines of the other
 #' causes.
-#' @param select Select which lines to plot. This can be used when there are many strata coming out by default to quickly select a subset of the lines (however, perhaps better to use newdata argument). Useful also for stacked plot when there are many events and one wants to stack only a subset of the cumulative incidence functions. 
+#' @param select Select which lines to plot. This can be used when there are many strata or many competing risks to select a subset of the lines. However, a more clean way to select covariate stratat is to use newdata argument. With many competing risks, it is useful for the stacked plot to stack and show only a subset of the cumulative incidence functions. 
 #' @param newdata a data frame containing strata for which plotted
 #' curves are desired. When omitted element \code{X} of object
 #' \code{x} is used.
@@ -108,6 +108,9 @@
 ##' 
 ##' # change scale of y-axis
 ##' plot(kmfit,percent=FALSE)
+##'
+##' # mortality instead of survival
+##' plot(kmfit,type="cuminc")
 ##' 
 ##' # change axis label and position of ticks
 ##' plot(kmfit,
@@ -244,8 +247,7 @@
 ##'      legend.legend=paste("cause:",getStates(ajfitX$model.response)),
 ##'      plot.main="Subject specific stacked plot")
 ##' 
-#' @method plot prodlim
-#' @S3method plot prodlim
+#' @export 
 plot.prodlim <- function(x,
                          type,
                          cause=1,
@@ -490,7 +492,7 @@ plot.prodlim <- function(x,
                          verbose=TRUE)
 
   # }}}
-  # {{{  setting margin parameters 
+  # {{{  setting margin parameters
   if (atrisk==TRUE){
       oldmar <- par()$mar
       if (missing(automar) || automar==TRUE){

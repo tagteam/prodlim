@@ -212,10 +212,6 @@
 ##' summary(fitd)
 ##' plot(fitd)
 ##' #'
-#' @importFrom survival survdiff Surv cluster
-#' @importFrom stats quantile
-#' @import lava
-#' @useDynLib prodlim
 #' @export
 ## --> import From KernSmooth dpik
 "prodlim" <- function(formula,

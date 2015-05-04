@@ -1,5 +1,4 @@
-##' @S3method print quantile.prodlim
-##' @method print quantile.prodlim
+##' @export 
 print.quantile.prodlim <- function(x,digits=2,na.val="--",...){
     printx <- function(u){
         ifelse(is.na(u),na.val,round(u,digits))

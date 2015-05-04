@@ -165,8 +165,7 @@
 ##' arrowlabel4.x=68)
 ##' 
 ##' ##'
-#' @method plot Hist
-#' @S3method plot Hist
+#' @export 
 plot.Hist <- function(x,
                       nrow,
                       ncol,
