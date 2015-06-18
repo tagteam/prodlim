@@ -315,22 +315,22 @@ plot.prodlim <- function(x,
       stop("To plot the event-free survival curve, please fit a suitable model: prodlim(Hist(time,status!=0)~....")
   
   if (cens.type=="intervalCensored")
-    plot.times <- sort(unique(x$time[2,]))
+      plot.times <- sort(unique(x$time[2,]))
   else{
-    plot.times <- sort(unique(x$time))
-    if (plot.times[1]>timeOrigin) plot.times <- c(timeOrigin,plot.times)
+      plot.times <- sort(unique(x$time))
+      if (plot.times[1]>timeOrigin) plot.times <- c(timeOrigin,plot.times)
   }
   if (length(x$clustervar)>0)
-    nRisk <- x$n.risk[,1]
+      nRisk <- x$n.risk[,1]
   else
-    nRisk <- x$n.risk
+      nRisk <- x$n.risk
   if (minAtrisk>0 && any(nRisk<=minAtrisk)){
-
       if (all(nRisk<=minAtrisk)){
           return(plot(0,0,type="n",xlim=c(0, max(plot.times)),ylim=c(0, 1),axes=FALSE))
       }
       criticalTime <- min(x$time[nRisk<=minAtrisk])
       plot.times <- plot.times[plot.times<criticalTime]
+      ## if (sum(nEvent[nRisk>minAtrisk])<=1)
   }
   if (missing(newdata)) {
       newdata <- x$X
@@ -346,11 +346,11 @@ plot.prodlim <- function(x,
       if (model!="competing.risks") stop("Stacked plot works only for competing risks models.")
       if (NROW(newdata)>1) stop("Stacked plot works only for one covariate stratum.")
   }else{
-      if (length(cause)!=1){
-          warning("Currently only the cumulative incidence of a single cause can be plotted in one go. Use argument add=TRUE to add the lines of the other causes. For now I use the first cause")
-          cause <- cause[1]
-      }
-  }
+       if (length(cause)!=1){
+           warning("Currently only the cumulative incidence of a single cause can be plotted in one go. Use argument add=TRUE to add the lines of the other causes. For now I use the first cause")
+           cause <- cause[1]
+       }
+   }
   ## Y <- predict(x,times=plot.times,newdata=newdata,level.chaos=1,type=type,cause=cause,mode="list")
   startValue=ifelse(type=="surv",1,0)
   stats=list(c(type,startValue))
