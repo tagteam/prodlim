@@ -1,3 +1,4 @@
+#' @export 
 print.IntIndex <- function(x,...){
   mlist <- split(x$Mindex,rep(1:length(x$Mstrata),diff(c(0,x$Mstrata))))
   p <- x$petoInt[1,]

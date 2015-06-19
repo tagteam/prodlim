@@ -72,7 +72,10 @@ void neighbors(int *first,
     }
 
     /*     sort the neighborhood */
-    qsort(neighbors+start,size[u],(size_t) sizeof(int),(int (*)(const void *, const void *))(neworder));  
+    qsort(neighbors+start,
+	  size[u],
+	  (size_t) sizeof(int),
+	  (int (*)(const void *, const void *))(neworder));  
 
     start+=size[u];
   }

@@ -46,7 +46,7 @@
 
   [L[i],R[i]]
 
-  that overlap the currentn
+  that overlap the current
   grid interval:
 
   [grid[s] ; grid[s+1]]
@@ -100,7 +100,7 @@ void icens_prodlim(double *L,
   /*   int verbose; */
   double atrisk, pl, haz, varhaz, diff, survL, survR, lenOBS, nom;
   
-  n = (int) *N; /* number of interval censored observations */
+  /* n = (int) *N; /\* number of interval censored observations *\/ */
   ns = (int) *NS;  /* number of grid points + 1 */
 
   while (done==0 && step < *maxstep){

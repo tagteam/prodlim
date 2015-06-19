@@ -1,3 +1,86 @@
+#' Predicting event probabilities from product limit estimates
+#' 
+#' Evaluation of estimated survival or event probabilities at given times and
+#' covariate constellations.
+#' 
+#' Predicted (survival) probabilities are returned that can be plotted,
+#' summarized and used for inverse of probability of censoring weighting.
+#' 
+#' @aliases predict.prodlim predictSurv predictCuminc
+#' @param object A fitted object of class "prodlim".
+#' @param times Vector of times at which to return the estimated probabilities.
+#' @param newdata A data frame with the same variable names as those that
+#' appear on the right hand side of the 'prodlim' formula.  If there are
+#' covariates this argument is required.
+#' @param level.chaos Integer specifying the sorting of the output: `0' sort by
+#' time and newdata; `1' only by time; `2' no sorting at all
+#' @param type Choice between "surv","cuminc","list":
+#' 
+#' "surv": predict survival probabilities only survival models
+#' 
+#' "cuminc": predict cumulative incidences only competing risk models
+#' 
+#' "list": find the indices corresponding to times and newdata. See value.
+#' 
+#' Defaults to "surv" for two-state models and to "cuminc" for competing risk
+#' models.
+#' @param mode Only for \code{type=="surv"} and \code{type=="cuminc"}. Can
+#' either be "list" or "matrix". For "matrix" the predicted probabilities will
+#' be returned in matrix form.
+#' @param bytime Logical. If TRUE and \code{mode=="matrix"} the matrix with
+#' predicted probabilities will have a column for each time and a row for each
+#' newdata. Only when \code{object$covariate.type>1} and more than one time is
+#' given.
+#' @param cause The cause for predicting the cause-specific cumulative
+#' incidence function in competing risk models.
+#' @param \dots Only for compatibility reasons.
+#' @return \code{type=="surv"} A list or a matrix with survival probabilities
+#' for all times and all newdata.
+#' 
+#' \code{type=="cuminc"} A list or a matrix with cumulative incidences for all
+#' times and all newdata.
+#' 
+#' \code{type=="list"} A list with the following components:
+#' 
+#' \item{times}{The argument \code{times} carried forward}
+#' 
+#' \item{predictors}{The relevant part of the argument \code{newdata}.}
+#' \item{indices}{ A list with the following components
+#' 
+#' \code{time}: Where to find values corresponding to the requested times
+#' \code{strata}: Where to find values corresponding to the values of the
+#' variables in newdata.  Together time and strata show where to find the
+#' predicted probabilities.  } \item{dimensions}{ a list with the following
+#' components: \code{time} : The length of \code{times} \code{strata} : The
+#' number of rows in \code{newdata} \code{names.strata} : Labels for the
+#' covariate values.  }
+#' @author Thomas Alexander Gerds <tag@@biostat.ku.dk>
+#' @seealso \code{\link{predictSurvIndividual}}
+#' @keywords survival
+#' @examples
+#' 
+#' 
+#' dat <- SimSurv(400)
+#' fit <- prodlim(Hist(time,status)~1,data=dat)
+#' 
+#' ## predict the survival probs at selected times 
+#' predict(fit,times=c(10,100,1000))
+#' 
+#' ## works also outside the usual range of the Kaplan-Meier
+#' predict(fit,times=c(-1,0,10,100,1000,10000))
+#' 
+#' ## newdata is required if there are strata
+#' ## or neighborhoods (i.e. overlapping strata)
+#' mfit <- prodlim(Hist(time,status)~X1+X2,data=dat)
+#' predict(mfit,times=c(-1,0,10,100,1000,10000),newdata=dat[18:21,])
+#' 
+#' ## this can be requested in matrix form
+#' predict(mfit,times=c(-1,0,10,100,1000,10000),newdata=dat[18:21,],mode="matrix")
+#' 
+#' ## and even transposed
+#' predict(mfit,times=c(-1,0,10,100,1000,10000),newdata=dat[18:21,],mode="matrix",bytime=TRUE)
+#' 
+#' @export 
 "predict.prodlim" <- function(object,
                               times,
                               newdata,
@@ -95,20 +178,24 @@
       else{
           # strata
           # --------------------------------------------------------------------
-          requested.strata <- do.call("paste",c(requested.X[,strata.vars,drop=FALSE],sep="\r"))
-          ## fit.strata <- factor(do.call("paste",c(fit.X[,paste("strata",strata.vars,sep="."),drop=FALSE],sep="\r")))
-          fit.strata <- factor(do.call("paste",c(fit.X[,strata.vars,drop=FALSE],sep="\r")))
-          ## changed Tue Sep 16 10:45:01 CEST 2008
-          ## fit.levels <- unique(fit.strata)
+          ## changed 09 Dec 2014 (16:44) -->
+          ## requested.strata <- do.call("paste",c(requested.X[,strata.vars,drop=FALSE],sep="\r"))
+          fit.strata <- interaction(fit.X[,strata.vars,drop=FALSE],sep=":",drop=TRUE)
+          requested.strata <- interaction(requested.X[,strata.vars,drop=FALSE],sep=":",drop=TRUE)
           fit.levels <- as.character(unique(fit.strata))
-          ## changed Tue Sep 16 10:45:01 CEST 2008
-          if (!all(unique(requested.strata) %in% (fit.levels)))
+          ## <-- changed 09 Dec 2014 (16:44)          
+          ## before version 1.5.1
+          ## fit.strata <- factor(do.call("paste",c(fit.X[,strata.vars,drop=FALSE],sep="\r")))
+          ## fit.levels <- unique(fit.strata)
+          if (!all(unique(requested.strata) %in% (fit.levels))){
               stop(paste("Not all values of newdata strata variables occur in fit:\nrequested:",
                          paste(unique(requested.strata),collapse=","),
                          "\nfitted:",
                          paste(fit.levels,collapse=",")))
+          }
           NS <- length(fit.levels)
-          fit.strata <- factor(fit.strata,levels=unique(fit.strata),labels=1:NS)    
+          ## fit.strata <- factor(fit.strata,levels=unique(fit.strata),labels=1:NS)
+          fit.strata <- factor(fit.strata,levels=levels(fit.strata),labels=1:NS)
           requested.strata <- factor(requested.strata,levels=fit.levels,labels=1:NS)
           freq.strata <- cumsum(tabulate(fit.strata))
       }

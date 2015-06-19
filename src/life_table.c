@@ -108,8 +108,8 @@ void life_table(int *pred_nrisk,
 	  }
 	  /* ... then count events and lost in interval [lower[t],upper[t]) */
 	  
-	  /* while ((eventTime[First + s] >= lower[t]) && (eventTime[First + s] < upper[t]) && s <= size[i]-1){ */
-	  while ((eventTime[First + s] < upper[t]) && s <= size[i]-1){
+	  /* while ((s <= size[i]-1) && (eventTime[First + s] >= lower[t]) && (eventTime[First + s] < upper[t])){ */
+	  while ((s <= size[i]-1) && (eventTime[First + s] < upper[t])){
 	    count_e +=nevent[First+s];
 	    count_l +=nlost[First+s];
 	    /* Rprintf("s=%d\tsize=%d\tetime[First+s]=%1.2f\tlower[t]=%1.2f\tupper[t]=%1.2f\tnevent[First+s]=%d\tnlost[First+s]=%d\n",s,size[i]-1,eventTime[First+s],lower[t],upper[t],nevent[First+s],nlost[First+s]);  */
