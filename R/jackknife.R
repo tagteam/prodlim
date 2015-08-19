@@ -52,7 +52,7 @@ jackknife <- function(object,times,cause,keepResponse=FALSE,...){
 
 #' @export
 jackknife.survival <- function(object,times,keepResponse=FALSE,...){
-  S <- predict(object,times=times,newdata=object$model.response)
+  S <- stats::predict(object,times=times,newdata=object$model.response)
   Sk <- leaveOneOut.survival(object,times,...)
   N <- NROW(Sk)
   Jk <- t(N*S-t((N-1)*Sk))
@@ -66,7 +66,7 @@ jackknife.survival <- function(object,times,keepResponse=FALSE,...){
 }
 #' @export
 jackknife.competing.risks <- function(object,times,cause,keepResponse=FALSE,...){
-  F <- predict(object,times=times,newdata=object$model.response,cause=cause)
+  F <- stats::predict(object,times=times,newdata=object$model.response,cause=cause)
   Fk <- leaveOneOut.competing.risks(object,times,cause=cause,...)
   N <- NROW(Fk)
   Jk <- t(N*F-t((N-1)*Fk))

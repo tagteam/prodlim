@@ -30,7 +30,9 @@ Reformulate a terms object such that some specials are stripped off
 }
 \details{
 This function is used to remove special specials, i.e., those
-which cannot or should not be evaluated. See examples.
+which cannot or should not be evaluated.
+IMPORTANT: the unstripped terms need to know about all specials including the aliases.
+See examples.
 }
 \examples{
 ## parse a survival formula and identify terms which

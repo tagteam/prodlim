@@ -182,15 +182,15 @@ plot.Hist <- function(x,
                       verbose=FALSE,
                       ...){
     # {{{ margin 
-    oldmar <- par()$mar
-    oldoma <- par()$oma
-    par(oma=c(0,0,0,0))
-    oldxpd <- par()$xpd
+    oldmar <- graphics::par()$mar
+    oldoma <- graphics::par()$oma
+    graphics::par(oma=c(0,0,0,0))
+    oldxpd <- graphics::par()$xpd
     if (!missing(margin)){
-        par(mar=rep(margin,length.out=4),xpd=TRUE)
+        graphics::par(mar=rep(margin,length.out=4),xpd=TRUE)
     }
     else
-        par(mar=c(0,0,0,0),xpd=TRUE)
+        graphics::par(mar=c(0,0,0,0),xpd=TRUE)
     # }}}
     # {{{ find states 
     model.type <- attr(x,"model")
@@ -317,7 +317,7 @@ plot.Hist <- function(x,
   # plot
   Xlim <- 100
   Ylim <- 100
-  plot(0,0,type="n",xlim=c(0,Xlim),ylim=c(0,Ylim),xlab="",ylab="",axes=FALSE)
+  graphics::plot(0,0,type="n",xlim=c(0,Xlim),ylim=c(0,Ylim),xlab="",ylab="",axes=FALSE)
   ## backGround(c(0,100),c(0,100),bg="yellow")
 
   # }}}
@@ -336,7 +336,7 @@ plot.Hist <- function(x,
   ## box labels
   boxLabelDefaults <- data.frame(name=paste("label",1:NS,sep=""),stringsAsFactors=FALSE,label=stateLabs)
   ## arrows
-  arrowDefaults <- data.frame(name=paste("arrow",1:N,sep=""),code=2,lwd=1,headoffset=strwidth("ab",cex=arrowLabel.cex),length=.13,stringsAsFactors=FALSE)
+  arrowDefaults <- data.frame(name=paste("arrow",1:N,sep=""),code=2,lwd=1,headoffset=graphics::strwidth("ab",cex=arrowLabel.cex),length=.13,stringsAsFactors=FALSE)
   arrowDefaults <- cbind(arrowDefaults,ordered.transitions)
   ## arrowlabels
   if (missing(changeArrowLabelSide))
@@ -395,10 +395,10 @@ plot.Hist <- function(x,
   ## state.cex <- max(boxLabelCex)
   if (length(boxLabelCex)<length(stateLabs))
     boxLabelCex <- rep(boxLabelCex,length.out=length(stateLabs))
-  state.width <- sapply(1:length(stateLabs),function(i){strwidth(stateLabs[i],cex=boxLabelCex[i])})
-  state.height <- sapply(1:length(stateLabs),function(i){strheight(stateLabs[i],cex=boxLabelCex[i])})
-  ## state.width <- sapply(stateLabs,strwidth,cex=boxLabelCex)
-  ## state.height <- sapply(stateLabs,strheight,cex=boxLabelCex)
+  state.width <- sapply(1:length(stateLabs),function(i){graphics::strwidth(stateLabs[i],cex=boxLabelCex[i])})
+  state.height <- sapply(1:length(stateLabs),function(i){graphics::strheight(stateLabs[i],cex=boxLabelCex[i])})
+  ## state.width <- sapply(stateLabs,graphics::strwidth,cex=boxLabelCex)
+  ## state.height <- sapply(stateLabs,graphics::strheight,cex=boxLabelCex)
 
   if (missing(oneFitsAll))
     oneFitsAll <- length(unique(boxLabelCex))==1
@@ -407,15 +407,15 @@ plot.Hist <- function(x,
     max.height <- max(state.height)
     ##     box.width <- max.width + xbox.rule * max.width
     ##     box.height <- max.height + ybox.rule * max.height
-    box.width <- max.width + strwidth("ab",cex=max(boxLabelCex))
-    box.height <- max.height + strwidth("ab",cex=max(boxLabelCex))
+    box.width <- max.width + graphics::strwidth("ab",cex=max(boxLabelCex))
+    box.height <- max.height + graphics::strwidth("ab",cex=max(boxLabelCex))
     ## really need to check this for each row:
     ##     if ((ncol * box.width) > Xlim) warning("The horizontal dimensions of the boxes are too big -- change layout or tune parameters `label.cex' and/or `xbox.rule'.")
     ##     if ((nrow * box.height) > Ylim) warning("The verticalf dimensions of the boxes are too big -- change layout or tune parameters `label.cex' and/or `ybox.rule'.")
   }
   else{
-    box.width <- state.width + strwidth("ab",cex=boxLabelCex)
-    box.height <- state.height + strwidth("ab",cex=boxLabelCex)
+    box.width <- state.width + graphics::strwidth("ab",cex=boxLabelCex)
+    box.height <- state.height + graphics::strwidth("ab",cex=boxLabelCex)
   }
 
   if (length(box.height)==1) box.height <- rep(box.height,NS)
@@ -522,7 +522,7 @@ plot.Hist <- function(x,
     ## shift double arrows
     dd <- arrowDefaults[trans,"doubleArrow"]
     if (dd!=0){
-      dist <- strwidth(".",cex=arrowLabel.cex)
+      dist <- graphics::strwidth(".",cex=arrowLabel.cex)
       arrowDefaults[trans,"headoffset"]+dist
       if (dd>trans){
         from <- from + sign(PerDir) * c(dist,dist)
@@ -542,7 +542,7 @@ plot.Hist <- function(x,
     arrowDefaults[trans,"y0"] <- from[2]
     arrowDefaults[trans,"y1"] <- to[2]
     ## shift arrow label perpendicular (left) to arrow direction
-    offset <- strwidth(".",cex=arrowLabel.cex)
+    offset <- graphics::strwidth(".",cex=arrowLabel.cex)
     ArrowMid <- (to+from)/2
     ## points(x=ArrowMid[1],y=ArrowMid[2],col=3,pch=16)
     if (changeArrowLabelSide[trans]==TRUE)
@@ -558,9 +558,9 @@ plot.Hist <- function(x,
     }
     ## relative label height
     lab <- arrowLabels[[trans]]
-    labelHeight <- strheight(lab,cex=arrowlabelDefaults[trans,"cex"])
+    labelHeight <- graphics::strheight(lab,cex=arrowlabelDefaults[trans,"cex"])
     ## relative label width 
-    labelWidth <-  strwidth(lab,cex=arrowlabelDefaults[trans,"cex"])
+    labelWidth <-  graphics::strwidth(lab,cex=arrowlabelDefaults[trans,"cex"])
     ## shift further according to label height and width in perpendicular direction
     if (changeArrowLabelSide[trans]==TRUE)
       ArrowLabelPos <- ArrowLabelPos-sign(PerDir)*c(labelWidth/2,labelHeight/2)
@@ -646,7 +646,7 @@ plot.Hist <- function(x,
     tagList <- smartArgs$boxtags
     nix <- lapply(1:NS,function(b) {
       lab <- tagList[b]
-      text(x=xbox.position[b],
+      graphics::text(x=xbox.position[b],
            y=ybox.position[b]+box.height,
            labels=tagList$labels[b],
            cex=tagList$cex,
@@ -655,7 +655,7 @@ plot.Hist <- function(x,
 
   # }}}
     # {{{ reset margin
-  par(mar=oldmar,xpd=oldxpd,oma=oldoma)
+  graphics::par(mar=oldmar,xpd=oldxpd,oma=oldoma)
   # }}}
     if (verbose){
         cat("\nRelevel the factor 'event' in the dataset which defines the Hist object,\nto change the order of the boxes.\n")

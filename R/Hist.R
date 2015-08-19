@@ -504,11 +504,11 @@ is.na.Hist <- function(x) {
 
 str.Hist <- function(x){
   class(x) <- "matrix"
-  str(x)
+  utils::str(x)
 }
 
 head.Hist <- function(x){
   class(x) <- "matrix"
-  head(x)
+  utils::head(x)
 }
 

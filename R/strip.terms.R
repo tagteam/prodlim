@@ -114,7 +114,7 @@ strip.terms <- function(terms,
         }
     }
     if (do.unspecials||do.alias){
-        aform <- reformulate(termLabels,response,intercept)
+        aform <- stats::reformulate(termLabels,response,intercept)
         environment(aform) <- environment(terms)
         if (do.alias)
             terms <- terms(aform,specials=newspecials)
@@ -146,7 +146,7 @@ strip.terms <- function(terms,
             strippedTerms <- c(strippedTerms,terms.s)
             termLabels[hit.s] <- names(ps)
         }
-        strippedFormula <- reformulate(termLabels,response,intercept)
+        strippedFormula <- stats::reformulate(termLabels,response,intercept)
         environment(strippedFormula) <- environment(terms)
         out <- terms(strippedFormula, specials = names(terms.specials))
         ## reset specials

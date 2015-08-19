@@ -13,10 +13,10 @@ plotIntervals <- function(object,rightCensored=FALSE,xlim,ylim,ylab,xlab,...){
     xlab <- "Time"
   if (missing(ylab))
     ylab <- "Observed intervals"
-  plot(0,0,type="n",xlim=xlim,ylim=ylim,xlab=xlab,ylab=ylab,...)
+  graphics::plot(0,0,type="n",xlim=xlim,ylim=ylim,xlab=xlab,ylab=ylab,...)
   nix <- lapply(1:NROW(x),function(f){
     x <- unlist(x[f,c("L","R"),drop=TRUE])
     x[is.infinite(x)] <- max(R[!is.na(R)&!is.infinite(R)])
-    segments(x0=x[1],y0=f,x1=x[2],y1=f,lwd=2)})
+    graphics::segments(x0=x[1],y0=f,x1=x[2],y1=f,lwd=2)})
   invisible(x)
 }

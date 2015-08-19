@@ -25,7 +25,7 @@ markTime <- function(x,times,nlost,pch,col,...){
     mark.y=x[[i]][who]
     if (length(col)<length(x)) mcol=col[1] else mcol=col[i]
     if (length(pch)<length(x)) mpch=pch[1] else mpch=pch[i]
-    points(x=mark.x,y=mark.y,col=mcol,pch=mpch,...)
+    graphics::points(x=mark.x,y=mark.y,col=mcol,pch=mpch,...)
     ##       cbind(mark.x,mark.y)
     invisible(NULL)
   })

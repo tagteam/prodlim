@@ -13,8 +13,8 @@
 ##' @export 
 ##' @author Thomas A. Gerds <tag@@biostat.ku.dk>
 dimColor <- function(col,density=55){
-    ccrgb=as.list(col2rgb(col,alpha=TRUE))
+    ccrgb=as.list(grDevices::col2rgb(col,alpha=TRUE))
     names(ccrgb) <- c("red","green","blue","alpha")
     ccrgb$alpha=density
-    do.call("rgb",c(ccrgb,list(max=255)))
+    do.call(grDevices::rgb,c(ccrgb,list(max=255)))
 }

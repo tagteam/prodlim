@@ -170,7 +170,7 @@ EventHistory.frame <- function(formula,
     # }}}
     # {{{call model.frame
     ## data argument is used to resolve '.' see help(terms.formula)
-    Terms <- terms(x=formula,specials=specials,data=data)
+    Terms <- stats::terms(x=formula,specials=specials,data=data)
     if (!is.null(stripSpecials)){
         ## Terms <- terms(x=formula, specials=specials)
         if (length(attr(Terms,"term.labels"))>0)
@@ -185,13 +185,13 @@ EventHistory.frame <- function(formula,
     ## use the stripped formula because, otherwise
     ## it may be hard to know what variables are, e.g.,
     ## FGR uses cov2(var,tf=qfun) where qfun is a function 
-    mm <- na.omit(get_all_vars(formula(Terms),data))
+    mm <- stats::na.omit(stats::get_all_vars(formula(Terms),data))
     if (NROW(mm) == 0) stop("No (non-missing) observations")
     # }}}
 
     # {{{ extract response
     if (response==TRUE && attr(Terms,"response")!=0){
-        event.history <- model.response(model.frame(update(formula,".~1"),
+        event.history <- stats::model.response(stats::model.frame(stats::update(formula,".~1"),
                                                     data=mm))
         # }}}
         # {{{ Fix for those who use `Surv' instead of `Hist' 

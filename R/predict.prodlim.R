@@ -156,12 +156,12 @@
       ## NN.vars <- sapply(strsplit(grep("NN",names(object$X),val=TRUE),"NN."),function(x)x[2])
       strata.vars <- object$discrete.predictors
       NN.vars <- object$continuous.predictors
-      X.formula <- update(formula(object$formula),NULL~.)
+      X.formula <- stats::update(stats::formula(object$formula),NULL~.)
       ## delete.response(terms(formula(object$formula)))
       iid <- is.null(object$clustervar)
       if (!iid){
           find.clu <- match(object$clustervar,all.vars(X.formula))
-          X.formula <- drop.terms(terms(X.formula),find.clu)
+          X.formula <- stats::drop.terms(stats::terms(X.formula),find.clu)
       }
       if (!all(match(all.vars(X.formula),names(newdata),nomatch=FALSE)))
           stop("Arg newdata does not contain all the covariates used for fitting. \n\nrequested: ", as.character(X.formula))
@@ -272,7 +272,7 @@ predictSurv <- function(object,
                         level.chaos=1,
                         mode="list",
                         bytime=FALSE){
-  p <- predict(object,
+  p <- stats::predict(object,
                newdata=newdata,
                level.chaos=level.chaos,
                times=times,type="list")
@@ -307,7 +307,7 @@ predictSurv <- function(object,
                             cause,
                             ...){
   #  if (object$model!="competing.risks") stop("This object is not a competing.risks model.")
-  p <- predict(object,newdata=newdata,level.chaos=level.chaos,times=times,type="list")
+  p <- stats::predict(object,newdata=newdata,level.chaos=level.chaos,times=times,type="list")
   NT <- p$dimensions$time
   NR <- p$dimensions$strata
   pindex <- p$indices$time

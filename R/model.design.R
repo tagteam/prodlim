@@ -34,7 +34,7 @@
 ##' @return A list which contains
 ##'   - the design matrix with the levels of the variables stored in attribute 'levels' 
 ##'   - separate data.frames which contain the values of the special variables.
-##' @seealso \code{\link{EventHistory.frame}} model.frame terms model.matrix .getXlevels  
+##' @seealso \code{\link{EventHistory.frame}} model.frame terms model.matrix stats::.getXlevels  
 ##' @examples
 ##' # specials that are evaluated. here ID needs to be defined 
 ##' set.seed(8)
@@ -107,7 +107,7 @@ model.design <- function(terms,
                       dQuote("terms")), domain = NA)
     response <- attr(terms,"response")
     if (response==1)
-        terms <- delete.response(terms)
+        terms <- stats::delete.response(terms)
     if (dropIntercept) attr(terms, "intercept") <- 1
     design <- attr(terms,"factor")
     varnames <- rownames(design)
@@ -165,7 +165,7 @@ model.design <- function(terms,
         if (length(termLabels) == length(specialTerms)){
             unspecialTerms <- NULL
         }else{
-            unspecialTerms <- drop.terms(terms,specialTerms)
+            unspecialTerms <- stats::drop.terms(terms,specialTerms)
         }
         # }}}
         # {{{ loop over specials
@@ -177,13 +177,13 @@ model.design <- function(terms,
             if (length(xlev)>0){
                 spLevels <- xlev[match(sp.terms,names(xlev),nomatch=0)]
                 if (length(spLevels)>0)
-                    spData <- model.frame(spTerms,data=data,xlev=spLevels)
+                    spData <- stats::model.frame(spTerms,data=data,xlev=spLevels)
                 else
-                    spData <- model.frame(spTerms,data)
+                    spData <- stats::model.frame(spTerms,data)
             } else{
-                spData <- model.frame(spTerms,data)
+                spData <- stats::model.frame(spTerms,data)
             }
-            spLevels <- .getXlevels(spTerms,spData)
+            spLevels <- stats::.getXlevels(spTerms,spData)
             if (match(sp,stripped,nomatch=0)){
                 ## stripped specials may have arguments
                 ## in which case we need to know which
@@ -207,7 +207,7 @@ model.design <- function(terms,
                 names(arguments.terms) <- arg.names
             }
             if (sp %in% specialsDesign){
-                spMatrix <- model.matrix(spTerms,data=spData,xlev=spLevels)[,-1,drop=FALSE]
+                spMatrix <- stats::model.matrix(spTerms,data=spData,xlev=spLevels)[,-1,drop=FALSE]
                 attr(spMatrix,"levels") <- spLevels
                 if (match(sp,stripped,nomatch=0)){
                     attr(spMatrix,"arguments") <- stripped.arguments[[sp]]
@@ -241,15 +241,15 @@ model.design <- function(terms,
             if (length(xlev)>0){
                 uLevels <- xlev[match(attr(unspecialTerms,"term.labels"),names(xlev),nomatch=0)]
                 if (length(uLevels)>0)
-                    X <- model.frame(unspecialTerms,data=data,xlev=uLevels)
+                    X <- stats::model.frame(unspecialTerms,data=data,xlev=uLevels)
                 else
-                    X <- model.frame(unspecialTerms,data=data)
+                    X <- stats::model.frame(unspecialTerms,data=data)
             } else{
-                X <- model.frame(unspecialTerms,data)
+                X <- stats::model.frame(unspecialTerms,data)
             }
-            uLevels <- .getXlevels(unspecialTerms,X)
+            uLevels <- stats::.getXlevels(unspecialTerms,X)
             if (unspecialsDesign==TRUE){
-                X <- model.matrix(unspecialTerms,data,xlev=uLevels)
+                X <- stats::model.matrix(unspecialTerms,data,xlev=uLevels)
                 if (dropIntercept) X <- X[,-1,drop=FALSE]
             }
         } else {
@@ -264,15 +264,15 @@ model.design <- function(terms,
         if (length(xlev)>0){
             levels <- xlev[match(attr(terms,"term.labels"),names(xlev),nomatch=0)]
             if (length(levels)>0)
-                X <- model.frame(terms,data=data,xlev=uLevels)
+                X <- stats::model.frame(terms,data=data,xlev=uLevels)
             else
-                X <- model.frame(terms,data)
+                X <- stats::model.frame(terms,data)
         } else{
-            X <- model.frame(terms,data)
+            X <- stats::model.frame(terms,data)
         }
-        levels <- .getXlevels(terms,X)
+        levels <- stats::.getXlevels(terms,X)
         if (unspecialsDesign==TRUE){
-            X <- model.matrix(terms,data,xlev=levels)
+            X <- stats::model.matrix(terms,data,xlev=levels)
             if (dropIntercept) X <- X[,-1,drop=FALSE]
         }
         attr(X,"levels") <- levels        

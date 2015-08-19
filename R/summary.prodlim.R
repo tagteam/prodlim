@@ -165,7 +165,7 @@ summary.prodlim <- function(object,
                                            "corresponding to the middle row (median of the number of rows in object$X) ",
                                            "and corresponding to the last row in object$X ...\n",
                                            "to see more tables use arguments `newdata' and `max.tables'\n"))
-                    X <- X[c(1,round(median(1:NROW(X))),NROW(X)),,drop=FALSE]
+                    X <- X[c(1,round(stats::median(1:NROW(X))),NROW(X)),,drop=FALSE]
                 }
             } else{
                 X <- unique.data.frame(newdata)
@@ -211,9 +211,9 @@ summary.prodlim <- function(object,
                 cause <- attr(object$model.response,"states")
             }
             # found <- match(cause,attr(object$model.response,"states"),nomatch=FALSE))
-            Found <- match(cause,names(ltab))
-            if (all(Found)) ltab <- ltab[Found]
-            else warning("could not find requested causes in attributes of object$mode.response")
+            Found <- match(cause,names(ltab),nomatch=0)
+            if (all(Found)>0) ltab <- ltab[Found]
+            else stop(paste("\nCannot find cause: ",cause,".\nFitted were causes: ",paste(names(ltab),collapse=", "),sep=""))
         }
     }
     # }}}

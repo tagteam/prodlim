@@ -326,7 +326,7 @@ plot.prodlim <- function(x,
       nRisk <- x$n.risk
   if (minAtrisk>0 && any(nRisk<=minAtrisk)){
       if (all(nRisk<=minAtrisk)){
-          return(plot(0,0,type="n",xlim=c(0, max(plot.times)),ylim=c(0, 1),axes=FALSE))
+          return(graphics::plot(0,0,type="n",xlim=c(0, max(plot.times)),ylim=c(0, 1),axes=FALSE))
       }
       criticalTime <- min(x$time[nRisk<=minAtrisk])
       plot.times <- plot.times[plot.times<criticalTime]
@@ -335,10 +335,10 @@ plot.prodlim <- function(x,
   if (missing(newdata)) {
       newdata <- x$X
       if (NROW(newdata)>limit)
-          newdata <- newdata[c(1,round(median(1:NROW(newdata))),NROW(newdata)),,drop=FALSE]          
+          newdata <- newdata[c(1,round(stats::median(1:NROW(newdata))),NROW(newdata)),,drop=FALSE]          
   }
   ## if (missing(newdata) && NROW(newdata)>limit)
-  ## newdata <- newdata[c(1,round(median(1:NROW(newdata))),NROW(newdata)),,drop=FALSE]
+  ## newdata <- newdata[c(1,round(stats::median(1:NROW(newdata))),NROW(newdata)),,drop=FALSE]
   ## browser()
   stacked <- cause=="stacked"
   if (stacked){
@@ -351,7 +351,7 @@ plot.prodlim <- function(x,
            cause <- cause[1]
        }
    }
-  ## Y <- predict(x,times=plot.times,newdata=newdata,level.chaos=1,type=type,cause=cause,mode="list")
+  ## Y <- stats::predict(x,times=plot.times,newdata=newdata,level.chaos=1,type=type,cause=cause,mode="list")
   startValue=ifelse(type=="surv",1,0)
   stats=list(c(type,startValue))
   if (model=="survival" && type=="cuminc") {
@@ -421,20 +421,30 @@ plot.prodlim <- function(x,
   }
   else{
       if (length(x$clustervar)>0){
+          atriskDefaultTitle <- ""
           atriskDefaultLabels <- rep(paste(c("Subjects","Clusters"),": ",sep=""),
                                      nlines)
       }
       else{
           ## print(names(Y))
           if (model=="competing.risks" && stacked==TRUE){
+              atriskDefaultTitle <- ""
               atriskDefaultLabels <- "Subjects: "
           }
           else{
-              atriskDefaultLabels <- paste(gsub("[ \t]*$","",names(Y)),": ",sep="")
+
+              if ((length(grep("=",names(Y)))==length(names(Y)))){
+                  atriskDefaultLabels <- paste(gsub("[ \t]*$","",sapply(strsplit(names(Y),"="),function(x)x[[2]])),
+                                               ": ", sep="")
+                  atriskDefaultTitle <- unique(sapply(strsplit(names(Y),"="),function(x)x[[1]]))
+              }else{
+                   atriskDefaultTitle <- ""
+                   atriskDefaultLabels <- paste(gsub("[ \t]*$","",names(Y)),": ",sep="")
+               }
           }
       }
       ## atriskDefaultLabels <- format(atriskDefaultLabels,justify="left")
-      atriskDefaultTitle <- ""
+      ## atriskDefaultTitle <- ""
   }
   atrisk.DefaultArgs <- list(x=x,
                              newdata=newdata,
@@ -506,7 +516,7 @@ plot.prodlim <- function(x,
   # }}}
   # {{{  setting margin parameters
   if (atrisk==TRUE){
-      oldmar <- par()$mar
+      oldmar <- graphics::par()$mar
       if (missing(automar) || automar==TRUE){
           ##        bottomMargin =  margin line (in 'mex' units) for xlab
           ##                        + distance of xlab from xaxis
@@ -514,15 +524,15 @@ plot.prodlim <- function(x,
           ##                        + number of atrisk lines
           ##                        + one extra line below the bottom number atrisk line
           ##      leftSideMargin =  margin line + atrisk.lab
-          bottomMargin <- par()$mgp[2] + smartA$atrisk$dist+ ifelse(clusterp,2,1)*nlines + 1
+          bottomMargin <- graphics::par()$mgp[2] + smartA$atrisk$dist+ ifelse(clusterp,2,1)*nlines + 1
           ## smartA$atrisk$labels
-          maxlabellen <- max(strwidth(c(smartA$atrisk$labels,smartA$atrisk$title),
+          maxlabellen <- max(graphics::strwidth(c(smartA$atrisk$labels,smartA$atrisk$title),
                                       cex=smartA$atrisk$cex,
                                       units="inches"))
-          maxlabellen <- pmax(maxlabellen * (par("mar")[2] / par("mai")[2]),par("mar")[2])
-          leftMargin <- maxlabellen+2-par("mar")[2]
-          newmar <- par()$mar + c(bottomMargin,leftMargin,0,0)
-          par(mar=newmar)
+          maxlabellen <- pmax(maxlabellen * (graphics::par("mar")[2] / graphics::par("mai")[2]),graphics::par("mar")[2])
+          leftMargin <- maxlabellen+2-graphics::par("mar")[2]
+          newmar <- graphics::par()$mar + c(bottomMargin,leftMargin,0,0)
+          graphics::par(mar=newmar)
       }
   }
 
@@ -531,7 +541,7 @@ plot.prodlim <- function(x,
   if (!add) {
     do.call("plot",smartA$plot)
     ##     if (background==TRUE && match("bg",names(smartA$background),nomatch=FALSE)){
-    ## par(bg=smartA$background$bg)
+    ## graphics::par(bg=smartA$background$bg)
     ##     }
     if (background==TRUE){
       do.call("backGround",smartA$background)
@@ -548,7 +558,7 @@ plot.prodlim <- function(x,
       do.call("axis",smartA$axis2)
     }
   }
-  if (atrisk==TRUE) par(mar=oldmar) ## reset
+  if (atrisk==TRUE) graphics::par(mar=oldmar) ## reset
 
   # }}}
   # {{{  pointwise confidence intervals
@@ -573,7 +583,7 @@ plot.prodlim <- function(x,
           pos.na <- is.na(yyy)
           ppp <- ppp[!pos.na]
           yyy <- yyy[!pos.na]
-          lines(x = ppp,y = yyy,type = lines.type,col = col[s],lty = lty[s],lwd = lwd[s])
+          graphics::lines(x = ppp,y = yyy,type = lines.type,col = col[s],lty = lty[s],lwd = lwd[s])
           cc <- dimColor(col[s],density=55)
           ttt <- ppp
           nt <- length(ttt)
@@ -587,11 +597,11 @@ plot.prodlim <- function(x,
           uuu <- uuu[neworder]
           lll <- lll[neworder]
           ttt <- sort(ttt)
-          polygon(x=c(ttt,rev(ttt)),y=c(lll,rev(uuu)),col=cc,border=NA)
+          graphics::polygon(x=c(ttt,rev(ttt)),y=c(lll,rev(uuu)),col=cc,border=NA)
       })
   }else{
       nix <- lapply(1:nlines, function(s) {
-          lines(x = plot.times,
+          graphics::lines(x = plot.times,
                 y = Y[[s]],
                 type = lines.type,
                 col = col[s],
@@ -635,16 +645,16 @@ plot.prodlim <- function(x,
               smartA$legend$title <- unique(sapply(strsplit(names(Y),"="),function(x)x[[1]]))
       }
       smartA$legend <- smartA$legend[-match("trimnames",names(smartA$legend))]
-      save.xpd <- par()$xpd
+      save.xpd <- graphics::par()$xpd
       if (logrank && model=="survival" && length(smartA$legend$legend)>1){
-          formula.names <- try(all.names(formula),silent=TRUE)
+          ## formula.names <- try(all.names(formula),silent=TRUE)
           lrform <- x$call$formula
           if (lrform[[2]][[1]]==as.name("Hist"))
               lrform[[2]][[1]] <- as.name("Surv")
           ## require(survival)
           lrtest <- survival::survdiff(eval(lrform),data=eval(x$call$data))
           if (length(lrtest$n) == 1) {
-              p <- 1 - pchisq(lrtest$chisq, 1)
+              p <- 1 - stats::pchisq(lrtest$chisq, 1)
           } else{
               if (is.matrix(x$obs)) {
                   etmp <- apply(lrtest$exp, 1, sum)
@@ -653,16 +663,16 @@ plot.prodlim <- function(x,
                   etmp <- lrtest$exp
               }
               df <- (sum(1 * (etmp > 0))) - 1
-              p <- 1 - pchisq(lrtest$chisq, df)
+              p <- 1 - stats::pchisq(lrtest$chisq, df)
           }
           if (length(smartA$legend$title))
               smartA$legend$title <- paste(smartA$legend$title," Log-rank: p=",format.pval(p,digits=logrank,eps=0.0001))
           else
               smartA$legend$title <- paste(" Log-rank: ",format.pval(p,digits=logrank,eps=0.0001))
       }
-      par(xpd=TRUE)
+      graphics::par(xpd=TRUE)
       do.call("legend",smartA$legend)
-      par(xpd=save.xpd)
+      graphics::par(xpd=save.xpd)
   }
 
 # }}}

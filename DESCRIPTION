@@ -1,5 +1,5 @@
 Package: prodlim
-Title: Product-limit estimation for censored event history analysis
+Title: Product-Limit Estimation for Censored Event History Analysis
 Version: 1.5.5
 Author: Thomas A. Gerds
 Description: Fast and user friendly implementation of nonparametric estimators
@@ -10,6 +10,7 @@ Depends:
 Imports:
     Rcpp (>= 0.11.5),
     stats,
+    graphics,
     survival,
     KernSmooth,
     lava

@@ -6,7 +6,7 @@ lifeTab.survival <- function(object,
                              percent=TRUE,
                              showTime=TRUE){
     # {{{ get the indices
-    IndeX <- predict(object,
+    IndeX <- stats::predict(object,
                      newdata=newdata,
                      level.chaos=0,
                      times=times,
