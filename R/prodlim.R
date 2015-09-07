@@ -240,7 +240,7 @@
                               data=data,
                               unspecialsDesign=FALSE,
                               specials=c("Strata","strata","factor", "NN","cluster"),
-                              stripSpecials=c("strata","cluster"),
+                              stripSpecials=c("strata","cluster","NN"),
                               stripAlias=list("strata"=c("Strata","factor")),
                               stripArguments=list("strata"=NULL,"NN"=NULL,"cluster"=NULL),
                               specialsDesign=FALSE,
