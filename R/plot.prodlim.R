@@ -258,7 +258,7 @@
 ##'      legend.title="X1=0,X2=0.1",
 ##'      legend.legend=paste("cause:",getStates(ajfitX$model.response)),
 ##'      plot.main="Subject specific stacked plot")
- 
+##'  
 #' @export 
 plot.prodlim <- function(x,
                          type,
@@ -340,7 +340,7 @@ plot.prodlim <- function(x,
   ## if (missing(newdata) && NROW(newdata)>limit)
   ## newdata <- newdata[c(1,round(stats::median(1:NROW(newdata))),NROW(newdata)),,drop=FALSE]
   ## browser()
-  stacked <- cause=="stacked"
+  stacked <- cause[1]=="stacked"
   if (stacked){
       confint <- FALSE
       if (model!="competing.risks") stop("Stacked plot works only for competing risks models.")
@@ -363,14 +363,33 @@ plot.prodlim <- function(x,
   if (x$cens.type=="intervalCensored"){
       stop("FIXME: There is no plot method implemented for intervalCensored data.")
   }
-  sumX <- lifeTab(x,
-                  times=plot.times,
-                  newdata=newdata,
-                  stats=stats,
-                  percent=FALSE)
-
-  if (model=="competing.risks" && stacked == FALSE) sumX <- sumX[[cause]]
-
+  if  (model=="competing.risks"){
+      if (stacked) ## all causes
+          cause <- attributes(x$model.response)$states
+      else
+          cause <- checkCauses(cause,x)
+      sumX <- lifeTab(x,
+                      times=plot.times,
+                      cause=cause,
+                      newdata=newdata,
+                      stats=stats,
+                      percent=FALSE)
+  }
+  else
+      sumX <- lifeTab(x,
+                      times=plot.times,
+                      newdata=newdata,
+                      stats=stats,
+                      percent=FALSE)
+  if (model=="competing.risks"){
+      if (stacked == FALSE){
+          sumX <- sumX[[cause]]
+      } else {
+            ## there is at most one stratum for each cause
+            if (!is.null(newdata))
+                sumX <- lapply(sumX,function(cc)cc[[1]])
+        }
+  }
   ## cover both no covariate and single newdata:
   if (!is.null(dim(sumX))) sumX <- list(sumX)
 
@@ -456,7 +475,7 @@ plot.prodlim <- function(x,
                              title=atriskDefaultTitle,
                              labels=atriskDefaultLabels,
                              times=seq(0,min(x$maxtime,xlim[2]),min(x$maxtime,xlim[2])/10))
-  if (!missing(select)){
+  if (!missing(select) && (!(model=="competing.risks" && stacked))){
       atrisk.DefaultArgs$newdata <- atrisk.DefaultArgs$newdata[select,,drop=FALSE]
   }
   legend.DefaultArgs <- list(legend=names(Y),

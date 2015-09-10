@@ -168,13 +168,13 @@ summary.prodlim <- function(object,
                     X <- X[c(1,round(stats::median(1:NROW(X))),NROW(X)),,drop=FALSE]
                 }
             } else{
-                X <- unique.data.frame(newdata)
-                if (NROW(X) < NROW(newdata))
-                    warning("Returned is only one summary for each unique value in newdata.")
-            }
+                  X <- unique.data.frame(newdata)
+                  if (NROW(X) < NROW(newdata))
+                      warning("Returned is only one summary for each unique value in newdata.")
+              }
         } else {
-            X <- NULL
-        }
+              X <- NULL
+          }
         if (model=="survival") {
             stats <- list(c("surv",1),c("se.surv",0))
             if (!is.null(object$conf.int))
@@ -195,37 +195,44 @@ summary.prodlim <- function(object,
             stats <- list(c("cuminc",0),c("se.cuminc",0))
             if (!is.null(object$conf.int))
                 stats <- c(stats,list(c("lower",0),c("upper",0)))
-        }
-        ltab <- lifeTab(object=object,
-                        times=times,
-                        newdata=X,
-                        stats=stats,
-                        intervals=intervals,
-                        percent=percent,
-                        showTime=showTime)
-        if (model=="competing.risks"){
             if (!missing(cause)){
-                if (is.numeric(cause) && !is.numeric(names(ltab)))
-                    cause <- attr(object$model.response,"states")[cause]
+                cause <- checkCauses(cause=cause,object=object)
             } else{ ## show all causes
-                cause <- attr(object$model.response,"states")
-            }
-            # found <- match(cause,attr(object$model.response,"states"),nomatch=FALSE))
+                  cause <- attr(object$model.response,"states")
+              }
+            ltab <- lifeTab(object=object,
+                            times=times,
+                            cause=cause,
+                            newdata=X,
+                            stats=stats,
+                            intervals=intervals,
+                            percent=percent,
+                            showTime=showTime)
             Found <- match(cause,names(ltab),nomatch=0)
-            if (all(Found)>0) ltab <- ltab[Found]
+            if (all(Found)>0) {
+                ltab <- ltab[Found]
+            }
             else stop(paste("\nCannot find cause: ",cause,".\nFitted were causes: ",paste(names(ltab),collapse=", "),sep=""))
-        }
+        }else{
+             ltab <- lifeTab(object=object,
+                             times=times,
+                             newdata=X,
+                             stats=stats,
+                             intervals=intervals,
+                             percent=percent,
+                             showTime=showTime)
+         }
     }
     # }}}
     # {{{ output
     if (is.list(ltab)) {
         tab <- lapply(ltab,function(x){
-            if (is.list(x)) {
-                lapply(x,data.frame) }
-            else{
-                data.frame(as.matrix(x))
-            }
-        })
+                          if (is.list(x)) {
+                              lapply(x,data.frame) }
+                          else{
+                              data.frame(as.matrix(x))
+                          }
+                      })
     }
     else{
         tab <- data.frame(ltab)

@@ -164,7 +164,7 @@
           X.formula <- stats::drop.terms(stats::terms(X.formula),find.clu)
       }
       if (!all(match(all.vars(X.formula),names(newdata),nomatch=FALSE)))
-          stop("Arg newdata does not contain all the covariates used for fitting. \n\nrequested: ", as.character(X.formula))
+          stop("Arg newdata does not contain all the covariates used for fitting. \n\nfitted variables: ", paste(all.vars(X.formula),collapse=", "),"\nnewdata contains:",ifelse(length(names(newdata))==0," nothing",names(newdata)))
       requested.X <- newdata[,all.vars(X.formula),drop=FALSE]
       NR <- NROW(requested.X)
       requested.names <- extract.name.from.special(names(requested.X))
@@ -306,36 +306,35 @@ predictSurv <- function(object,
                             mode="list",
                             cause,
                             ...){
-  #  if (object$model!="competing.risks") stop("This object is not a competing.risks model.")
-  p <- stats::predict(object,newdata=newdata,level.chaos=level.chaos,times=times,type="list")
-  NT <- p$dimensions$time
-  NR <- p$dimensions$strata
-  pindex <- p$indices$time
-  if (object$model=="survival")
-    object$cuminc <- list("1"=1-object$surv)
-  if (missing(cause))
-    cause <- 1:NCOL(object$cuminc)
-  if (is.character(cause))
-    cause <- match(cause,names(object$cuminc))
-  stopifnot(is.numeric(cause) || any(cause>NROW(object$cuminc)))
-  out <- lapply(cause,function(thisCause){
-    if (NR == 1){
-      pcuminc <- c(0,object$cuminc[[thisCause]])[pindex+1]
-      if (mode=="matrix")
-        pcuminc <- matrix(pcuminc,nrow=1)
-    }
+    #  if (object$model!="competing.risks") stop("This object is not a competing.risks model.")
+    p <- stats::predict(object,newdata=newdata,level.chaos=level.chaos,times=times,type="list")
+    NT <- p$dimensions$time
+    NR <- p$dimensions$strata
+    pindex <- p$indices$time
+    if (object$model=="survival")
+        object$cuminc <- list("1"=1-object$surv)
+    if (missing(cause))
+        cause <- attributes(object$model.response)$states
+    else
+        causes <- checkCauses(cause,object)
+    out <- lapply(cause,function(thisCause){
+                      if (NR == 1){
+                          pcuminc <- c(0,object$cuminc[[thisCause]])[pindex+1]
+                          if (mode=="matrix")
+                              pcuminc <- matrix(pcuminc,nrow=1)
+                      }
+                      else{
+                          pcuminc <- split(c(0,object$cuminc[[thisCause]])[pindex+1],
+                                           rep(1:NR,rep(NT,NR)))
+                          names(pcuminc) <- p$names.strata
+                          if (mode=="matrix" && NR>1) {
+                              pcuminc <- do.call("rbind",pcuminc)
+                          }
+                      }
+                      pcuminc})
+    if (length(cause)==1){
+        out[[1]]}
     else{
-      pcuminc <- split(c(0,object$cuminc[[thisCause]])[pindex+1],
-                       rep(1:NR,rep(NT,NR)))
-      names(pcuminc) <- p$names.strata
-      if (mode=="matrix" && NR>1) {
-        pcuminc <- do.call("rbind",pcuminc)
-      }
-    }
-    pcuminc})
-  if (length(cause)==1){
-    out[[1]]}
-  else{
-    names(out) <- names(object$cuminc)[cause]
-    out}
+        names(out) <- names(object$cuminc)[cause]
+        out}
 }

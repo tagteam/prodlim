@@ -51,8 +51,9 @@ atRisk <- function(x,
                    adjust.labels=TRUE,
                    ...){
     if (missing(times)) times <- seq(0,x$maxtime,x$maxtime/10)
-    if (x$model=="competing.risks")
-        px <- lifeTab(object=x,times=times,newdata=newdata,stats=NULL)[[1]]
+    if (x$model=="competing.risks"){
+        px <- lifeTab(object=x,times=times,cause=1,newdata=newdata,stats=NULL)[[1]]
+    }
     else if (x$model=="survival"){
         px <- lifeTab(object=x,times=times,newdata=newdata,stats=NULL)
     }
@@ -100,15 +101,15 @@ atRisk <- function(x,
     ##
     if (!is.null(title))
         graphics::mtext(title,
-              side=1,
-              at=pos,
-              col=tcol,
-              line=line[1]-1,
-              adj=adj,
-              cex=cex,
-              outer=FALSE,
-              xpd=NA,
-              ...)
+                        side=1,
+                        at=pos,
+                        col=tcol,
+                        line=line[1]-1,
+                        adj=adj,
+                        cex=cex,
+                        outer=FALSE,
+                        xpd=NA,
+                        ...)
     # labeling the no. at-risk below plot
     # --------------------------------------------------------------------
     ## if (is.null(adjust.labels) || adjust.labels==TRUE){
@@ -117,14 +118,14 @@ atRisk <- function(x,
         col <- rep(col,rep(2,length(col)))
     lapply(1:nlines,function(y){
                graphics::mtext(text=as.character(sumx[[y]]),
-                     side=1,
-                     at=times,
-                     line=rep(line[y],length(times)),
-                     col=rep(col[y],length(times)),
-                     cex=cex,
-                     outer=FALSE,
-                     xpd=NA,
-                     ...)
+                               side=1,
+                               at=times,
+                               line=rep(line[y],length(times)),
+                               col=rep(col[y],length(times)),
+                               cex=cex,
+                               outer=FALSE,
+                               xpd=NA,
+                               ...)
                if (is.null(labelcol)){
                    lcol <- col[y]
                } else {
@@ -135,15 +136,15 @@ atRisk <- function(x,
                  }
                ## print(labels[y])
                graphics::mtext(text=labels[y],
-                     side=1,
-                     at=pos,
-                     col=labelcol[y],
-                     ## col=1,
-                     line=line[y],
-                     adj=adj,
-                     cex=cex,
-                     outer=FALSE,
-                     xpd=NA,
-                     ...)
+                               side=1,
+                               at=pos,
+                               col=labelcol[y],
+                               ## col=1,
+                               line=line[y],
+                               adj=adj,
+                               cex=cex,
+                               outer=FALSE,
+                               xpd=NA,
+                               ...)
            })
 }
