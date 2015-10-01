@@ -605,7 +605,18 @@
                 names(out) <- names
                 out
             }
-            Cout <- list("time"=fit$time[1:NT],"n.risk"=fit$nrisk[1:NT],"n.event"=gatherC(fit$nevent),"n.lost"=fit$ncens[1:NT],"cuminc"=gatherC(fit$cuminc),"var.cuminc"=gatherC(fit$var.hazard),"se.cuminc"=gatherC(sqrt(pmax(0,fit$var.hazard))),"surv"=fit$surv[1:NT],"cause.hazard"=gatherC(fit$cause.hazard),"first.strata"=fit$first.strata,"size.strata"=fit$ntimes.strata,"model"="competing.risks")
+            Cout <- list("time"=fit$time[1:NT],
+                         "n.risk"=fit$nrisk[1:NT],
+                         "n.event"=gatherC(fit$nevent),
+                         "n.lost"=fit$ncens[1:NT],
+                         "cuminc"=gatherC(fit$cuminc),
+                         "var.cuminc"=gatherC(fit$var.hazard),
+                         "se.cuminc"=gatherC(sqrt(pmax(0,fit$var.hazard))),
+                         "surv"=fit$surv[1:NT],
+                         "cause.hazard"=gatherC(fit$cause.hazard),
+                         "first.strata"=fit$first.strata,
+                         "size.strata"=fit$ntimes.strata,
+                         "model"="competing.risks")
             Cout$maxtime <- max(Cout$time)
         }
         else {

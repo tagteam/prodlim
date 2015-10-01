@@ -311,12 +311,16 @@ predictSurv <- function(object,
     NT <- p$dimensions$time
     NR <- p$dimensions$strata
     pindex <- p$indices$time
-    if (object$model=="survival")
+    if (object$model=="survival"){
         object$cuminc <- list("1"=1-object$surv)
-    if (missing(cause))
-        cause <- attributes(object$model.response)$states
-    else
-        causes <- checkCauses(cause,object)
+        cause <- 1
+    }
+    if (object$model=="competing.risks"){
+        if (missing(cause))
+            cause <- attributes(object$model.response)$states
+        else
+            causes <- checkCauses(cause,object)
+    }
     out <- lapply(cause,function(thisCause){
                       if (NR == 1){
                           pcuminc <- c(0,object$cuminc[[thisCause]])[pindex+1]

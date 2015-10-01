@@ -278,10 +278,19 @@ plot(ajfit,cause=2,add=TRUE,col=2)
 
 plot(ajfit,cause="stacked",select=2)
 
-### conditional Aalen-Johansen estimator
+### stratified Aalen-Johansen estimator
 ajfitX1 <- prodlim(Hist(time, event) ~ X1, data = datCR)
 plot(ajfitX1)
 
+## add total number at-risk to a stratified curve
+ttt = 1:10
+plot(ajfitX1,atrisk.at=ttt,col=2:3)
+plot(ajfit,add=TRUE,col=1)
+atRisk(ajfit,newdata=datCR,col=1,times=ttt,line=3,labels="Total")
+
+
+## stratified Aalen-Johansen estimator in nearest neighborhoods
+## of a continuous variable
 ajfitX <- prodlim(Hist(time, event) ~ X1+X2, data = datCR)
 plot(ajfitX,newdata=data.frame(X1=c(1,1,0),X2=c(4,10,10)))
 plot(ajfitX,newdata=data.frame(X1=c(1,1,0),X2=c(4,10,10)),cause=2)

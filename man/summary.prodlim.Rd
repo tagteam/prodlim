@@ -6,37 +6,48 @@
 \usage{
 \method{summary}{prodlim}(object, times, newdata, max.tables = 20,
   surv = TRUE, cause, intervals = FALSE, percent = FALSE,
-  showTime = TRUE, ...)
+  showTime = TRUE, asMatrix = FALSE, ...)
 }
 \arguments{
-\item{object}{An object with class `prodlim' derived with \code{\link{prodlim}}}
+\item{object}{An object with class `prodlim' derived with
+\code{\link{prodlim}}}
 
-\item{times}{Vector of times at which to return the estimated probabilities.}
+\item{times}{Vector of times at which to return the estimated
+probabilities.}
 
-\item{newdata}{A data frame with the same variable names as those that
-appear on the right hand side of the 'prodlim' formula.  Defaults to
-\code{object$X}.}
+\item{newdata}{A data frame with the same variable names as those
+that appear on the right hand side of the 'prodlim' formula.
+Defaults to \code{object$X}.}
 
-\item{max.tables}{Integer. If \code{newdata} is not given the value of
-\code{max.tables} decides about the maximal number of tables to be shown.
-Defaults to 20.}
+\item{max.tables}{Integer. If \code{newdata} is not given the value
+of \code{max.tables} decides about the maximal number of tables to
+be shown.  Defaults to 20.}
 
-\item{surv}{Logical. If FALSE report event probabilities instead of survival
-probabilities. Only available for \code{object$model=="survival"}.}
+\item{surv}{Logical. If FALSE report event probabilities instead of
+survival probabilities. Only available for
+\code{object$model=="survival"}.}
 
 \item{cause}{The cause for predicting the cause-specific cumulative
 incidence function in competing risk models.}
 
-\item{intervals}{Logical. If TRUE count events and censored in intervals
-between the values of \code{times}.}
+\item{intervals}{Logical. If TRUE count events and censored in
+intervals between the values of \code{times}.}
 
-\item{percent}{Logical. If TRUE all estimated values are multiplied by 100
-and thus interpretable on a percent scale.}
+\item{percent}{Logical. If TRUE all estimated values are multiplied
+by 100 and thus interpretable on a percent scale.}
 
-\item{showTime}{If \code{TRUE} evaluation times are put into a column of the
-output table, otherwise evaluation times are shown as rownames.}
+\item{showTime}{If \code{TRUE} evaluation times are put into a
+column of the output table, otherwise evaluation times are shown as
+rownames.}
 
-\item{\dots}{Further arguments that are passed to the print function.}
+\item{asMatrix}{Control the output format when there are multiple
+life tables, either because of covariate strata or competing causes
+or both.  If not missing and not FALSE, reduce multiple life tables
+into a matrix with new columns \code{X} for covariate strata and
+\code{Event} for competing risks.}
+
+\item{...}{Further arguments that are passed to the print
+function.}
 }
 \value{
 A data.frame with the relevant information.
@@ -88,10 +99,12 @@ summary(fit0,times=c(1,5,10,12),surv=FALSE,percent=TRUE,intervals=TRUE)
 fit1 <- prodlim(Hist(time,event)~sex,data=d)
 print(summary(fit1,times=c(1,5,10),intervals=TRUE,percent=TRUE),digits=3)
 
+summary(fit1,times=c(1,5,10),asMatrix=TRUE,intervals=TRUE,percent=TRUE)
+
 fit2 <- prodlim(Hist(time,event)~Z,data=d)
 print(summary(fit2,times=c(1,5,10),intervals=TRUE,percent=TRUE),digits=3)
 
-## Beran estimator
+## Continuous strata (Beran estimator)
 # -----------------------------------------------------------------------------------------
 fit3 <- prodlim(Hist(time,event)~age,data=d)
 print(summary(fit3,
@@ -109,9 +122,17 @@ print(summary(fit4,
               intervals=TRUE,
               percent=TRUE),digits=3)
 
+print(summary(fit4,
+              times=c(1,5,10),
+              newdata=data.frame(age=c(20,50,70),sex=c("female","male","male")),
+              intervals=TRUE,collapse=TRUE,
+              percent=TRUE),digits=3)
+
 ## assess results from summary
 x <- summary(fit4,times=10,newdata=expand.grid(age=c(60,40,50),sex=c("male","female")))
 cbind(names(x$table),do.call("rbind",lapply(x$table,round,2)))
+
+x <- summary(fit4,times=10,newdata=expand.grid(age=c(60,40,50),sex=c("male","female")))
 
 ## Competing risks: Aalen-Johansen
 # -----------------------------------------------------------------------------------------
@@ -119,8 +140,11 @@ d <- SimCompRisk(30)
 crfit <- prodlim(Hist(time,event)~X1,data=d)
 summary(crfit,times=c(1,2,5))
 summary(crfit,times=c(1,2,5),cause=1,intervals=TRUE)
+summary(crfit,times=c(1,2,5),cause=1,asMatrix=TRUE)
+summary(crfit,times=c(1,2,5),cause=1:2,asMatrix=TRUE)
 
-# extract the results
+
+# extract the actual tables from the summary
 sumfit <- summary(crfit,times=c(1,2,5),print=FALSE)
 sumfit$table[[1]] # cause 1
 sumfit$table[[2]] # cause 2

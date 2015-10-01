@@ -3,9 +3,9 @@
 ## author: Thomas Alexander Gerds
 ## created: Sep 10 2015 (11:56) 
 ## Version: 
-## last-updated: Sep 10 2015 (11:59) 
+## last-updated: Sep 28 2015 (10:03) 
 ##           By: Thomas Alexander Gerds
-##     Update #: 2
+##     Update #: 3
 #----------------------------------------------------------------------
 ## 
 ### Commentary: 
@@ -24,7 +24,7 @@ checkCauses <- function(cause,object){
         return(cause)
     }else{
          if (length(fitted.causes)<max(cause))
-             stop(paste0("Object has fitted ",length(fitted.causes)," competing causes. So, there is no ",max(cause),"th cause."))
+             stop(paste0("Object has fitted ",length(fitted.causes)," competing causes. So, there is no cause number: ",max(cause)))
          return(fitted.causes[cause])
      }
 }

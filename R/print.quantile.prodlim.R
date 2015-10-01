@@ -26,7 +26,7 @@ print.quantile.prodlim <- function(x,digits=2,na.val="--",...){
                         ";",
                         printx(tab[tab$q==0.25,"quantile"]),
                         ")",
-                        "\n")
+                        "\n",sep="")
                 else
                     cat("IQR (time):",
                         " (",
@@ -34,7 +34,7 @@ print.quantile.prodlim <- function(x,digits=2,na.val="--",...){
                         ";",
                         printx(tab[tab$q==0.75,"quantile"]),
                         ")",
-                        "\n")
+                        "\n",sep="")
                     
             }
         }

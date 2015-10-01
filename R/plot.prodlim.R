@@ -242,10 +242,19 @@
 ##' 
 ##' plot(ajfit,cause="stacked",select=2)
 ##' 
-##' ### conditional Aalen-Johansen estimator
+##' ### stratified Aalen-Johansen estimator
 ##' ajfitX1 <- prodlim(Hist(time, event) ~ X1, data = datCR)
 ##' plot(ajfitX1)
 ##' 
+##' ## add total number at-risk to a stratified curve
+##' ttt = 1:10
+##' plot(ajfitX1,atrisk.at=ttt,col=2:3)
+##' plot(ajfit,add=TRUE,col=1)
+##' atRisk(ajfit,newdata=datCR,col=1,times=ttt,line=3,labels="Total")
+##' 
+##'
+##' ## stratified Aalen-Johansen estimator in nearest neighborhoods
+##' ## of a continuous variable
 ##' ajfitX <- prodlim(Hist(time, event) ~ X1+X2, data = datCR)
 ##' plot(ajfitX,newdata=data.frame(X1=c(1,1,0),X2=c(4,10,10)))
 ##' plot(ajfitX,newdata=data.frame(X1=c(1,1,0),X2=c(4,10,10)),cause=2)
@@ -425,12 +434,12 @@ plot.prodlim <- function(x,
   
   background.DefaultArgs <- list(xlim=xlim,
                                  ylim=ylim,
-                                 horizontal=seq(0,1,.25),
+                                 horizontal=seq(ylim[1],ylim[2],diff(ylim)/4),
                                  vertical=NULL,
                                  bg="white",
                                  fg="gray88")
   axis1.DefaultArgs <- list()
-  axis2.DefaultArgs <- list(at=seq(0,ylim[2],ylim[2]/4),side=2)
+  axis2.DefaultArgs <- list(at=seq(ylim[1],ylim[2],ylim[2]/4),side=2)
   lines.DefaultArgs <- list(type="s")
   plot.DefaultArgs <- list(x=0,y=0,type = "n",ylim = ylim,xlim = xlim,xlab = xlab,ylab = ylab)
   marktime.DefaultArgs <- list(x=Y,nlost=lapply(sumX,function(x)x[,"n.lost"]),times=plot.times,pch="I",col=col)

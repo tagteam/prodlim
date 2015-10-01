@@ -9,30 +9,39 @@
 #' given. Confidence intervals are displayed when they are part of the fitted
 #' object.
 #' 
-#' @param object
-#' 
-#' An object with class `prodlim' derived with \code{\link{prodlim}}
-#' @param times Vector of times at which to return the estimated probabilities.
-#' @param newdata A data frame with the same variable names as those that
-#' appear on the right hand side of the 'prodlim' formula.  Defaults to
-#' \code{object$X}.
-#' @param max.tables Integer. If \code{newdata} is not given the value of
-#' \code{max.tables} decides about the maximal number of tables to be shown.
-#' Defaults to 20.
-#' @param surv Logical. If FALSE report event probabilities instead of survival
-#' probabilities. Only available for \code{object$model=="survival"}.
+#' @param object An object with class `prodlim' derived with
+#' \code{\link{prodlim}}
+#' @param times Vector of times at which to return the estimated
+#' probabilities.
+#' @param newdata A data frame with the same variable names as those
+#' that appear on the right hand side of the 'prodlim' formula.
+#' Defaults to \code{object$X}.
+#' @param max.tables Integer. If \code{newdata} is not given the value
+#' of \code{max.tables} decides about the maximal number of tables to
+#' be shown.  Defaults to 20.
+#' @param surv Logical. If FALSE report event probabilities instead of
+#' survival probabilities. Only available for
+#' \code{object$model=="survival"}.
 #' @param cause The cause for predicting the cause-specific cumulative
 #' incidence function in competing risk models.
-#' @param intervals Logical. If TRUE count events and censored in intervals
-#' between the values of \code{times}.
-#' @param percent Logical. If TRUE all estimated values are multiplied by 100
-#' and thus interpretable on a percent scale.
-#' @param showTime If \code{TRUE} evaluation times are put into a column of the
-#' output table, otherwise evaluation times are shown as rownames.
-#' @param \dots Further arguments that are passed to the print function.
+#' @param intervals Logical. If TRUE count events and censored in
+#' intervals between the values of \code{times}.
+#' @param percent Logical. If TRUE all estimated values are multiplied
+#' by 100 and thus interpretable on a percent scale.
+#' @param showTime If \code{TRUE} evaluation times are put into a
+#' column of the output table, otherwise evaluation times are shown as
+#' rownames.
+#' @param asMatrix Control the output format when there are multiple
+#' life tables, either because of covariate strata or competing causes
+#' or both.  If not missing and not FALSE, reduce multiple life tables
+#' into a matrix with new columns \code{X} for covariate strata and
+#' \code{Event} for competing risks.
+#' @param ... Further arguments that are passed to the print
+#' function.
 #' @return A data.frame with the relevant information.
 #' @author Thomas A. Gerds \email{tag@@biostat.ku.dk}
 #' @seealso \code{\link{prodlim}}, \code{\link{summary.Hist}}
+#' 
 #' @keywords survival
 ##' @examples
 ##' 
@@ -72,10 +81,12 @@
 ##' fit1 <- prodlim(Hist(time,event)~sex,data=d)
 ##' print(summary(fit1,times=c(1,5,10),intervals=TRUE,percent=TRUE),digits=3)
 ##' 
+##' summary(fit1,times=c(1,5,10),asMatrix=TRUE,intervals=TRUE,percent=TRUE)
+##' 
 ##' fit2 <- prodlim(Hist(time,event)~Z,data=d)
 ##' print(summary(fit2,times=c(1,5,10),intervals=TRUE,percent=TRUE),digits=3)
 ##' 
-##' ## Beran estimator
+##' ## Continuous strata (Beran estimator)
 ##' # -----------------------------------------------------------------------------------------
 ##' fit3 <- prodlim(Hist(time,event)~age,data=d)
 ##' print(summary(fit3,
@@ -93,9 +104,17 @@
 ##'               intervals=TRUE,
 ##'               percent=TRUE),digits=3)
 ##' 
+##' print(summary(fit4,
+##'               times=c(1,5,10),
+##'               newdata=data.frame(age=c(20,50,70),sex=c("female","male","male")),
+##'               intervals=TRUE,collapse=TRUE,
+##'               percent=TRUE),digits=3)
+##' 
 ##' ## assess results from summary
 ##' x <- summary(fit4,times=10,newdata=expand.grid(age=c(60,40,50),sex=c("male","female")))
 ##' cbind(names(x$table),do.call("rbind",lapply(x$table,round,2)))
+##' 
+##' x <- summary(fit4,times=10,newdata=expand.grid(age=c(60,40,50),sex=c("male","female")))
 ##' 
 ##' ## Competing risks: Aalen-Johansen
 ##' # -----------------------------------------------------------------------------------------
@@ -103,8 +122,11 @@
 ##' crfit <- prodlim(Hist(time,event)~X1,data=d)
 ##' summary(crfit,times=c(1,2,5))
 ##' summary(crfit,times=c(1,2,5),cause=1,intervals=TRUE)
+##' summary(crfit,times=c(1,2,5),cause=1,asMatrix=TRUE)
+##' summary(crfit,times=c(1,2,5),cause=1:2,asMatrix=TRUE)
 ##' 
-##' # extract the results 
+##' 
+##' # extract the actual tables from the summary 
 ##' sumfit <- summary(crfit,times=c(1,2,5),print=FALSE)
 ##' sumfit$table[[1]] # cause 1
 ##' sumfit$table[[2]] # cause 2
@@ -121,6 +143,7 @@ summary.prodlim <- function(object,
                             intervals=FALSE,
                             percent=FALSE,
                             showTime=TRUE,
+                            asMatrix=FALSE,
                             ...) {
     # }}}
     # {{{  classify the situation
@@ -225,24 +248,23 @@ summary.prodlim <- function(object,
     }
     # }}}
     # {{{ output
-    if (is.list(ltab)) {
-        tab <- lapply(ltab,function(x){
-                          if (is.list(x)) {
-                              lapply(x,data.frame) }
-                          else{
-                              data.frame(as.matrix(x))
-                          }
-                      })
+    if (asMatrix!=FALSE) asMatrix <- TRUE
+    if (model=="competing.risks"){
+        ## out <- list(table=ltab,cause=cause)
+        if (asMatrix)
+            if (cotype>1)
+                ltab <- List2Matrix(ltab,depth=2,names=c("Event","X"))
+            else
+                ltab <- List2Matrix(ltab,depth=1,names=c("Event"))
+        
+    }else{
+         if(cotype>1 && asMatrix)
+             ltab <- List2Matrix(ltab,depth=1,names="X")
+     }
+    out <- list(table=ltab,model=model,cotype=cotype,asMatrix=asMatrix,percent=percent)
+    if (model=="competing.risks"){
+        out <- c(out,list(cause=cause))
     }
-    else{
-        tab <- data.frame(ltab)
-    }
-    if (model=="competing.risks")
-        out <- list(table=ltab,cause=cause)
-    else
-        out <- list(table=ltab)
-    out$model <- model
-    out$cotype <- cotype
     class(out) <- "summary.prodlim"
     out
     # }}}

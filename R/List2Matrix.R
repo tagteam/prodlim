@@ -3,9 +3,9 @@
 ## author: Thomas Alexander Gerds
 ## created: Sep 21 2015 (07:01) 
 ## Version: 
-## last-updated: Sep 21 2015 (07:51) 
+## last-updated: Sep 29 2015 (06:32) 
 ##           By: Thomas Alexander Gerds
-##     Update #: 3
+##     Update #: 6
 #----------------------------------------------------------------------
 ## 
 ### Commentary: Reduce a list to a matrix or data.frame and add list names as new columns
@@ -18,12 +18,15 @@
 ##'
 ##' Reduction is done with rbind.
 ##' @title Reduce list to a matrix or data.frame with names as new columns
-##' @param list
-##' @param depth
-##' @param names
+##' @param list A named list which contains nested lists 
+##' @param depth The depth in the list hierarchy until an rbindable object
+##' @param names Names for the list variables
 ##' @return Matrix or data.frame.
-##' @seealso 
-##' @examples 
+##' @examples
+##' 
+##' x=list(a=data.frame(u=1,b=2,c=3),b=data.frame(u=3,b=4,c=6))
+##' List2Matrix(x,depth=1,"X")
+##' @export
 ##' @author Thomas A. Gerds <tag@@biostat.ku.dk>
 List2Matrix <- function(list,depth,names){
     if (missing(names)) names <- paste0("D",1:depth)
