@@ -188,7 +188,7 @@ summary.prodlim <- function(object,
                                            "corresponding to the middle row (median of the number of rows in object$X) ",
                                            "and corresponding to the last row in object$X ...\n",
                                            "to see more tables use arguments `newdata' and `max.tables'\n"))
-                    X <- X[c(1,round(stats::median(1:NROW(X))),NROW(X)),,drop=FALSE]
+                    X <- X[c(1,round(median(1:NROW(X))),NROW(X)),,drop=FALSE]
                 }
             } else{
                   X <- unique.data.frame(newdata)

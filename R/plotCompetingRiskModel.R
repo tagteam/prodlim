@@ -22,7 +22,7 @@ plotCompetingRiskModel <- function(stateLabels,horizontal=TRUE,...){
   if (horizontal==TRUE){
     comprisk.model <- data.frame(time=1:3,status=1:3)
     CRHist <- with(comprisk.model,Hist(time,status,cens.code=2))
-    graphics::plot(CRHist,stateLabels=stateLabels,...)
+    plot(CRHist,stateLabels=stateLabels,...)
   }
   else{
     crHist <- Hist(time=1:nTrans,event=list(from=rep("1",nTrans),to=stateLabels[-1]))

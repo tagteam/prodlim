@@ -115,6 +115,6 @@ md4$timevar
 Thomas A. Gerds <tag@biostat.ku.dk>
 }
 \seealso{
-\code{\link{EventHistory.frame}} model.frame terms model.matrix stats::.getXlevels
+\code{\link{EventHistory.frame}} model.frame terms model.matrix .getXlevels
 }
 

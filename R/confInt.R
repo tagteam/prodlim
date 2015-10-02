@@ -60,7 +60,7 @@ confInt <- function(x,
         if (NROW(ci[[i]])>0){
             switch(citype,
                    "bars"={
-                       graphics::segments(x0=ci[[i]]$time,
+                       segments(x0=ci[[i]]$time,
                                 x1=ci[[i]]$time,
                                 y0=ci[[i]]$lower,
                                 y1=ci[[i]]$upper,
@@ -84,15 +84,15 @@ confInt <- function(x,
                        uuu <- uuu[neworder]
                        lll <- lll[neworder]
                        ttt <- sort(ttt)
-                       graphics::polygon(x=c(ttt,rev(ttt)),
+                       polygon(x=c(ttt,rev(ttt)),
                                y=c(lll,rev(uuu)),col=cc,border=NA)
                        ## xx=ci[[i]]$time
                        ## nix <- sapply(1:length(xx),function(b){
                        ## rect(xleft=xx[b],xright=xx[b+1],ybottom=ci[[i]]$lower[b],ytop=ci[[i]]$upper[b],col=cc,border=NA)
                        ## })
                    },{
-                       graphics::lines(x=ci[[i]]$time,ci[[i]]$lower,type="s",lwd=lwd[i],col=col[i],lty=lty[i],...)
-                       graphics::lines(x=ci[[i]]$time,ci[[i]]$upper,type="s",lwd=lwd[i],col=col[i],lty=lty[i],...)
+                       lines(x=ci[[i]]$time,ci[[i]]$lower,type="s",lwd=lwd[i],col=col[i],lty=lty[i],...)
+                       lines(x=ci[[i]]$time,ci[[i]]$upper,type="s",lwd=lwd[i],col=col[i],lty=lty[i],...)
                    })
         }
     })

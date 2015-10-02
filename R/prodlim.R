@@ -633,7 +633,7 @@
         if (model.type==1){
             if (!(is.null(Cout$se.surv))){
                 ## pointwise confidence intervals for survival probability
-                zval <- stats::qnorm(1- (1-conf.int)/2, 0,1)
+                zval <- qnorm(1- (1-conf.int)/2, 0,1)
                 lower <- pmax(Cout$surv - zval * Cout$se.surv,0)
                 lower[Cout$se.surv==0] <- 0
                 upper <- pmin(Cout$surv + zval * Cout$se.surv,1)
@@ -646,7 +646,7 @@
                 if (!(0<conf.int && conf.int<1)) conf.int <- 0.95
                 ## pointwise confidence intervals for cumulative incidence probabilities
                 # variance for cuminc (Korn & Dorey (1992), Stat in Med, Vol 11, page 815)
-                zval <- stats::qnorm(1- (1-conf.int)/2, 0,1)
+                zval <- qnorm(1- (1-conf.int)/2, 0,1)
                 lower <- lapply(1:NS, function(state){
                                     pmax(Cout$cuminc[[state]] - zval * Cout$se.cuminc[[state]],0)})
                 upper <- lapply(1:NS, function(state){

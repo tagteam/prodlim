@@ -1,6 +1,6 @@
 lifeTab.competing.risks <- function(object,times,cause,newdata,stats,intervals=FALSE,percent=TRUE,showTime=TRUE){
     # {{{---------get the indices--------------------------
-    IndeX <- stats::predict(object,newdata=newdata,level.chaos=0,times=times,type="list")
+    IndeX <- predict(object,newdata=newdata,level.chaos=0,times=times,type="list")
     # }}}
     # {{{--------------times-------------------------------
     times <- IndeX$times

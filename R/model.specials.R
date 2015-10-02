@@ -33,7 +33,7 @@ model.specials <- function(data,specials,allowInteractions=FALSE){
             sp.frame
         }
         else NULL})
-    all.varnames <- all.vars(stats::delete.response(Terms))
+    all.varnames <- all.vars(delete.response(Terms))
     unspecified <- all.varnames[!(all.varnames %in% unlist(lapply(special.frame,names)))]
     special.frame$unspecified <- data[,unspecified,drop=FALSE]
     special.frame

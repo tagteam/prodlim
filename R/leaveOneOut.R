@@ -37,7 +37,7 @@ leaveOneOut.survival <- function(object,times,lag=FALSE,...){
   status <- mr[,"status"]
   N <- length(obstimes)
   ##
-  S <- stats::predict(object,times=time,newdata=mr)
+  S <- predict(object,times=time,newdata=mr)
   ## idea: find the at-risk set for pseudo-value k by
   ##       substracting 1 in the period where subj k is
   ##       at risk. need the position of obstime.k in time ...

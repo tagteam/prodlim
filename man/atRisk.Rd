@@ -40,7 +40,7 @@ labels.}
 numbers).}
 
 \item{dist}{If \code{line} is missing, the distance of the upper
-most atrisk row from the inner plotting region: graphics::par()$mgp[2].}
+most atrisk row from the inner plotting region: par()$mgp[2].}
 
 \item{adjust.labels}{If \code{TRUE} the labels are left adjusted.}
 

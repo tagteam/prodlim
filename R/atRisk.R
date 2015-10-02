@@ -24,7 +24,7 @@
 #' @param adj Passed on to \code{mtext} for the labels (not the atriks
 #' numbers).
 #' @param dist If \code{line} is missing, the distance of the upper
-#' most atrisk row from the inner plotting region: graphics::par()$mgp[2].
+#' most atrisk row from the inner plotting region: par()$mgp[2].
 #' @param adjust.labels If \code{TRUE} the labels are left adjusted.
 #' @param ... Further arguments that are passed to the function
 #' \code{mtext}.
@@ -75,12 +75,12 @@ atRisk <- function(x,
     if (all(sapply(sumx,NCOL))==1)
         nlines <- length(sumx)
     if (missing(line)){
-        line <- graphics::par()$mgp[2] + dist +
+        line <- par()$mgp[2] + dist +
             (0:(2*nlines-1)) *interspace -(nlines-1)
     }
     if (missing(cex)) cex <- 1
     ## if (missing(pos)) pos <- min(times)
-    if (missing(pos)) pos <- graphics::par()$usr[1]
+    if (missing(pos)) pos <- par()$usr[1]
     if (missing(adj)) adj <- 1
     if (missing(labels))
         if (length(names(sumx)==nlines))
@@ -100,7 +100,7 @@ atRisk <- function(x,
       }
     ##
     if (!is.null(title))
-        graphics::mtext(title,
+        mtext(title,
                         side=1,
                         at=pos,
                         col=tcol,
@@ -117,7 +117,7 @@ atRisk <- function(x,
     if (length(col)==nlines/2) ## 1 cluster level
         col <- rep(col,rep(2,length(col)))
     lapply(1:nlines,function(y){
-               graphics::mtext(text=as.character(sumx[[y]]),
+               mtext(text=as.character(sumx[[y]]),
                                side=1,
                                at=times,
                                line=rep(line[y],length(times)),
@@ -135,7 +135,7 @@ atRisk <- function(x,
                          lcol <- labelcol[y]
                  }
                ## print(labels[y])
-               graphics::mtext(text=labels[y],
+               mtext(text=labels[y],
                                side=1,
                                at=pos,
                                col=labelcol[y],

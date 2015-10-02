@@ -18,5 +18,5 @@
 #' 
 #' @export
 PercentAxis <- function(x,at,...){
-  graphics::axis(x,at=at,labels=paste(100*at,"%"),...)
+  axis(x,at=at,labels=paste(100*at,"%"),...)
 }
