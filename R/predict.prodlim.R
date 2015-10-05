@@ -251,7 +251,10 @@
       ##        order of names needs to
       ##        obey level.chaos
       names.strata <- apply(do.call("cbind",lapply(names(requested.X),function(n){
-          paste(n,format(requested.X[,n],digits=2),sep="=")})),1,paste,collapse=", ")
+                                                            if(is.numeric(requested.X[,n]))
+                                                                paste(n,format(requested.X[,n],digits=2),sep="=")
+                                                            else 
+                                                                paste(n,requested.X[,n],sep="=")})),1,paste,collapse=", ")
       if (level.chaos==0) {names.strata <- names.strata[new.order]}
       ##     print(names.strata)
       predictors <- predictors
