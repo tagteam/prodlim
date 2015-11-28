@@ -41,7 +41,8 @@
                                ...){
     ## require(stats)
     ## stopifnot(x$model=="survival")
-    if (attr(x$model.response,"entry.type")=="leftTruncated")
+    etype <- attr(x$model.response,"entry.type")
+    if (!is.null(etype) && etype=="leftTruncated")
         stop("Don't know how to compute quantiles with delayed entry (left-truncation).")
     if(x$model=="survival"){
         if (missing(q)) q <- c(1,.75,0.5,.25,0)
@@ -49,13 +50,13 @@
         sumx <- summary(x,newdata=x$X,times=x$time,showTime=TRUE,verbose=FALSE)
         getQ <- function(sum){
             out <- do.call("cbind",lapply(c("surv","lower","upper"),function(w){
-                notna=is.na(sum[,w])
-                xxx=as.numeric(sum[,w,drop=TRUE][!notna])
-                ttt=as.numeric(sum[,"time"][!notna])
-                found <- 2+sindex(jump.times=xxx,eval.times=q,comp="greater",strict=FALSE)
-                inner <- c(as.vector(c(0,ttt)[found]))
-                inner
-            }))
+                                               notna=is.na(sum[,w])
+                                               xxx=as.numeric(sum[,w,drop=TRUE][!notna])
+                                               ttt=as.numeric(sum[,"time"][!notna])
+                                               found <- 2+sindex(jump.times=xxx,eval.times=q,comp="greater",strict=FALSE)
+                                               inner <- c(as.vector(c(0,ttt)[found]))
+                                               inner
+                                           }))
             out <- data.frame(out)
             out <- cbind(q,out)
             names(out) <- c("q","quantile","lower","upper")
@@ -66,34 +67,34 @@
         class(out) <- "quantile.prodlim"
         out
     } else{
-        ## cumulative incidence, competing risks
-        if (missing(q)) q <- c(0,0.25,0.5,0.75,1)
-        sumx <- summary(x,newdata=x$X,times=x$time,showTime=TRUE,verbose=FALSE,cause=cause)
-        getQ <- function(sum){
-            out <- do.call("cbind",lapply(c("cuminc","lower","upper"),function(w){
-                notna=is.na(sum[,w])
-                xxx=as.numeric(sum[,w][!notna])
-                ttt=as.numeric(sum[,"time"][!notna])
-                ## found <- 2+sindex(jump.times=xxx,eval.times=q,comp="greater",strict=FALSE)
-                found <- 2+sindex(jump.times=xxx,eval.times=q,comp="smaller",strict=FALSE)
-                inner <- c(as.vector(c(0,ttt)[found]))
-                inner
-            }))
-            out <- data.frame(out)
-            out <- cbind(q,out)
-            ## upper is lower and lower is upper
-            names(out) <- c("q","quantile","upper","lower")
-            out <- out[,c("q","quantile","lower","upper")]
-            out}
-        if (sumx$cotype==1)
-            out <- list("quantiles.cuminc"=getQ(sumx$table[[1]]))
-        else {
-            out <- lapply(sumx$table[[1]],getQ)
-        }
-        attr(out,"model") <- x$model
-        class(out) <- "quantile.prodlim"
-        out
-    }
+          ## cumulative incidence, competing risks
+          if (missing(q)) q <- c(0,0.25,0.5,0.75,1)
+          sumx <- summary(x,newdata=x$X,times=x$time,showTime=TRUE,verbose=FALSE,cause=cause)
+          getQ <- function(sum){
+              out <- do.call("cbind",lapply(c("cuminc","lower","upper"),function(w){
+                                                 notna=is.na(sum[,w])
+                                                 xxx=as.numeric(sum[,w][!notna])
+                                                 ttt=as.numeric(sum[,"time"][!notna])
+                                                 ## found <- 2+sindex(jump.times=xxx,eval.times=q,comp="greater",strict=FALSE)
+                                                 found <- 2+sindex(jump.times=xxx,eval.times=q,comp="smaller",strict=FALSE)
+                                                 inner <- c(as.vector(c(0,ttt)[found]))
+                                                 inner
+                                             }))
+              out <- data.frame(out)
+              out <- cbind(q,out)
+              ## upper is lower and lower is upper
+              names(out) <- c("q","quantile","upper","lower")
+              out <- out[,c("q","quantile","lower","upper")]
+              out}
+          if (sumx$cotype==1)
+              out <- list("quantiles.cuminc"=getQ(sumx$table[[1]]))
+          else {
+              out <- lapply(sumx$table[[1]],getQ)
+          }
+          attr(out,"model") <- x$model
+          class(out) <- "quantile.prodlim"
+          out
+      }
 }
       
 

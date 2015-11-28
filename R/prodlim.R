@@ -247,7 +247,7 @@
                               check.formula=TRUE)
     event.history <- EHF$event.history
     response <- EHF$event.history
-    if (reverse==TRUE){      ## estimation of censoring distribution
+    if (reverse==TRUE){ ## estimation of censoring distribution
         model.type <- 1
     }else{
         model.type <- match(attr(event.history,"model"),c("survival","competing.risks","multi.states"))

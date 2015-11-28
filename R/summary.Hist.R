@@ -75,15 +75,28 @@ summary.Hist <- function(object, verbose=TRUE,...){
         ## entry time
         entry.type <- attr(object,"entry.type")
         if (entry.type!="")
-            entry.string <- paste("with ",entry.type," entry time",sep="")
+            entry.string <- paste(" with ",entry.type," entry time",sep="")
         else
             entry.string <- ""
-        cat(paste("\n",cens.string," ",model.string," ",entry.string,"\n",sep=""))
+        ## stop time
+        stop.time <- attr(object,"stop.time")
+        if (is.null(stop.time))
+            stop.string <- ""
+        else
+            stop.string <- paste(" stopped at time ",stop.time,sep="")
+        cat("\n",
+            cens.string,
+            " ",
+            model.string,
+            entry.string,
+            stop.string,
+            "\n",
+            sep="")
         cat("\nNo.Observations:",NROW(object),"\n\nPattern:\n")
         switch(model,"survival"={
-            prmatrix(cbind(names(Freq),Freq),
-                     quote=FALSE,
-                     rowlab=rep("",NROW(Freq)))},
+                         prmatrix(cbind(names(Freq),Freq),
+                                  quote=FALSE,
+                                  rowlab=rep("",NROW(Freq)))},
                "competing.risks"={
                    events <- getEvent(object)
                    prout <- table("Cause"=events,as.character(Observations))
