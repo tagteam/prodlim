@@ -20,11 +20,8 @@
 #' @aliases plot.prodlim lines.prodlim
 #' @param x an object of class `prodlim' as returned by the
 #' \code{prodlim} function.
-#' @param type controls what part of the object is plotted.  Defaults
-#' to \code{"survival"} for the Kaplan-Meier estimate of the survival
-#' function in two state models and to \code{"incidence"} for the
-#' Aalen-Johansen estimate of the cumulative incidence function in
-#' competing risk models
+#' @param type Either \code{"surv"} or \code{"cuminc"} controls what part of the object is plotted. 
+# Defaults to \code{object$type}.  
 #' @param cause determines the cause of the cumulative incidence
 #' function.  Currently one cause is allowed at a time, but you may
 #' call the function again with add=TRUE to add the lines of the other
@@ -315,8 +312,9 @@ plot.prodlim <- function(x,
   model <- x$model                 # survival, competing risks or multi-state
   clusterp <- !is.null(x$clustervar)
   if (missing(type)||is.null(type)){
-      type <- switch(model,"survival"="surv","competing.risks"="cuminc","multi.states"="hazard")
-      if (!is.null(x$reverse) && x$reverse==TRUE && model=="survival") type <- "cuminc"
+      type <- x$type
+      ## type <- switch(model,"survival"="surv","competing.risks"="cuminc","multi.states"="hazard")
+      ## if (!is.null(x$reverse) && x$reverse==TRUE && model=="survival") type <- "cuminc"
   }
   else
       type <- match.arg(type,c("surv","cuminc","hazard"))
@@ -362,7 +360,10 @@ plot.prodlim <- function(x,
    }
   ## Y <- predict(x,times=plot.times,newdata=newdata,level.chaos=1,type=type,cause=cause,mode="list")
   startValue=ifelse(type=="surv",1,0)
-  stats=list(c(type,startValue))
+  if (type=="hazard" && model!="survival")
+      stats=list(c("cause.hazard",0))
+  else
+      stats=list(c(type,startValue))
   if (model=="survival" && type=="cuminc") {
       startValue=1
       stats=list(c("surv",startValue))
@@ -401,22 +402,21 @@ plot.prodlim <- function(x,
   }
   ## cover both no covariate and single newdata:
   if (!is.null(dim(sumX))) sumX <- list(sumX)
-
   if (model=="survival" && type=="cuminc"){
       Y <- lapply(sumX,function(x)1-x[,"surv"])
       names(Y) <- names(sumX)
       nlines <- length(Y)
   } else{
-      Y <- lapply(sumX,function(x)x[,type])
-      names(Y) <- names(sumX)
-      if (!missing(select)){
-          if (length(select)==1)
-              Y <- Y[select]
-          else
-              Y <- Y[select]
-      }
-      nlines <- length(Y)
-  }
+        Y <- lapply(sumX,function(x)x[,type])
+        names(Y) <- names(sumX)
+        if (!missing(select)){
+            if (length(select)==1)
+                Y <- Y[select]
+            else
+                Y <- Y[select]
+        }
+        nlines <- length(Y)
+    }
   
   # }}}
   # {{{  getting default arguments for plot, atrisk, axes, legend, confint, marktime

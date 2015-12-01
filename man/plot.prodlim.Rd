@@ -15,11 +15,7 @@
 \item{x}{an object of class `prodlim' as returned by the
 \code{prodlim} function.}
 
-\item{type}{controls what part of the object is plotted.  Defaults
-to \code{"survival"} for the Kaplan-Meier estimate of the survival
-function in two state models and to \code{"incidence"} for the
-Aalen-Johansen estimate of the cumulative incidence function in
-competing risk models}
+\item{type}{Either \code{"surv"} or \code{"cuminc"} controls what part of the object is plotted.}
 
 \item{cause}{determines the cause of the cumulative incidence
 function.  Currently one cause is allowed at a time, but you may

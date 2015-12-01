@@ -10,65 +10,78 @@ prodlim(formula, data = parent.frame(), subset, na.action = NULL,
   reverse = FALSE, conf.int = 0.95, bandwidth = NULL, caseweights,
   discrete.level = 3, x = TRUE, maxiter = 1000, grid, tol = 7,
   method = c("npmle", "one.step", "impute.midpoint", "impute.right"),
-  exact = TRUE)
+  exact = TRUE, type)
 }
 \arguments{
-\item{formula}{A formula whose left hand side is a \code{Hist} object. In
-some special cases it can also be a \code{Surv} response object, see the
-details section. The right hand side is as usual a linear combination of
-covariates which may contain at most one continuous factor. Whether or not a
-covariate is recognized as continuous or discrete depends on its class and
-on the argument \code{discrete.level}. The right hand side may also be used
-to specify clusters, see the details section.}
+\item{formula}{A formula whose left hand side is a \code{Hist}
+object. In some special cases it can also be a \code{Surv}
+response object, see the details section. The right hand side is
+as usual a linear combination of covariates which may contain at
+most one continuous factor. Whether or not a covariate is
+recognized as continuous or discrete depends on its class and on
+the argument \code{discrete.level}. The right hand side may also
+be used to specify clusters, see the details section.}
 
-\item{data}{A data.frame in which all the variables of \code{formula} can be
-interpreted.}
+\item{data}{A data.frame in which all the variables of
+\code{formula} can be interpreted.}
 
-\item{subset}{Passed as argument \code{subset} to function \code{subset} which applied to \code{data} before the formula is processed.}
+\item{subset}{Passed as argument \code{subset} to function
+\code{subset} which applied to \code{data} before the formula is
+processed.}
 
-\item{na.action}{All lines in data with any missing values in the variables of formula are removed.}
+\item{na.action}{All lines in data with any missing values in the
+variables of formula are removed.}
 
-\item{reverse}{For right censored data, if reverse=TRUE then the censoring
-distribution is estimated.}
+\item{reverse}{For right censored data, if reverse=TRUE then the
+censoring distribution is estimated.}
 
-\item{conf.int}{The level (between 0 and 1) for two-sided pointwise
-confidence intervals. Defaults to 0.95. Remark: only plain Wald-type confidence limits are available.}
+\item{conf.int}{The level (between 0 and 1) for two-sided
+pointwise confidence intervals. Defaults to 0.95. Remark: only
+plain Wald-type confidence limits are available.}
 
 \item{bandwidth}{Smoothing parameter for nearest neighborhoods
 based on the values of a continuous covariate. See function
 \code{neighborhood} for details.}
 
-\item{caseweights}{Weights applied to the contribution of each subject to
-change the number of events and the number at risk. This can be used for
-bootstrap and survey analysis. Should be a vector of the same length and the
-same order as \code{data}.}
+\item{caseweights}{Weights applied to the contribution of each
+subject to change the number of events and the number at
+risk. This can be used for bootstrap and survey analysis. Should
+be a vector of the same length and the same order as \code{data}.}
 
-\item{discrete.level}{Numeric covariates are treated as factors when their
-number of unique values exceeds not \code{discrete.level}. Otherwise the
-product limit method is applied, in overlapping neighborhoods according to
-the bandwidth.}
+\item{discrete.level}{Numeric covariates are treated as factors
+when their number of unique values exceeds not
+\code{discrete.level}. Otherwise the product limit method is
+applied, in overlapping neighborhoods according to the bandwidth.}
 
-\item{x}{logical value: if \code{TRUE}, the full covariate matrix with is returned in component \code{model.matrix}.
-The reduced matrix contains unique rows of the full covariate matrix and is always returned in component \code{X}.}
+\item{x}{logical value: if \code{TRUE}, the full covariate matrix
+with is returned in component \code{model.matrix}.  The reduced
+matrix contains unique rows of the full covariate matrix and is
+always returned in component \code{X}.}
 
 \item{maxiter}{For interval censored data only.  Maximal number of
-iterations to obtain the nonparametric maximum likelihood estimate.
-Defaults to 1000.}
+iterations to obtain the nonparametric maximum likelihood
+estimate.  Defaults to 1000.}
 
-\item{grid}{For interval censored data only. When method=one.step grid for
-one-step product limit estimate. Defaults to sorted list of unique left and
-right endpoints of the observed intervals.}
+\item{grid}{For interval censored data only. When method=one.step
+grid for one-step product limit estimate. Defaults to sorted list
+of unique left and right endpoints of the observed intervals.}
 
-\item{tol}{For interval censored data only. Numeric value whose negative
-exponential is used as convergence criterion for finding the nonparametric
-maximum likelihood estimate.  Defaults to 7 meaning exp(-7).}
+\item{tol}{For interval censored data only. Numeric value whose
+negative exponential is used as convergence criterion for finding
+the nonparametric maximum likelihood estimate.  Defaults to 7
+meaning exp(-7).}
 
-\item{method}{For interval censored data only.  If equal to \code{"npmle"}
-(the default) use the usual Turnbull algorithm, else the product limit
-version of the self-consistent estimate.}
+\item{method}{For interval censored data only.  If equal to
+\code{"npmle"} (the default) use the usual Turnbull algorithm,
+else the product limit version of the self-consistent estimate.}
 
-\item{exact}{If TRUE the grid of time points used for estimation includes
-all the L and R endpoints of the observed intervals.}
+\item{exact}{If TRUE the grid of time points used for estimation
+includes all the L and R endpoints of the observed intervals.}
+
+\item{type}{In two state models either \code{"surv"} for the Kaplan-Meier estimate of the survival
+function or \code{"cuminc"} for 1-Kaplan-Meier. Default is \code{"surv"} when \code{reverse==FALSE} and \code{"cuminc"} when \code{reverse==TRUE}.
+In competing risks models it has to be \code{"cuminc"}
+Aalen-Johansen estimate of the cumulative incidence function.}
 }
 \value{
 Object of class "prodlim". See \code{\link{print.prodlim}}, \code{\link{predict.prodlim}}, predict,
@@ -224,10 +237,11 @@ dat <- data.frame(entry=c(7,3,11,12,11,2,1,7,15,17,3),time=10:20,status=c(1,0,2,
 fitd <- prodlim(Hist(time=time,event=status,entry=entry)~1,data=dat)
 summary(fitd)
 plot(fitd)
-#'
 }
 \author{
 Thomas A. Gerds \email{tag@biostat.ku.dk}
+
+Thomas A. Gerds <tag@biostat.ku.dk>
 }
 \references{
 Andersen, Borgan, Gill, Keiding (1993) Springer `Statistical
