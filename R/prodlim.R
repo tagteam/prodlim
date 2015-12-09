@@ -484,7 +484,9 @@
                        "\nthis is not the same as the number of subjects\nwith no missing values, which is ",
                        NROW(response),
                        sep=""))
-        caseweights <- caseweights[event.time.order]
+        ## caseweights <- caseweights[event.time.order]
+        ## fixes bug in versions < 1.5.7 
+        caseweights <- caseweights[sorted]
     }
     # }}}
     # {{{  cluster correlated data need an adjusted variance formula

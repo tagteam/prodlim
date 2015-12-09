@@ -291,7 +291,6 @@ sum0
 sum1
 #+END_SRC   
 
-
 ** Bootstrap weights
 
 #+BEGIN_SRC R :results graphics :file "bw.png" :exports both :session *R* :cache yes 
@@ -306,7 +305,7 @@ plot(S2,add=TRUE,col=2,confint=FALSE,lwd=3)
 #+END_SRC   
 
 ** Case-weights 
-
+*** Without covariates
 #+BEGIN_SRC R :results graphics :file "compSurvey.png" :exports both :session *R* :cache yes 
 library(survey)
 library(survival)
@@ -323,6 +322,38 @@ prodlim.1 <- prodlim(Hist(time,status>0)~1,data=pbc,caseweights=pbc$randprob)
 plot(prodlim.1,add=TRUE,col=2,confint=FALSE)
 #+END_SRC   
 
+*** With  covariates
+
+#+BEGIN_SRC R  :results output raw drawer  :exports results  :session *R* :cache yes 
+d <- data.frame(time=c(1:2,1:2),status=c(1,1,1,1),group=c(1,1,2,2),w=c(0.5,1,8,1))
+d$w <- c(1,1,.5,1)
+x <- prodlim(Hist(time,status)~ group, data=d, caseweights = d$w)
+x1 <- prodlim(Hist(time,status)~ 1, data=d[d$group==1,], caseweights = d[d$group==1,]$w)
+x2 <- prodlim(Hist(time,status)~ 1, data=d[d$group==2,], caseweights = d[d$group==2,]$w)
+cbind(x$surv, c(x1$surv, x2$surv))
+#+END_SRC
+
+#+BEGIN_SRC R :results graphics :file "compSurvey.png" :exports both :session *R* :cache yes 
+library(survey)
+library(survival)
+library(prodlim)
+set.seed(0815)
+dat <- SimSurv(30)
+dat$weights <- runif(30) # some nonsensical weights (0,1)
+dat$group   <- rbinom(30,1,0.5) # some grouping
+pfitw <- prodlim(Hist(time,status)~ group, data=dat, caseweights = dat$weights)
+sfitw <- survfit(Surv(time,status)~ group, data=dat, conf.type="plain", weights=dat$weights)
+all(round(pfitw$surv,12)==round(sfitw$surv,12)) # FALSE
+cbind(round(pfitw$surv,10),round(sfitw$surv,10))
+# compare with survey package
+design <- svydesign(ids=~1, weights=~weights, data=dat)
+svyfit <- svykm(Surv(time,status) ~ group , design=design)
+# quartiles of survfit and svykm agree
+t(sapply(svyfit, quantile))
+quantile(sfitw)$quantile # as for svykm
+quantile(pfitw) # different
+#+END_SRC
+
 ** delayed entry 
 *** Without covariates
 
@@ -334,20 +365,18 @@ plot(survfit.delay,lwd=8)
 plot(prodlim.delay,lwd=4,col=2,add=TRUE,confint=FALSE)
 #+END_SRC
 
-    
 *** With covariates
 
 #+BEGIN_SRC R :results graphics :file "compSurvDelayEdema.png" :exports both :session *R* :cache yes 
-  pbc0 <- pbc
-  pbc0$entry <- round(pbc0$time/5)
-  survfit.delay.edema <- survfit(Surv(entry,time,status!=0)~edema,data=pbc0)
-  ## survfit.delay.edema.0.5 <- survfit(Surv(entry,time,status!=0)~1,data=pbc0[pbc0$edema==0.5,])
-  prodlim.delay.edema <- prodlim(Hist(time,status!=0,entry=entry)~edema,data=pbc0)
-  ## prodlim.delay.edema.0.5 <- prodlim(Hist(time,status!=0,entry=entry)~1,data=pbc0[pbc0$edema==0.5,])
-  plot(survfit.delay.edema,conf.int=FALSE,col=1:3,lwd=8)
-  plot(prodlim.delay.edema,add=TRUE,confint=FALSE,col=c("gray88","orange",5),lwd=4)
+pbc0 <- pbc
+pbc0$entry <- round(pbc0$time/5)
+survfit.delay.edema <- survfit(Surv(entry,time,status!=0)~edema,data=pbc0)
+## survfit.delay.edema.0.5 <- survfit(Surv(entry,time,status!=0)~1,data=pbc0[pbc0$edema==0.5,])
+prodlim.delay.edema <- prodlim(Hist(time,status!=0,entry=entry)~edema,data=pbc0)
+## prodlim.delay.edema.0.5 <- prodlim(Hist(time,status!=0,entry=entry)~1,data=pbc0[pbc0$edema==0.5,])
+plot(survfit.delay.edema,conf.int=FALSE,col=1:3,lwd=8)
+plot(prodlim.delay.edema,add=TRUE,confint=FALSE,col=c("gray88","orange",5),lwd=4)
 #+END_SRC    
-
 
 ** Stacked plot
   
