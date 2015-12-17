@@ -26,14 +26,18 @@
 #' function.  Currently one cause is allowed at a time, but you may
 #' call the function again with add=TRUE to add the lines of the other
 #' causes.
-#' @param select Select which lines to plot. This can be used when there are many strata or many competing risks to select a subset of the lines. However, a more clean way to select covariate stratat is to use newdata argument. With many competing risks, it is useful for the stacked plot to stack and show only a subset of the cumulative incidence functions. 
-#' @param newdata a data frame containing strata for which plotted
-#' curves are desired. When omitted element \code{X} of object
+#' @param select Select which lines to plot. This can be used when there
+#' are many strata or many competing risks to select a subset of the lines.
+#' However, a more clean way to select covariate stratat is to use argument \code{newdata}.
+#' Another application is when there are many competing risks and it is desired (for the stacked plot)
+#'  to stack and show only a subset of the cumulative incidence functions. 
+#' @param newdata a data frame containing covariate strata for which to show 
+#' curves. When omitted element \code{X} of object
 #' \code{x} is used.
-#' @param add if 'TRUE' curves are added to an existing plot.
-#' @param col color for curves defaults to 1:number(curves)
-#' @param lty line type for curves defaults to 1
-#' @param lwd line width for all curves
+#' @param add if \code{TRUE} curves are added to an existing plot.
+#' @param col color for curves. Default is \code{1:number(curves)}
+#' @param lty line type for curves. Default is 1.
+#' @param lwd line width for all curves. Default is 3.
 #' @param ylim limits of the y-axis
 #' @param xlim limits of the x-axis
 #' @param xlab label for the x-axis
@@ -291,18 +295,19 @@ plot.prodlim <- function(x,
                          percent=TRUE,
                          minAtrisk=0,
                          limit=10,
+                         ## time.scale="same",
                          ...){
 
-  # }}}
-# {{{  backward compatibility
-  ##   args=match.call(expand=TRUE)
-  ##   args[[1]]=list
-  allArgs <- match.call()
-  if (missing(type)){
-    type=allArgs[[match("what",names(allArgs))]]
-  }
-  # }}}
-  # {{{  extracting a list of lines to draw
+    # }}}
+    # {{{  backward compatibility
+    ##   args=match.call(expand=TRUE)
+    ##   args[[1]]=list
+    allArgs <- match.call()
+    if (missing(type)){
+        type=allArgs[[match("what",names(allArgs))]]
+    }
+    # }}}
+    # {{{  extracting a list of lines to draw
 
   cens.type <- x$cens.type    # uncensored, right or interval censored
   if (cens.type=="intervalCensored") {
@@ -326,6 +331,7 @@ plot.prodlim <- function(x,
   else{
       plot.times <- sort(unique(x$time))
       if (plot.times[1]>timeOrigin) plot.times <- c(timeOrigin,plot.times)
+      else plot.times <- c(timeOrigin,plot.times[plot.times>timeOrigin])
   }
   if (length(x$clustervar)>0)
       nRisk <- x$n.risk[,1]
@@ -333,7 +339,7 @@ plot.prodlim <- function(x,
       nRisk <- x$n.risk
   if (minAtrisk>0 && any(nRisk<=minAtrisk)){
       if (all(nRisk<=minAtrisk)){
-          return(plot(0,0,type="n",xlim=c(0, max(plot.times)),ylim=c(0, 1),axes=FALSE))
+          return(plot(0,0,type="n",xlim=c(min(plot.times), max(plot.times)),ylim=c(0, 1),axes=FALSE))
       }
       criticalTime <- min(x$time[nRisk<=minAtrisk])
       plot.times <- plot.times[plot.times<criticalTime]
@@ -343,6 +349,11 @@ plot.prodlim <- function(x,
       newdata <- x$X
       if (NROW(newdata)>limit)
           newdata <- newdata[c(1,round(median(1:NROW(newdata))),NROW(newdata)),,drop=FALSE]          
+  }
+  ## restrict plot.times to xlim
+  if (!missing(xlim)){
+      if (xlim[1]>plot.times[1]) plot.times <- plot.times[plot.times>=xlim[1]]
+      if (xlim[2]<plot.times[length(plot.times)]) plot.times <- plot.times[plot.times<=xlim[2]]
   }
   ## if (missing(newdata) && NROW(newdata)>limit)
   ## newdata <- newdata[c(1,round(median(1:NROW(newdata))),NROW(newdata)),,drop=FALSE]
@@ -385,12 +396,13 @@ plot.prodlim <- function(x,
                       stats=stats,
                       percent=FALSE)
   }
-  else
+  else{
       sumX <- lifeTab(x,
                       times=plot.times,
                       newdata=newdata,
                       stats=stats,
                       percent=FALSE)
+  }
   if (model=="competing.risks"){
       if (stacked == FALSE){
           sumX <- sumX[[cause]]
@@ -423,7 +435,7 @@ plot.prodlim <- function(x,
   
   if (missing(ylab)) ylab <- switch(type,"surv"=ifelse(x$reverse==TRUE,"Censoring probability","Survival probability"),"cuminc"="Cumulative incidence","hazard"="Cumulative hazard")
   if (missing(xlab)) xlab <- "Time"
-  if (missing(xlim)) xlim <- c(0, max(plot.times))
+  if (missing(xlim)) xlim <- c(min(plot.times), max(plot.times))
   if (missing(ylim)) ylim <- c(0, 1)
   if (missing(lwd)) lwd <- rep(3,nlines)
   if (missing(col)) col <- 1:nlines
@@ -483,7 +495,8 @@ plot.prodlim <- function(x,
                              titlecol=1,
                              title=atriskDefaultTitle,
                              labels=atriskDefaultLabels,
-                             times=seq(0,min(x$maxtime,xlim[2]),min(x$maxtime,xlim[2])/10))
+                             times=seq(min(plot.times),max(plot.times),(max(plot.times)-min(plot.times))/10))
+                             ## times=seq(0,min(x$maxtime,xlim[2]),min(x$maxtime,xlim[2])/10))
   if (!missing(select) && (!(model=="competing.risks" && stacked))){
       atrisk.DefaultArgs$newdata <- atrisk.DefaultArgs$newdata[select,,drop=FALSE]
   }
@@ -606,37 +619,37 @@ plot.prodlim <- function(x,
       }
       ## names(Y) <- attr(x$model.response,"states")
       nix <- lapply(1:nlines, function(s) {
-          yyy <- Y[[s]]
-          ppp <- plot.times
-          pos.na <- is.na(yyy)
-          ppp <- ppp[!pos.na]
-          yyy <- yyy[!pos.na]
-          lines(x = ppp,y = yyy,type = lines.type,col = col[s],lty = lty[s],lwd = lwd[s])
-          cc <- dimColor(col[s],density=55)
-          ttt <- ppp
-          nt <- length(ttt)
-          ttt <- c(ttt,ttt)
-          uuu <- c(0,yyy[-nt],yyy)
-          if (s==1)
-              lll <- rep(0,nt*2)
-          else
-              lll <- c(0,Y[[s-1]][!pos.na][-nt],Y[[s-1]][!pos.na])
-          neworder <- order(ttt)
-          uuu <- uuu[neworder]
-          lll <- lll[neworder]
-          ttt <- sort(ttt)
-          polygon(x=c(ttt,rev(ttt)),y=c(lll,rev(uuu)),col=cc,border=NA)
-      })
+                        yyy <- Y[[s]]
+                        ppp <- plot.times
+                        pos.na <- is.na(yyy)
+                        ppp <- ppp[!pos.na]
+                        yyy <- yyy[!pos.na]
+                        lines(x = ppp,y = yyy,type = lines.type,col = col[s],lty = lty[s],lwd = lwd[s])
+                        cc <- dimColor(col[s],density=55)
+                        ttt <- ppp
+                        nt <- length(ttt)
+                        ttt <- c(ttt,ttt)
+                        uuu <- c(0,yyy[-nt],yyy)
+                        if (s==1)
+                            lll <- rep(0,nt*2)
+                        else
+                            lll <- c(0,Y[[s-1]][!pos.na][-nt],Y[[s-1]][!pos.na])
+                        neworder <- order(ttt)
+                        uuu <- uuu[neworder]
+                        lll <- lll[neworder]
+                        ttt <- sort(ttt)
+                        polygon(x=c(ttt,rev(ttt)),y=c(lll,rev(uuu)),col=cc,border=NA)
+                    })
   }else{
-      nix <- lapply(1:nlines, function(s) {
-          lines(x = plot.times,
-                y = Y[[s]],
-                type = lines.type,
-                col = col[s],
-                lty = lty[s],
-                lwd = lwd[s])
-      })
-  }
+       nix <- lapply(1:nlines, function(s) {
+                         lines(x = plot.times,
+                               y = Y[[s]],
+                               type = lines.type,
+                               col = col[s],
+                               lty = lty[s],
+                               lwd = lwd[s])
+                     })
+   }
   # }}}
   # {{{  marks at the censored times
 

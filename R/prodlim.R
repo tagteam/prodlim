@@ -484,8 +484,9 @@
                        "\nthis is not the same as the number of subjects\nwith no missing values, which is ",
                        NROW(response),
                        sep=""))
+        ## wrong to order by event.time.order when there are covariates
         ## caseweights <- caseweights[event.time.order]
-        ## fixes bug in versions < 1.5.7 
+        ## this fixes bug in versions < 1.5.7 
         caseweights <- caseweights[sorted]
     }
     # }}}
