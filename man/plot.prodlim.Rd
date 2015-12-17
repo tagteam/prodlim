@@ -22,19 +22,23 @@ function.  Currently one cause is allowed at a time, but you may
 call the function again with add=TRUE to add the lines of the other
 causes.}
 
-\item{select}{Select which lines to plot. This can be used when there are many strata or many competing risks to select a subset of the lines. However, a more clean way to select covariate stratat is to use newdata argument. With many competing risks, it is useful for the stacked plot to stack and show only a subset of the cumulative incidence functions.}
+\item{select}{Select which lines to plot. This can be used when there
+are many strata or many competing risks to select a subset of the lines.
+However, a more clean way to select covariate stratat is to use argument \code{newdata}.
+Another application is when there are many competing risks and it is desired (for the stacked plot)
+ to stack and show only a subset of the cumulative incidence functions.}
 
-\item{newdata}{a data frame containing strata for which plotted
-curves are desired. When omitted element \code{X} of object
+\item{newdata}{a data frame containing covariate strata for which to show
+curves. When omitted element \code{X} of object
 \code{x} is used.}
 
-\item{add}{if 'TRUE' curves are added to an existing plot.}
+\item{add}{if \code{TRUE} curves are added to an existing plot.}
 
-\item{col}{color for curves defaults to 1:number(curves)}
+\item{col}{color for curves. Default is \code{1:number(curves)}}
 
-\item{lty}{line type for curves defaults to 1}
+\item{lty}{line type for curves. Default is 1.}
 
-\item{lwd}{line width for all curves}
+\item{lwd}{line width for all curves. Default is 3.}
 
 \item{ylim}{limits of the y-axis}
 
