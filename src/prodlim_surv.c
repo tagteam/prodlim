@@ -24,12 +24,9 @@ void prodlim_surv(double *y,
   hazard_temp=0;
   varhazard_temp=0;
   atrisk=(double) stop-start;
-  
   event[s] = status[start];
   loss[s] = (1-status[start]);
-  
   for (i=(1+start);i<=stop;i++){
-
     if (i<stop && y[i]==y[i-1]){
       event[s] += status[i];
       loss[s]  += (1-status[i]);
@@ -37,15 +34,15 @@ void prodlim_surv(double *y,
     else {
       time[s]=y[i-1];
       nrisk[s]=atrisk;
-      
       if (*reverse==1)
 	pl_step(&surv_temp, &hazard_temp, &varhazard_temp, atrisk, loss[s], event[s]);
       else
 	pl_step(&surv_temp, &hazard_temp, &varhazard_temp, atrisk, event[s], 0);
       surv[s]=surv_temp;
+      /* Rprintf("Before s=%d\thazard_temp=%1.2f\t\n",s,hazard[s]);  */
       hazard[s]=hazard_temp;
+      /* Rprintf("After s=%d\thazard_temp=%1.2f\t\n",s,hazard[s]);  */
       varhazard[s] = varhazard_temp;
-      
       if (i<stop){
 	atrisk-=(event[s]+loss[s]);
 	s++;
@@ -80,7 +77,6 @@ void prodlimSurvPlus(double *y,
 		     ){
   int i,e,s,entered;
   double surv_temp,hazard_temp,varhazard_temp,atrisk;
-  
   e=0;
   s=(*t);
   surv_temp=1; 
@@ -161,7 +157,9 @@ void prodlimSurvPlus(double *y,
       else
 	pl_step(&surv_temp, &hazard_temp, &varhazard_temp, atrisk, event[s], 0);
       surv[s]=surv_temp;
+      /* Rprintf("Before s=%d\thazard_temp=%1.2f\t\n",s,hazard[s]); */
       hazard[s]=hazard_temp;
+      /* Rprintf("After s=%d\thazard_temp=%1.2f\t\n",s,hazard[s]); */
       varhazard[s] = varhazard_temp;
       if (i<stop){
 	atrisk-=(event[s]+loss[s]);

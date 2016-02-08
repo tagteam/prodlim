@@ -9,9 +9,9 @@
 #' sindex returns \code{0}. This must be considered when sindex is used for
 #' subsetting, see the Examples below.
 #' 
-#' @param jump.times Numeric vector: e.g.\ the unique jump times of a step
+#' @param jump.times Numeric vector: e.g. the unique jump times of a step
 #' function.
-#' @param eval.times Numeric vector: e.g.\ the times where the step function
+#' @param eval.times Numeric vector: e.g. the times where the step function
 #' should be evaluated
 #' @param strict If TRUE make the comparison of jump times and eval times
 #' strict

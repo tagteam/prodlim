@@ -110,10 +110,12 @@ void prodlim(double *y,
 
 
 void pl_step(double *pl,double *aj,double *v,double n,double d,int rev){
-  if (d > 0){	    
+  if (d > 0){	     
     *aj = (d / (double) (n - rev));	/* nelson-aalen */
-    *pl *= (1 - *aj); /* product limit */
     *v += (double) d / ((double) (n - rev) * (double) (n - rev - d)); /* greenwood variance */
+    *pl *= (1 - *aj); /* product limit */
+  } else{
+    *aj=0;
   }
 }
 

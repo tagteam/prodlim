@@ -18,3 +18,4 @@ LinkingTo: Rcpp
 Maintainer: Thomas A. Gerds <tag@biostat.ku.dk>
 License: GPL (>= 2)
 Packaged: Wed Oct 3 20:15:28 2007; tag
+RoxygenNote: 5.0.1

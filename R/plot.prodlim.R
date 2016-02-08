@@ -281,8 +281,9 @@ plot.prodlim <- function(x,
                          lwd,
                          ylim,
                          xlim,
-                         xlab="Time",
                          ylab,
+                         xlab="Time",
+                         timeconverter,
                          legend=TRUE,
                          logrank=FALSE,
                          marktime=FALSE,
@@ -430,89 +431,106 @@ plot.prodlim <- function(x,
         nlines <- length(Y)
     }
   
-  # }}}
-  # {{{  getting default arguments for plot, atrisk, axes, legend, confint, marktime
-  
-  if (missing(ylab)) ylab <- switch(type,"surv"=ifelse(x$reverse==TRUE,"Censoring probability","Survival probability"),"cuminc"="Cumulative incidence","hazard"="Cumulative hazard")
-  if (missing(xlab)) xlab <- "Time"
-  if (missing(xlim)) xlim <- c(min(plot.times), max(plot.times))
-  if (missing(ylim)) ylim <- c(0, 1)
-  if (missing(lwd)) lwd <- rep(3,nlines)
-  if (missing(col)) col <- 1:nlines
-  if (missing(lty)) lty <- rep(1, nlines)
-  if (length(lwd) < nlines) lwd <- rep(lwd, nlines)
-  if (length(lty) < nlines) lty <- rep(lty, nlines)
-  if (length(col) < nlines) col <- rep(col, nlines)
-  
-  background.DefaultArgs <- list(xlim=xlim,
-                                 ylim=ylim,
-                                 horizontal=seq(ylim[1],ylim[2],diff(ylim)/4),
-                                 vertical=NULL,
-                                 bg="white",
-                                 fg="gray88")
-  axis1.DefaultArgs <- list()
-  axis2.DefaultArgs <- list(at=seq(ylim[1],ylim[2],ylim[2]/4),side=2)
-  lines.DefaultArgs <- list(type="s")
-  plot.DefaultArgs <- list(x=0,y=0,type = "n",ylim = ylim,xlim = xlim,xlab = xlab,ylab = ylab)
-  marktime.DefaultArgs <- list(x=Y,nlost=lapply(sumX,function(x)x[,"n.lost"]),times=plot.times,pch="I",col=col)
-  if (length(Y)==1 && length(x$clustervar)==0){
-      atriskDefaultLabels <- "Subjects: "
-      atriskDefaultTitle <- ""
-  }
-  else{
-      if (length(x$clustervar)>0){
-          atriskDefaultTitle <- ""
-          atriskDefaultLabels <- rep(paste(c("Subjects","Clusters"),": ",sep=""),
-                                     nlines)
+    # }}}
+    # {{{  getting default arguments for plot, atrisk, axes, legend, confint, marktime
+    if (missing(xlim)) xlim <- c(min(plot.times), max(plot.times))
+    if (!missing(timeconverter)){
+        units <- strsplit(tolower(as.character(substitute(timeconverter))),"[ \t]?(2|to)[ \t]?")[[1]]
+        conversion <- switch(paste0(units,collapse="-"),
+                             "days-years"=1/365.25,
+                             "months-years"=1/12,
+                             "days-months"=1/30.4368499,
+                             "years-days"=365.25,
+                             "years-months"=12,
+                             "months-days"=30.4368499)
+        one <- switch(units[[1]],"years"=1,"months"=12,"days"=365.25)
+        xlab <- paste0("Time (", units[[2]],")")
+        axis1.DefaultArgs <- list(at=seq(xlim[1],xlim[2],one),labels=seq(xlim[1],xlim[2],one)*conversion)
+        atriskDefaultPosition <- seq(xlim[1],xlim[2],one)
+    } else {
+          if (missing(xlab)) xlab <- "Time"
+          axis1.DefaultArgs <- list()
+          atriskDefaultPosition <- seq(min(plot.times),max(plot.times),(max(plot.times)-min(plot.times))/10)
       }
-      else{
-          ## print(names(Y))
-          if (model=="competing.risks" && stacked==TRUE){
-              atriskDefaultTitle <- ""
-              atriskDefaultLabels <- "Subjects: "
-          }
-          else{
+    if (missing(ylab)) ylab <- switch(type,
+                                      "surv"=ifelse(x$reverse==TRUE,"Censoring probability","Survival probability"),
+                                      "cuminc"="Cumulative incidence",
+                                      "hazard"="Cumulative hazard")
+    if (missing(ylim)) ylim <- c(0, 1)
+    if (missing(lwd)) lwd <- rep(3,nlines)
+    if (missing(col)) col <- 1:nlines
+    if (missing(lty)) lty <- rep(1, nlines)
+    if (length(lwd) < nlines) lwd <- rep(lwd, nlines)
+    if (length(lty) < nlines) lty <- rep(lty, nlines)
+    if (length(col) < nlines) col <- rep(col, nlines)
+  
+    background.DefaultArgs <- list(xlim=xlim,
+                                   ylim=ylim,
+                                   horizontal=seq(ylim[1],ylim[2],diff(ylim)/4),
+                                   vertical=NULL,
+                                   bg="white",
+                                   fg="gray88")
+    axis2.DefaultArgs <- list(at=seq(ylim[1],ylim[2],ylim[2]/4),side=2)
+    lines.DefaultArgs <- list(type="s")
+    plot.DefaultArgs <- list(x=0,y=0,type = "n",ylim = ylim,xlim = xlim,xlab = xlab,ylab = ylab)
+    marktime.DefaultArgs <- list(x=Y,nlost=lapply(sumX,function(x)x[,"n.lost"]),times=plot.times,pch="I",col=col)
+    if (length(Y)==1 && length(x$clustervar)==0){
+        atriskDefaultLabels <- "Subjects: "
+        atriskDefaultTitle <- ""
+    }
+    else{
+        if (length(x$clustervar)>0){
+            atriskDefaultTitle <- ""
+            atriskDefaultLabels <- rep(paste(c("Subjects","Clusters"),": ",sep=""),
+                                       nlines)
+        }
+        else{
+            ## print(names(Y))
+            if (model=="competing.risks" && stacked==TRUE){
+                atriskDefaultTitle <- ""
+                atriskDefaultLabels <- "Subjects: "
+            }
+            else{
 
-              if ((length(grep("=",names(Y)))==length(names(Y)))){
-                  atriskDefaultLabels <- paste(gsub("[ \t]*$","",sapply(strsplit(names(Y),"="),function(x)x[[2]])),
-                                               ": ", sep="")
-                  atriskDefaultTitle <- unique(sapply(strsplit(names(Y),"="),function(x)x[[1]]))
-              }else{
-                   atriskDefaultTitle <- ""
-                   atriskDefaultLabels <- paste(gsub("[ \t]*$","",names(Y)),": ",sep="")
-               }
-          }
-      }
-      ## atriskDefaultLabels <- format(atriskDefaultLabels,justify="left")
-      ## atriskDefaultTitle <- ""
-  }
-  atrisk.DefaultArgs <- list(x=x,
-                             newdata=newdata,
-                             interspace=1,
-                             dist=.3,
-                             col=col,
-                             labelcol=1,
-                             titlecol=1,
-                             title=atriskDefaultTitle,
-                             labels=atriskDefaultLabels,
-                             times=seq(min(plot.times),max(plot.times),(max(plot.times)-min(plot.times))/10))
-                             ## times=seq(0,min(x$maxtime,xlim[2]),min(x$maxtime,xlim[2])/10))
-  if (!missing(select) && (!(model=="competing.risks" && stacked))){
-      atrisk.DefaultArgs$newdata <- atrisk.DefaultArgs$newdata[select,,drop=FALSE]
-  }
-  legend.DefaultArgs <- list(legend=names(Y),
-                             lwd=lwd,
-                             col=col,
-                             lty=lty,
-                             cex=1.5,
-                             bty="n",
-                             y.intersp=1.3,
-                             trimnames=!match("legend.legend",names(allArgs),nomatch=0),
-                             x="topright")
-  if (stacked) {
-      legend.DefaultArgs$title <- "Competing risks"
-      legend.DefaultArgs$x <- "topleft"
-  }
+                if ((length(grep("=",names(Y)))==length(names(Y)))){
+                    atriskDefaultLabels <- paste(gsub("[ \t]*$","",sapply(strsplit(names(Y),"="),function(x)x[[2]])),
+                                                 ": ", sep="")
+                    atriskDefaultTitle <- unique(sapply(strsplit(names(Y),"="),function(x)x[[1]]))
+                }else{
+                     atriskDefaultTitle <- ""
+                     atriskDefaultLabels <- paste(gsub("[ \t]*$","",names(Y)),": ",sep="")
+                 }
+            }
+        }
+        ## atriskDefaultLabels <- format(atriskDefaultLabels,justify="left")
+        ## atriskDefaultTitle <- ""
+    }
+    atrisk.DefaultArgs <- list(x=x,
+                               newdata=newdata,
+                               interspace=1,
+                               dist=.3,
+                               col=col,
+                               labelcol=1,
+                               titlecol=1,
+                               title=atriskDefaultTitle,
+                               labels=atriskDefaultLabels,
+                               times=atriskDefaultPosition)
+    if (!missing(select) && (!(model=="competing.risks" && stacked))){
+        atrisk.DefaultArgs$newdata <- atrisk.DefaultArgs$newdata[select,,drop=FALSE]
+    }
+    legend.DefaultArgs <- list(legend=names(Y),
+                               lwd=lwd,
+                               col=col,
+                               lty=lty,
+                               cex=1.5,
+                               bty="n",
+                               y.intersp=1.3,
+                               trimnames=!match("legend.legend",names(allArgs),nomatch=0),
+                               x="topright")
+    if (stacked) {
+        legend.DefaultArgs$title <- "Competing risks"
+        legend.DefaultArgs$x <- "topleft"
+    }
 
   if (NCOL(newdata)>1) legend.DefaultArgs$trimnames <- FALSE
   confint.DefaultArgs <- list(x=x,
