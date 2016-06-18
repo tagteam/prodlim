@@ -353,8 +353,9 @@ plot.prodlim <- function(x,
   }
   ## restrict plot.times to xlim
   if (!missing(xlim)){
+      browser()
       if (xlim[1]>plot.times[1]) plot.times <- plot.times[plot.times>=xlim[1]]
-      if (xlim[2]<plot.times[length(plot.times)]) plot.times <- plot.times[plot.times<=xlim[2]]
+      if (xlim[2]<plot.times[length(plot.times)]) plot.times <- unique(c(plot.times[plot.times<=xlim[2]],xlim[2]))
   }
   ## if (missing(newdata) && NROW(newdata)>limit)
   ## newdata <- newdata[c(1,round(median(1:NROW(newdata))),NROW(newdata)),,drop=FALSE]

@@ -50,6 +50,11 @@
 ##' mdb <- model.design(terms(t),data=d,specialsFactor=TRUE,unspecialsDesign=FALSE)
 ##' mdb$ID
 ##' mdb$design
+##'
+##' # set x-levels
+##' attr(mdb$ID,"levels")
+##' attr(model.design(terms(t),data=d,xlev=list("ID(z)"=1:10),
+##'      specialsFactor=TRUE)$ID,"levels")
 ##' 
 ##' # special specials (avoid define function SP)
 ##' f <- formula(y~x+SP(z)+factor(v))

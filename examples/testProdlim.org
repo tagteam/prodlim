@@ -447,7 +447,7 @@ plot(cif.test.prodlim,add=TRUE,cause=2,col=2,confint=TRUE,type="cuminc")
 #+END_SRC
 
 
-* COMMENT HEADER
+* HEADER :noexport:
 
 #+TITLE: Testing the prodlim package
 #+LANGUAGE:  en
