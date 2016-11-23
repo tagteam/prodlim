@@ -360,6 +360,28 @@
     response <- response[sorted,] # sort each stratum
   
     # }}}
+
+
+    # {{{ caseweights
+    if (missing(caseweights)) {
+        weighted <- 0
+        caseweights <- NULL
+    }
+    else {
+        weighted <- 1
+        if(length(caseweights)!=NROW(response))
+            stop(paste("The length of caseweights is: ",
+                       length(caseweights),
+                       "\nthis is not the same as the number of subjects\nwith no missing values, which is ",
+                       NROW(response),
+                       sep=""))
+        ## wrong to order by event.time.order when there are covariates
+        ## caseweights <- caseweights[event.time.order]
+        ## this fixes bug in versions < 1.5.7 
+        caseweights <- caseweights[sorted]
+    }
+    # }}}
+
     # {{{  overlapping neighborhoods (continuous covariates)
   
     if (cotype %in% c(3,4)){
@@ -470,25 +492,6 @@
     else
         model.matrix <- NULL
     event.history <- event.history[event.time.order,,drop=FALSE]
-    # }}}
-    # {{{ caseweights
-    if (missing(caseweights)) {
-        weighted <- 0
-        caseweights <- NULL
-    }
-    else {
-        weighted <- 1
-        if(length(caseweights)!=NROW(response))
-            stop(paste("The length of caseweights is: ",
-                       length(caseweights),
-                       "\nthis is not the same as the number of subjects\nwith no missing values, which is ",
-                       NROW(response),
-                       sep=""))
-        ## wrong to order by event.time.order when there are covariates
-        ## caseweights <- caseweights[event.time.order]
-        ## this fixes bug in versions < 1.5.7 
-        caseweights <- caseweights[sorted]
-    }
     # }}}
     # {{{  cluster correlated data need an adjusted variance formula
     clustered <- (length(covariates$cluster)>0)
