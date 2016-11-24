@@ -361,7 +361,6 @@
   
     # }}}
 
-
     # {{{ caseweights
     if (missing(caseweights)) {
         weighted <- 0
@@ -400,6 +399,7 @@
                 nbh.list[[l]]$neighbors+tabS[l]}),use.names=FALSE) ## the size of the previous strata
         }
         response <- response[neighbors,,drop=FALSE]
+        if (weighted==TRUE) caseweights <- caseweights[neighbors]
     }
   
   # }}}
