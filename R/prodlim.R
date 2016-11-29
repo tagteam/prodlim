@@ -245,8 +245,12 @@
                       type){
     # {{{  find the data
     call <- match.call()
-    if (!missing(subset))
+    if (!missing(subset)){
         data <- subset(data,subset=subset)
+        if (!missing(caseweights)){
+            caseweights <- subset(caseweights,subset=subset)
+        }
+    }
     EHF <- EventHistory.frame(formula=formula,
                               data=data,
                               unspecialsDesign=FALSE,
@@ -261,8 +265,8 @@
     if (reverse==TRUE){ ## estimation of censoring distribution
         model.type <- 1
     }else{
-         model.type <- match(attr(event.history,"model"),c("survival","competing.risks","multi.states"))
-     }
+        model.type <- match(attr(event.history,"model"),c("survival","competing.risks","multi.states"))
+    }
     if (missing(type)) type <- switch(model.type,"survival"=ifelse(reverse,"cuminc","surv"),"cuminc")
     else {
         type <- tolower(type)

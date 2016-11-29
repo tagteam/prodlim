@@ -1,4 +1,5 @@
 context("Prodlim")
+library(testthat)
 test_that("strata",{
     ## bug in version 1.5.1
     library(prodlim)
@@ -116,6 +117,24 @@ test_that("prodlim",{
     s2 <- prodlim(Hist(time,status>0)~1,data=pbc[sort(boot),])
     ## plot(s2,add=TRUE,col=2,confint=FALSE,lwd=3)
 })
+test_that("weigths, subset and smoothing"){
+    library(prodlim)
+    d <- SimSurv(100)
+    f1 <- prodlim(Hist(time,status)~X2,data=d)
+    f2 <- prodlim(Hist(time,status)~X2,data=d,caseweights=rep(1,100))
+    expect_equal(f1$surv,f2$surv)
+    d <- SimSurv(100)
+    d <- data.frame(d, group = c(rep(1, 70), rep(0,30)))
+    f1a <- prodlim(Hist(time,status)~X2,data=d, caseweights = rep(1, 100), subset = d$group==1,bandwidth=0.1)
+    f1b <- prodlim(Hist(time,status)~X2,data=d[d$group==1, ], caseweights = rep(1, 100)[d$group==1], bandwidth=0.1)
+    f1a$call <- f1b$call
+    expect_equal(f1a,f1b)
+    f1 <- prodlim(Hist(time,status)~X1,data=d, subset = d$group==1)
+    f2 <- prodlim(Hist(time,status)~X1,data=d,caseweights=d$group)
+    expect_equal(unique(f1$surv),unique(f2$surv))
+    expect_equal(predict(f1,newdata = d[1, ], times = 5),
+                 predict(f2, newdata = d[1, ], times = 5))
+}
 test_that("weights and delay",{
     library(survival)
     library(survey)
@@ -214,4 +233,3 @@ test_that("interval censored",{
     icens <- prodlim(Hist(time=list(L,R),event=seen.ill)~1,data=d)
     ## plot(icens)
 })
-
