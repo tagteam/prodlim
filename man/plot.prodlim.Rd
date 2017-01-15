@@ -15,21 +15,23 @@
 \item{x}{an object of class `prodlim' as returned by the
 \code{prodlim} function.}
 
-\item{type}{Either \code{"surv"} or \code{"cuminc"} controls what part of the object is plotted.}
+\item{type}{Either \code{"surv"} or \code{"cuminc"} controls what}
 
 \item{cause}{determines the cause of the cumulative incidence
 function.  Currently one cause is allowed at a time, but you may
 call the function again with add=TRUE to add the lines of the other
 causes.}
 
-\item{select}{Select which lines to plot. This can be used when there
-are many strata or many competing risks to select a subset of the lines.
-However, a more clean way to select covariate stratat is to use argument \code{newdata}.
-Another application is when there are many competing risks and it is desired (for the stacked plot)
- to stack and show only a subset of the cumulative incidence functions.}
+\item{select}{Select which lines to plot. This can be used when
+there are many strata or many competing risks to select a
+subset of the lines.  However, a more clean way to select
+covariate stratat is to use argument \code{newdata}.  Another
+application is when there are many competing risks and it is
+desired (for the stacked plot) to stack and show only a subset
+of the cumulative incidence functions.}
 
-\item{newdata}{a data frame containing covariate strata for which to show 
-curves. When omitted element \code{X} of object
+\item{newdata}{a data frame containing covariate strata for which
+to show curves. When omitted element \code{X} of object
 \code{x} is used.}
 
 \item{add}{if \code{TRUE} curves are added to an existing plot.}
@@ -48,23 +50,33 @@ curves. When omitted element \code{X} of object
 
 \item{xlab}{label for the x-axis}
 
+\item{timeconverter}{The strings are allowed:
+"days2years" (conversion factor: 1/365.25)
+"months2years" (conversion factor: 1/12)
+"days2months" (conversion factor 1/30.4368499)
+"years2days" (conversion factor 365.25)
+"years2months" (conversion factor 12)
+ "months2days" (conversion factor 30.4368499)}
+
 \item{legend}{if TRUE a legend is plotted by calling the function
-legend.  Optional arguments of the function \code{legend} can be
-given in the form \code{legend.x=val} where x is the name of the
-argument and val the desired value. See also Details.}
+legend.  Optional arguments of the function \code{legend} can
+be given in the form \code{legend.x=val} where x is the name of
+the argument and val the desired value. See also Details.}
 
 \item{logrank}{If TRUE, the logrank p-value will be extracted from
-a call to \code{survdiff} and added to the legend. This works only
-for survival models, i.e. Kaplan-Meier with discrete predictors.}
+a call to \code{survdiff} and added to the legend. This works
+only for survival models, i.e. Kaplan-Meier with discrete
+predictors.}
 
 \item{marktime}{if TRUE the curves are tick-marked at right
-censoring times by invoking the function \code{markTime}. Optional
-arguments of the function \code{markTime} can be given in the form
-\code{confint.x=val} as with legend. See also Details.}
+censoring times by invoking the function
+\code{markTime}. Optional arguments of the function
+\code{markTime} can be given in the form \code{confint.x=val}
+as with legend. See also Details.}
 
 \item{confint}{if TRUE pointwise confidence intervals are plotted
-by invoking the function \code{confInt}. Optional arguments of the
-function \code{confInt} can be given in the form
+by invoking the function \code{confInt}. Optional arguments of
+the function \code{confInt} can be given in the form
 \code{confint.x=val} as with legend.  See also Details.}
 
 \item{automar}{If TRUE the function trys to find suitable values
@@ -72,20 +84,21 @@ for the figure margins around the main plotting region.}
 
 \item{atrisk}{if TRUE display numbers of subjects at risk by
 invoking the function \code{atRisk}. Optional arguments of the
-function \code{atRisk} can be given in the form \code{atrisk.x=val}
-as with legend. See also Details.}
+function \code{atRisk} can be given in the form
+\code{atrisk.x=val} as with legend. See also Details.}
 
 \item{timeOrigin}{Start of the time axis}
 
 \item{axes}{If true axes are drawn. See details.}
 
 \item{background}{If \code{TRUE} the background color and grid
-color can be controlled using smart arguments SmartControl, such as
-background.bg="yellow" or background.bg=c("gray66","gray88").  The
-following defaults are passed to \code{background} by
-\code{plot.prodlim}: horizontal=seq(0,1,.25), vertical=NULL,
-bg="gray77", fg="white".  See \code{background} for all arguments,
-and the examples below.}
+color can be controlled using smart arguments SmartControl,
+such as background.bg="yellow" or
+background.bg=c("gray66","gray88").  The following defaults are
+passed to \code{background} by \code{plot.prodlim}:
+horizontal=seq(0,1,.25), vertical=NULL, bg="gray77",
+fg="white".  See \code{background} for all arguments, and the
+examples below.}
 
 \item{percent}{If true the y-axis is labeled in percent.}
 
@@ -94,9 +107,9 @@ at-risk is at least \code{minAtrisk}}
 
 \item{limit}{When newdata is not specified and the number of lines
 in element \code{X} of object \code{x} exceeds limits, only the
-results for covariate constellations of the first, the middle and
-the last row in \code{X} are shown. Otherwise all lines of \code{X}
-are shown.}
+results for covariate constellations of the first, the middle
+and the last row in \code{X} are shown. Otherwise all lines of
+\code{X} are shown.}
 
 \item{...}{Parameters that are filtered by
 \code{\link{SmartControl}} and then passed to the functions
@@ -127,7 +140,7 @@ arguments can be found in the help pages of the corresponding functions.
 }
 \note{
 Similar functionality is provided by the function
-\code{\link{plot.survfit}} of the survival library
+    \code{\link{plot.survfit}} of the survival library
 }
 \examples{
 ## simulate right censored data from a two state model 
@@ -138,6 +151,8 @@ dat <- SimSurv(100)
 ### marginal Kaplan-Meier estimator
 kmfit <- prodlim(Hist(time, status) ~ 1, data = dat)
 plot(kmfit)
+
+plot(kmfit,timeconverter="years2months")
 
 # change time range
 plot(kmfit,xlim=c(0,4))
@@ -309,10 +324,12 @@ plot(ajfitX,
 Thomas Alexander Gerds <tag@biostat.ku.dk>
 }
 \seealso{
-\code{\link{plot}}, \code{\link{legend}}, \code{\link{axis}},
-\code{\link{prodlim}},\code{\link{plot.Hist}},\code{\link{summary.prodlim}},
-\code{\link{neighborhood}}, \code{\link{atRisk}}, \code{\link{confInt}},
-\code{\link{markTime}}, \code{\link{backGround}}
+\code{\link{plot}}, \code{\link{legend}},
+    \code{\link{axis}},
+    \code{\link{prodlim}},\code{\link{plot.Hist}},\code{\link{summary.prodlim}},
+    \code{\link{neighborhood}}, \code{\link{atRisk}},
+    \code{\link{confInt}}, \code{\link{markTime}},
+    \code{\link{backGround}}
 }
 \keyword{survival}
 
