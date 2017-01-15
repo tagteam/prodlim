@@ -19,80 +19,94 @@
 #' 
 #' @aliases plot.prodlim lines.prodlim
 #' @param x an object of class `prodlim' as returned by the
-#' \code{prodlim} function.
-#' @param type Either \code{"surv"} or \code{"cuminc"} controls what part of the object is plotted. 
-# Defaults to \code{object$type}.  
+#'     \code{prodlim} function.
+#' @param type Either \code{"surv"} or \code{"cuminc"} controls what
+# part of the object is plotted.  Defaults to \code{object$type}.
 #' @param cause determines the cause of the cumulative incidence
 #' function.  Currently one cause is allowed at a time, but you may
 #' call the function again with add=TRUE to add the lines of the other
 #' causes.
-#' @param select Select which lines to plot. This can be used when there
-#' are many strata or many competing risks to select a subset of the lines.
-#' However, a more clean way to select covariate stratat is to use argument \code{newdata}.
-#' Another application is when there are many competing risks and it is desired (for the stacked plot)
-#'  to stack and show only a subset of the cumulative incidence functions. 
-#' @param newdata a data frame containing covariate strata for which to show 
-#' curves. When omitted element \code{X} of object
-#' \code{x} is used.
+#' @param select Select which lines to plot. This can be used when
+#'     there are many strata or many competing risks to select a
+#'     subset of the lines.  However, a more clean way to select
+#'     covariate stratat is to use argument \code{newdata}.  Another
+#'     application is when there are many competing risks and it is
+#'     desired (for the stacked plot) to stack and show only a subset
+#'     of the cumulative incidence functions.
+#' @param newdata a data frame containing covariate strata for which
+#'     to show curves. When omitted element \code{X} of object
+#'     \code{x} is used.
 #' @param add if \code{TRUE} curves are added to an existing plot.
 #' @param col color for curves. Default is \code{1:number(curves)}
 #' @param lty line type for curves. Default is 1.
 #' @param lwd line width for all curves. Default is 3.
 #' @param ylim limits of the y-axis
 #' @param xlim limits of the x-axis
-#' @param xlab label for the x-axis
 #' @param ylab label for the y-axis
+#' @param xlab label for the x-axis
+#' @param timeconverter The strings are allowed:
+#'  "days2years" (conversion factor: 1/365.25)
+#'  "months2years" (conversion factor: 1/12)
+#'  "days2months" (conversion factor 1/30.4368499)
+#'  "years2days" (conversion factor 365.25)
+#'  "years2months" (conversion factor 12)
+#'   "months2days" (conversion factor 30.4368499)
 #' @param legend if TRUE a legend is plotted by calling the function
-#' legend.  Optional arguments of the function \code{legend} can be
-#' given in the form \code{legend.x=val} where x is the name of the
-#' argument and val the desired value. See also Details.
+#'     legend.  Optional arguments of the function \code{legend} can
+#'     be given in the form \code{legend.x=val} where x is the name of
+#'     the argument and val the desired value. See also Details.
 #' @param logrank If TRUE, the logrank p-value will be extracted from
-#' a call to \code{survdiff} and added to the legend. This works only
-#' for survival models, i.e. Kaplan-Meier with discrete predictors.
+#'     a call to \code{survdiff} and added to the legend. This works
+#'     only for survival models, i.e. Kaplan-Meier with discrete
+#'     predictors.
 #' @param marktime if TRUE the curves are tick-marked at right
-#' censoring times by invoking the function \code{markTime}. Optional
-#' arguments of the function \code{markTime} can be given in the form
-#' \code{confint.x=val} as with legend. See also Details.
+#'     censoring times by invoking the function
+#'     \code{markTime}. Optional arguments of the function
+#'     \code{markTime} can be given in the form \code{confint.x=val}
+#'     as with legend. See also Details.
 #' @param confint if TRUE pointwise confidence intervals are plotted
-#' by invoking the function \code{confInt}. Optional arguments of the
-#' function \code{confInt} can be given in the form
-#' \code{confint.x=val} as with legend.  See also Details.
+#'     by invoking the function \code{confInt}. Optional arguments of
+#'     the function \code{confInt} can be given in the form
+#'     \code{confint.x=val} as with legend.  See also Details.
 #' @param automar If TRUE the function trys to find suitable values
-#' for the figure margins around the main plotting region.
+#'     for the figure margins around the main plotting region.
 #' @param atrisk if TRUE display numbers of subjects at risk by
-#' invoking the function \code{atRisk}. Optional arguments of the
-#' function \code{atRisk} can be given in the form \code{atrisk.x=val}
-#' as with legend. See also Details.
+#'     invoking the function \code{atRisk}. Optional arguments of the
+#'     function \code{atRisk} can be given in the form
+#'     \code{atrisk.x=val} as with legend. See also Details.
 #' @param timeOrigin Start of the time axis
 #' @param axes If true axes are drawn. See details.
 #' @param background If \code{TRUE} the background color and grid
-#' color can be controlled using smart arguments SmartControl, such as
-#' background.bg="yellow" or background.bg=c("gray66","gray88").  The
-#' following defaults are passed to \code{background} by
-#' \code{plot.prodlim}: horizontal=seq(0,1,.25), vertical=NULL,
-#' bg="gray77", fg="white".  See \code{background} for all arguments,
-#' and the examples below.
+#'     color can be controlled using smart arguments SmartControl,
+#'     such as background.bg="yellow" or
+#'     background.bg=c("gray66","gray88").  The following defaults are
+#'     passed to \code{background} by \code{plot.prodlim}:
+#'     horizontal=seq(0,1,.25), vertical=NULL, bg="gray77",
+#'     fg="white".  See \code{background} for all arguments, and the
+#'     examples below.
 #' @param percent If true the y-axis is labeled in percent.
 #' @param minAtrisk Integer. Show the curve only until the number
-#' at-risk is at least \code{minAtrisk}
+#'     at-risk is at least \code{minAtrisk}
 #' @param limit When newdata is not specified and the number of lines
-#' in element \code{X} of object \code{x} exceeds limits, only the
-#' results for covariate constellations of the first, the middle and
-#' the last row in \code{X} are shown. Otherwise all lines of \code{X}
-#' are shown.
+#'     in element \code{X} of object \code{x} exceeds limits, only the
+#'     results for covariate constellations of the first, the middle
+#'     and the last row in \code{X} are shown. Otherwise all lines of
+#'     \code{X} are shown.
 #' @param ... Parameters that are filtered by
-#' \code{\link{SmartControl}} and then passed to the functions
-#' \code{\link{plot}}, \code{\link{legend}}, \code{\link{axis}},
-#' \code{\link{atRisk}}, \code{\link{confInt}},
-#' \code{\link{markTime}}, \code{\link{backGround}}
+#'     \code{\link{SmartControl}} and then passed to the functions
+#'     \code{\link{plot}}, \code{\link{legend}}, \code{\link{axis}},
+#'     \code{\link{atRisk}}, \code{\link{confInt}},
+#'     \code{\link{markTime}}, \code{\link{backGround}}
 #' @return The (invisible) object.
 #' @note Similar functionality is provided by the function
-#' \code{\link{plot.survfit}} of the survival library
+#'     \code{\link{plot.survfit}} of the survival library
 #' @author Thomas Alexander Gerds <tag@@biostat.ku.dk>
-#' @seealso \code{\link{plot}}, \code{\link{legend}}, \code{\link{axis}},
-#' \code{\link{prodlim}},\code{\link{plot.Hist}},\code{\link{summary.prodlim}},
-#' \code{\link{neighborhood}}, \code{\link{atRisk}}, \code{\link{confInt}},
-#' \code{\link{markTime}}, \code{\link{backGround}}
+#' @seealso \code{\link{plot}}, \code{\link{legend}},
+#'     \code{\link{axis}},
+#'     \code{\link{prodlim}},\code{\link{plot.Hist}},\code{\link{summary.prodlim}},
+#'     \code{\link{neighborhood}}, \code{\link{atRisk}},
+#'     \code{\link{confInt}}, \code{\link{markTime}},
+#'     \code{\link{backGround}}
 #' @keywords survival
 ##' @examples
 ##' ## simulate right censored data from a two state model 
@@ -103,6 +117,8 @@
 ##' ### marginal Kaplan-Meier estimator
 ##' kmfit <- prodlim(Hist(time, status) ~ 1, data = dat)
 ##' plot(kmfit)
+##'
+##' plot(kmfit,timeconverter="years2months")
 ##' 
 ##' # change time range
 ##' plot(kmfit,xlim=c(0,4))
@@ -296,7 +312,6 @@ plot.prodlim <- function(x,
                          percent=TRUE,
                          minAtrisk=0,
                          limit=10,
-                         ## time.scale="same",
                          ...){
 
     # }}}
@@ -448,10 +463,10 @@ plot.prodlim <- function(x,
         axis1.DefaultArgs <- list(at=seq(xlim[1],xlim[2],one),labels=seq(xlim[1],xlim[2],one)*conversion)
         atriskDefaultPosition <- seq(xlim[1],xlim[2],one)
     } else {
-          if (missing(xlab)) xlab <- "Time"
-          axis1.DefaultArgs <- list()
-          atriskDefaultPosition <- seq(min(plot.times),max(plot.times),(max(plot.times)-min(plot.times))/10)
-      }
+        if (missing(xlab)) xlab <- "Time"
+        axis1.DefaultArgs <- list()
+        atriskDefaultPosition <- seq(min(plot.times),max(plot.times),(max(plot.times)-min(plot.times))/10)
+    }
     if (missing(ylab)) ylab <- switch(type,
                                       "surv"=ifelse(x$reverse==TRUE,"Censoring probability","Survival probability"),
                                       "cuminc"="Cumulative incidence",
