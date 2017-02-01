@@ -698,56 +698,56 @@ plot.prodlim <- function(x,
 # }}}
 # {{{  adding the no. of individuals at risk
 
-  if (atrisk==TRUE && !add){
-      if (hit <- match("at",names(smartA$atrisk),nomatch=FALSE)){
-          if (match("atrisk.times",names(list(...)),nomatch=FALSE)){
-              warning("Atrisk argument clash: remove either 'atrisk.at' or 'atrisk.times'.")
-          }
-          else{
-              names(smartA$atrisk)[hit] <- "times"
-              smartA$atrisk <- smartA$atrisk[!duplicated(names(smartA$atrisk))]
-          }
-      }
-      do.call("atRisk",smartA$atrisk)
-  }
-  # }}}
-  # {{{  legend
-  if(legend==TRUE && !add && !is.null(names(Y))){
-      if (smartA$legend$trimnames==TRUE && (length(grep("=",smartA$legend$legend))==length(smartA$legend$legend))){
-          smartA$legend$legend <- sapply(strsplit(smartA$legend$legend,"="),function(x)x[[2]])
-          if (is.null(smartA$legend$title))
-              smartA$legend$title <- unique(sapply(strsplit(names(Y),"="),function(x)x[[1]]))
-      }
-      smartA$legend <- smartA$legend[-match("trimnames",names(smartA$legend))]
-      save.xpd <- par()$xpd
-      if (logrank && model=="survival" && length(smartA$legend$legend)>1){
-          ## formula.names <- try(all.names(formula),silent=TRUE)
-          lrform <- x$call$formula
-          if (lrform[[2]][[1]]==as.name("Hist"))
-              lrform[[2]][[1]] <- as.name("Surv")
-          ## require(survival)
-          lrtest <- survival::survdiff(eval(lrform),data=eval(x$call$data))
-          if (length(lrtest$n) == 1) {
-              p <- 1 - pchisq(lrtest$chisq, 1)
-          } else{
-              if (is.matrix(x$obs)) {
-                  etmp <- apply(lrtest$exp, 1, sum)
-              }
-              else {
-                  etmp <- lrtest$exp
-              }
-              df <- (sum(1 * (etmp > 0))) - 1
-              p <- 1 - pchisq(lrtest$chisq, df)
-          }
-          if (length(smartA$legend$title))
-              smartA$legend$title <- paste(smartA$legend$title," Log-rank: p=",format.pval(p,digits=logrank,eps=0.0001))
-          else
-              smartA$legend$title <- paste(" Log-rank: ",format.pval(p,digits=logrank,eps=0.0001))
-      }
-      par(xpd=TRUE)
-      do.call("legend",smartA$legend)
-      par(xpd=save.xpd)
-  }
+    if (atrisk==TRUE && !add){
+        if (hit <- match("at",names(smartA$atrisk),nomatch=FALSE)){
+            if (match("atrisk.times",names(list(...)),nomatch=FALSE)){
+                warning("Atrisk argument clash: remove either 'atrisk.at' or 'atrisk.times'.")
+            }
+            else{
+                names(smartA$atrisk)[hit] <- "times"
+                smartA$atrisk <- smartA$atrisk[!duplicated(names(smartA$atrisk))]
+            }
+        }
+        do.call("atRisk",smartA$atrisk)
+    }
+    # }}}
+    # {{{  legend
+    if(legend==TRUE && !add && !is.null(names(Y))){
+        if (smartA$legend$trimnames==TRUE && (length(grep("=",smartA$legend$legend))==length(smartA$legend$legend))){
+            smartA$legend$legend <- sapply(strsplit(smartA$legend$legend,"="),function(x)x[[2]])
+            if (is.null(smartA$legend$title))
+                smartA$legend$title <- unique(sapply(strsplit(names(Y),"="),function(x)x[[1]]))
+        }
+        smartA$legend <- smartA$legend[-match("trimnames",names(smartA$legend))]
+        save.xpd <- par()$xpd
+        if (logrank && model=="survival" && length(smartA$legend$legend)>1){
+            ## formula.names <- try(all.names(formula),silent=TRUE)
+            lrform <- x$call$formula
+            if (lrform[[2]][[1]]==as.name("Hist"))
+                lrform[[2]][[1]] <- as.name("Surv")
+            ## require(survival)
+            lrtest <- survival::survdiff(eval(lrform),data=eval(x$call$data))
+            if (length(lrtest$n) == 1) {
+                p <- 1 - pchisq(lrtest$chisq, 1)
+            } else{
+                if (is.matrix(x$obs)) {
+                    etmp <- apply(lrtest$exp, 1, sum)
+                }
+                else {
+                    etmp <- lrtest$exp
+                }
+                df <- (sum(1 * (etmp > 0))) - 1
+                p <- 1 - pchisq(lrtest$chisq, df)
+            }
+            if (length(smartA$legend$title))
+                smartA$legend$title <- paste(smartA$legend$title," Log-rank: p=",format.pval(p,digits=logrank,eps=0.0001))
+            else
+                smartA$legend$title <- paste(" Log-rank: ",format.pval(p,digits=logrank,eps=0.0001))
+        }
+        par(xpd=TRUE)
+        do.call("legend",smartA$legend)
+        par(xpd=save.xpd)
+    }
 
 # }}}
 invisible(x)
