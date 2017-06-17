@@ -12,7 +12,7 @@ atRisk(x, newdata, times, line, col, labelcol = NULL, interspace, cex, labels,
 \item{x}{an object of class `prodlim' as returned by the
 \code{prodlim} function.}
 
-\item{newdata}{see \code{plot.prodim}}
+\item{newdata}{see \code{plot.prodlim}}
 
 \item{times}{Where to compute the atrisk numbers.}
 
@@ -55,7 +55,7 @@ This function is invoked and controlled by \code{plot.prodlim}.
 }
 \details{
 This function should not be called directly. The arguments can be specified
-as \code{atRisk.arg} in the call to \code{plot.prodim}.
+as \code{atRisk.arg} in the call to \code{plot.prodlim}.
 }
 \author{
 Thomas Alexander Gerds <tag@biostat.ku.dk>

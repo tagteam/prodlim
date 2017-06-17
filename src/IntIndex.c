@@ -1,6 +1,6 @@
 #include <math.h>
 #include <R.h>
-void IntIndex(double *L,
+void IntIndexSRC(double *L,
 	    double *R,
 	    double *p,
 	    double *q,

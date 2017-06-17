@@ -63,7 +63,7 @@ prodlimIcensSurv <- function(response,
        ## as.double(ntol),
        ## as.integer(maxiter),
        ## n.iter=integer(1),
-       ## package="prodim")
+       ## PACKAGE="prodlim")
       fit <- .C("icens_prodlim",
                 as.double(L),
                 as.double(R),
@@ -85,7 +85,7 @@ prodlimIcensSurv <- function(response,
                 as.double(ntol),
                 as.integer(maxiter),
                 n.iter=integer(1),
-                package="prodim")
+                PACKAGE="prodlim")
       ## rename the extra grid point before the smallest `L'
       ## if it is negative
       if (grid[1]<0) grid[1] <- 0
@@ -121,7 +121,7 @@ prodlimIcensSurv <- function(response,
     N <- length(Istrata)
     ## Zsurv <- predictSurv(prodlimIcensSurv(response=response,grid=grid,tol=tol,maxiter=1,ml=FALSE))
     Z <- rep(1/M,M)
-    fit  <- .C('GMLE',as.integer(c(0,Mstrata)),as.integer(c(0,Istrata)),as.integer(Mindex),as.integer(Iindex),as.integer(N),as.integer(M),Z=as.double(Z),double(length(Z)),as.double(ntol),as.integer(maxiter),steps=integer(1),package="prodlim")
+    fit  <- .C('GMLE',as.integer(c(0,Mstrata)),as.integer(c(0,Istrata)),as.integer(Mindex),as.integer(Iindex),as.integer(N),as.integer(M),Z=as.double(Z),double(length(Z)),as.double(ntol),as.integer(maxiter),steps=integer(1),PACKAGE="prodlim")
     n.event <- c(0,fit$Z*M)
     surv <- c(1,1-cumsum(fit$Z))
     hazard <- c(0,fit$Z)/surv

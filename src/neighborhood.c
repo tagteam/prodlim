@@ -20,7 +20,7 @@
 */
 
 #include <stdlib.h> 
-void neighborhood(int *first,
+void neighborhoodSRC(int *first,
 		  int *size,
 		  int *cumtabu,
 		  int *cumtabx,
@@ -56,7 +56,7 @@ void neighborhood(int *first,
 int neworder (int *a, int *b){
   if (*a < *b) return -1; else return 1;}
 
-void neighbors(int *first,
+void neighborsSRC(int *first,
 	       int *size,
 	       int *orderx,
 	       int *neighbors,

@@ -3,7 +3,7 @@
 #' This function is invoked and controlled by \code{plot.prodlim}.
 #' 
 #' This function should not be called directly. The arguments can be specified
-#' as \code{atRisk.arg} in the call to \code{plot.prodim}.
+#' as \code{atRisk.arg} in the call to \code{plot.prodlim}.
 #' 
 #' @param x The values of the curves at \code{times}.
 #' @param times The times where there curves are plotted.

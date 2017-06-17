@@ -18,35 +18,7 @@
 #include <R.h>
 #include "prodlim.h"
 
-void prodlim(double *y,
-	     double *status,
-	     int *cause,
-	     double *entrytime,
-	     double *caseweights,
-	     int *cluster,
-	     int *N,
-	     int *NS,
-	     int *NC,
-	     int *NU,
-	     int *size,
-	     double *time,
-	     double *nrisk,
-	     double *event,
-	     double *lost,
-	     double *surv,
-	     double *cuminc,
-	     double *hazard,
-	     double *varhazard,
-	     double *extra_double,
-	     int *max_nc,
-	     int *ntimes,
-	     int *size_strata,
-	     int *first_strata,
-	     int *reverse,
-	     int *model,
-	     int *independent,
-	     int *delayed,
-	     int *weighted) {
+void prodlimSRC(double *y,double *status,int *cause,double *entrytime,double *caseweights,int *cluster,int *N,int *NS,int *NC,int *NU,int *size,double *time,double *nrisk,double *event,double *lost,double *surv,double *cuminc,double *hazard,double *varhazard,double *extra_double,int *max_nc,int *ntimes,int *size_strata,int *first_strata,int *reverse,int *model,int *independent,int *delayed,int *weighted) {
   int t, u, start, stop, size_temp;
   t=0;
   start=0;

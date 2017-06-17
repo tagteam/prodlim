@@ -4,11 +4,11 @@
 #' This function is invoked and controlled by \code{plot.prodlim}.
 #' 
 #' This function should not be called directly. The arguments can be specified
-#' as \code{atRisk.arg} in the call to \code{plot.prodim}.
+#' as \code{atRisk.arg} in the call to \code{plot.prodlim}.
 #' 
 #' @param x an object of class `prodlim' as returned by the
 #' \code{prodlim} function.
-#' @param newdata see \code{plot.prodim}
+#' @param newdata see \code{plot.prodlim}
 #' @param times Where to compute the atrisk numbers.
 #' @param line Distance of the atrisk numbers from the inner plot.
 #' @param col The color of the text.

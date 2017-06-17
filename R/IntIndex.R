@@ -10,7 +10,7 @@ IntIndex  <-  function(x,L,R){
   M <- NCOL(x)
   p <- x[1,]
   q <- x[2,]
-  res <- .C('IntIndex',as.double(L),as.double(R),as.double(p),as.double(q),as.integer(N),as.integer(M),Iindex=integer(N*M),Mindex=integer(N*M),Istrata=integer(N),Mstrata=integer(M))
+  res <- .C('IntIndexSRC',as.double(L),as.double(R),as.double(p),as.double(q),as.integer(N),as.integer(M),Iindex=integer(N*M),Mindex=integer(N*M),Istrata=integer(N),Mstrata=integer(M))
   Iindex <- res$Iindex[res$Iindex!=0]
   Istrata <- res$Istrata#[res$Istrata!=0]
   Mindex <- res$Mindex[res$Mindex!=0]
@@ -28,7 +28,7 @@ IntIndex  <-  function(x,L,R){
 ##   M <- NCOL(x)
 ##   p <- x[1,]
 ##   q <- x[2,]
-##   res <- .C('IntIndex',as.double(L),as.double(R),as.double(p),as.double(q),as.integer(N),as.integer(M),Iindex=integer(N*M),Mindex=integer(N*M),Istrata=integer(N),Mstrata=integer(M),package="prodlim")
+##   res <- .C('IntIndex',as.double(L),as.double(R),as.double(p),as.double(q),as.integer(N),as.integer(M),Iindex=integer(N*M),Mindex=integer(N*M),Istrata=integer(N),Mstrata=integer(M),PACKAGE="prodlim")
 ##   Iindex <- res$Iindex[res$Iindex!=0]
 ##   Istrata <- res$Istrata[res$Istrata!=0]
 ##   Mindex <- res$Mindex[res$Mindex!=0]

@@ -28,7 +28,7 @@ This function is invoked and controlled by \code{plot.prodlim}.
 }
 \details{
 This function should not be called directly. The arguments can be specified
-as \code{atRisk.arg} in the call to \code{plot.prodim}.
+as \code{atRisk.arg} in the call to \code{plot.prodlim}.
 }
 \author{
 Thomas Alexander Gerds <tag@biostat.ku.dk>

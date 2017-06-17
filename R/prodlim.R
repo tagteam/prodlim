@@ -458,39 +458,39 @@
     continuous.predictors <- colnames(NN)
     discrete.predictors <- colnames(strata)
     X <- switch(cotype,
-                {#type=1
-    NULL},
-                { #type=2
-    X <- data.frame(unique(strata[sorted,,drop=FALSE]))
-    ## colnames(X) <- paste("strata",names(strata),sep=".")
-    # colnames(X) <- names(strata)
-    rownames(X) <- 1:NROW(X)
-    X
-},
-                { #type=3
-    X <- unlist(lapply(nbh.list,function(x)x$values),use.names=FALSE)
-    X <- data.frame(X)
-    ## colnames(X) <- paste("NN",names(NN),sep=".")
-    colnames(X) <- colnames(NN)
-    rownames(X) <- 1:NROW(X)                
-    X
-},
-                { #type=4
-    D <- data.frame(unique(strata[sorted,,drop=FALSE]))
-    ## colnames(D) <- paste("strata",names(strata),sep=".")
-    D <- data.frame(D[rep(1:NS,n.unique.strata),,drop=FALSE])
-    C <- data.frame(unlist(lapply(nbh.list,function(x)x$values),use.names=FALSE))
-    X <- cbind(D,C)
-    ## colnames(X) <- c(paste("strata",names(strata),sep="."),paste("NN",names(NN),sep="."))
-    colnames(X) <- c(colnames(strata),colnames(NN))
-    rownames(X) <- 1:NROW(X)                
-    X
-},
-                { #type=5
-    X=data.frame(pseudo="pseudo")
-    rownames(X) <- 1:NROW(X)                
-    X
-})
+    {#type=1
+        NULL},
+    { #type=2
+        X <- data.frame(unique(strata[sorted,,drop=FALSE]))
+        ## colnames(X) <- paste("strata",names(strata),sep=".")
+        # colnames(X) <- names(strata)
+        rownames(X) <- 1:NROW(X)
+        X
+    },
+    { #type=3
+        X <- unlist(lapply(nbh.list,function(x)x$values),use.names=FALSE)
+        X <- data.frame(X)
+        ## colnames(X) <- paste("NN",names(NN),sep=".")
+        colnames(X) <- colnames(NN)
+        rownames(X) <- 1:NROW(X)                
+        X
+    },
+    { #type=4
+        D <- data.frame(unique(strata[sorted,,drop=FALSE]))
+        ## colnames(D) <- paste("strata",names(strata),sep=".")
+        D <- data.frame(D[rep(1:NS,n.unique.strata),,drop=FALSE])
+        C <- data.frame(unlist(lapply(nbh.list,function(x)x$values),use.names=FALSE))
+        X <- cbind(D,C)
+        ## colnames(X) <- c(paste("strata",names(strata),sep="."),paste("NN",names(NN),sep="."))
+        colnames(X) <- c(colnames(strata),colnames(NN))
+        rownames(X) <- 1:NROW(X)                
+        X
+    },
+    { #type=5
+        X=data.frame(pseudo="pseudo")
+        rownames(X) <- 1:NROW(X)                
+        X
+    })
     if (x==TRUE)
         model.matrix <- switch(cotype,{NULL},strata,NN,cbind(strata,NN))[event.time.order,,drop=FALSE]
     else
@@ -513,7 +513,7 @@
             if (cotype==2){
                 NC <- unlist(tapply(cluster,Sfactor,function(x){length(unique(x))}))
                 cluster <- as.numeric(unlist(tapply(cluster,Sfactor,function(x){
-                                                                factor(x,labels=1:length(unique(x)))})))
+                    factor(x,labels=1:length(unique(x)))})))
             }
         }
     }
@@ -536,7 +536,7 @@
         # {{{  two state model
         if (clustered){
             ## right censored clustered
-            fit <- .C("prodlim",as.double(response[,"time"]),as.double(response[,"status"]),integer(0),as.double(entrytime),as.double(caseweights),as.integer(cluster),as.integer(N),integer(0),as.integer(NC),as.integer(NU),as.integer(size.strata),time=double(N),nrisk=double(2*N),nevent=double(2*N),ncens=double(2*N),surv=double(N),cuminc=double(0),hazard=double(N),var.hazard=double(N+N),extra.double=double(4 * max(NC)),max.nc=as.integer(max(NC)),ntimes=integer(1),ntimes.strata=integer(NU),first.strata=integer(NU),reverse=integer(0),model=as.integer(0),independent=as.integer(0),delayed=as.integer(delayed),weighted=as.integer(weighted),PACKAGE="prodlim")
+            fit <- .C("prodlimSRC",as.double(response[,"time"]),as.double(response[,"status"]),integer(0),as.double(entrytime),as.double(caseweights),as.integer(cluster),as.integer(N),integer(0),as.integer(NC),as.integer(NU),as.integer(size.strata),time=double(N),nrisk=double(2*N),nevent=double(2*N),ncens=double(2*N),surv=double(N),cuminc=double(0),hazard=double(N),var.hazard=double(N+N),extra.double=double(4 * max(NC)),max.nc=as.integer(max(NC)),ntimes=integer(1),ntimes.strata=integer(NU),first.strata=integer(NU),reverse=integer(0),model=as.integer(0),independent=as.integer(0),delayed=as.integer(delayed),weighted=as.integer(weighted),PACKAGE="prodlim")
             NT <- fit$ntimes
             Cout <- list("time"=fit$time[1:NT],"n.risk"=matrix(fit$nrisk,ncol=2,byrow=FALSE,dimnames=list(NULL,c("n.risk","cluster.n.risk")))[1:NT,],"n.event"=matrix(fit$nevent,ncol=2,byrow=FALSE,dimnames=list(NULL,c("n.event","cluster.n.event")))[1:NT,],"n.lost"=matrix(fit$ncens,ncol=2,byrow=FALSE,dimnames=list(NULL,c("n.lost","cluster.n.lost")))[1:NT,],"surv"=fit$surv[1:NT],"se.surv"=fit$surv[1:NT]*sqrt(pmax(0,fit$var.hazard[N+(1:NT)])),"naive.se.surv"=fit$surv[1:NT]*sqrt(pmax(0,fit$var.hazard[1:NT])),"hazard"=fit$hazard[1:NT],"first.strata"=fit$first.strata,"size.strata"=fit$ntimes.strata,"model"="survival")
             Cout$maxtime <- max(Cout$time)
@@ -565,7 +565,7 @@
             }
             else{
                 ## right censored not clustered
-                fit <- .C("prodlim",as.double(response[,"time"]),as.double(response[,"status"]),integer(0),as.double(entrytime),as.double(caseweights),integer(0),as.integer(N),integer(0),integer(0),as.integer(NU),as.integer(size.strata),time=double(N),nrisk=double(N),nevent=double(N),ncens=double(N),surv=double(N),double(0),hazard = double(N),var.hazard=double(N),extra.double=double(0),max.nc=integer(0),ntimes=integer(1),ntimes.strata=integer(NU),first.strata=integer(NU),as.integer(reverse),model=as.integer(0),independent=as.integer(1),delayed=as.integer(delayed),weighted=as.integer(weighted),PACKAGE="prodlim")
+                fit <- .C("prodlimSRC",as.double(response[,"time"]),as.double(response[,"status"]),integer(0),as.double(entrytime),as.double(caseweights),integer(0),as.integer(N),integer(0),integer(0),as.integer(NU),as.integer(size.strata),time=double(N),nrisk=double(N),nevent=double(N),ncens=double(N),surv=double(N),double(0),hazard = double(N),var.hazard=double(N),extra.double=double(0),max.nc=integer(0),ntimes=integer(1),ntimes.strata=integer(NU),first.strata=integer(NU),as.integer(reverse),model=as.integer(0),independent=as.integer(1),delayed=as.integer(delayed),weighted=as.integer(weighted),PACKAGE="prodlim")
                 NT <- fit$ntimes
                 Cout <- list("time"=fit$time[1:NT],
                              "n.risk"=fit$nrisk[1:NT],
@@ -589,7 +589,7 @@
             E <- response[,"event"]-1 # for the c routine
             D <- response[,"status"]
             NS <- length(unique(E[D!=0])) # number of different causes
-            fit <- .C("prodlim",
+            fit <- .C("prodlimSRC",
                       as.double(response[,"time"]),
                       as.double(D),
                       as.integer(E),
@@ -674,9 +674,9 @@
                 # variance for cuminc (Korn & Dorey (1992), Stat in Med, Vol 11, page 815)
                 zval <- qnorm(1- (1-conf.int)/2, 0,1)
                 lower <- lapply(1:NS, function(state){
-                                    pmax(Cout$cuminc[[state]] - zval * Cout$se.cuminc[[state]],0)})
+                    pmax(Cout$cuminc[[state]] - zval * Cout$se.cuminc[[state]],0)})
                 upper <- lapply(1:NS, function(state){
-                                    pmin(Cout$cuminc[[state]] + zval * Cout$se.cuminc[[state]],1)})
+                    pmin(Cout$cuminc[[state]] + zval * Cout$se.cuminc[[state]],1)})
                 names(lower) <- states
                 names(upper) <- states
                 Cout <- c(Cout,list(lower=lower,upper=upper))

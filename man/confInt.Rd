@@ -14,7 +14,7 @@ function.}
 
 \item{times}{where to compute point-wise confidence limits}
 
-\item{newdata}{see \code{plot.prodim}}
+\item{newdata}{see \code{plot.prodlim}}
 
 \item{type}{Either \code{"cuminc"} or \code{"survival"} passed to
 summary.prodlim as \code{surv=ifelse(type=="cuminc",FALSE,TRUE)}.}
@@ -23,7 +23,7 @@ summary.prodlim as \code{surv=ifelse(type=="cuminc",FALSE,TRUE)}.}
 shadows.  Otherwise, dotted lines are used to show the upper and lower
 confidence limits.}
 
-\item{cause}{see \code{plot.prodim}}
+\item{cause}{see \code{plot.prodlim}}
 
 \item{col}{the colour of the lines.}
 
@@ -45,7 +45,7 @@ This function is invoked and controlled by \code{plot.prodlim}.
 }
 \details{
 This function should not be called directly. The arguments can be specified
-as \code{Confint.arg} in the call to \code{plot.prodim}.
+as \code{Confint.arg} in the call to \code{plot.prodlim}.
 }
 \author{
 Thomas Alexander Gerds <tag@biostat.ku.dk>

@@ -2,7 +2,7 @@
    ie how many of the jumps are smaller or
    equal to the eval points  */
 
-void sindex(int *index,
+void sindexSRC(int *index,
 	    double *jump,
 	    double *eval,
 	    int *N,

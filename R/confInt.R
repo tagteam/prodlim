@@ -4,18 +4,18 @@
 #' This function is invoked and controlled by \code{plot.prodlim}.
 #' 
 #' This function should not be called directly. The arguments can be specified
-#' as \code{Confint.arg} in the call to \code{plot.prodim}.
+#' as \code{Confint.arg} in the call to \code{plot.prodlim}.
 #' 
 #' @param x an object of class `prodlim' as returned by the \code{prodlim}
 #' function.
 #' @param times where to compute point-wise confidence limits
-#' @param newdata see \code{plot.prodim}
+#' @param newdata see \code{plot.prodlim}
 #' @param type Either \code{"cuminc"} or \code{"survival"} passed to
 #' summary.prodlim as \code{surv=ifelse(type=="cuminc",FALSE,TRUE)}.
 #' @param citype If \code{"shadow"} then confidence limits are drawn as colored
 #' shadows.  Otherwise, dotted lines are used to show the upper and lower
 #' confidence limits.
-#' @param cause see \code{plot.prodim}
+#' @param cause see \code{plot.prodlim}
 #' @param col the colour of the lines.
 #' @param lty the line type of the lines.
 #' @param lwd the line thickness of the lines.

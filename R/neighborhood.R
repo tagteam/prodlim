@@ -51,7 +51,7 @@
         if (bandwidth=="smooth") bandwidth <- N^{-1/4}
     radius <- floor(bandwidth*N)
   
-    nbh <- .C("neighborhood",
+    nbh <- .C("neighborhoodSRC",
               first=integer(NU),
               size=integer(NU),
               as.integer(cumtabu),
@@ -62,7 +62,7 @@
               as.integer(N),
               PACKAGE="prodlim")
     nall <- sum(nbh$size)
-    nbors <- .C("neighbors",
+    nbors <- .C("neighborsSRC",
                 first=nbh$first,
                 size=nbh$size,
                 as.integer(orderx),

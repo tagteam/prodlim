@@ -1,5 +1,5 @@
 #include <R.h>
-void iindex(int *iindex,
+void iindexSRC(int *iindex,
 	    int *strata,
 	    double *L,
 	    double *R,

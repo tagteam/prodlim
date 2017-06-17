@@ -3,9 +3,9 @@
 ## author: Thomas Alexander Gerds
 ## created: Apr 24 2015 (09:08) 
 ## Version: 
-## last-updated: Dec  1 2015 (11:37) 
+## last-updated: Mar  6 2017 (12:32) 
 ##           By: Thomas Alexander Gerds
-##     Update #: 7
+##     Update #: 8
 #----------------------------------------------------------------------
 ## 
 ### Commentary: 
@@ -18,7 +18,7 @@
 #'
 #' @docType package
 #' @name prodlim
-#' @useDynLib prodlim
+#' @useDynLib prodlim, .registration=TRUE
 #' @importFrom survival survdiff Surv cluster
 #' @importFrom stats quantile 
 #' @import lava

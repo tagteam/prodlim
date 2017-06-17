@@ -5,7 +5,7 @@ iindex <- function (L,R,grid) {
   stopifnot(is.numeric(c(L,R,grid)))
   N <- length(L)
   NS <- length(grid)
-  ind <- .C("iindex",
+  ind <- .C("iindexSRC",
             index = integer(N*NS),
             strata = integer(NS-1),
             as.double(L),
@@ -13,7 +13,7 @@ iindex <- function (L,R,grid) {
             as.double(grid),
             as.integer(N),
             as.integer(NS),
-            package="prodlim")
+            PACKAGE="prodlim")
   strata <- ind$strata
   index <- ind$index[1:max(strata)]
   list(iindex=index,imax=strata)
