@@ -94,10 +94,9 @@ model.design(st5,data=pbc[1:3,],specialsDesign=TRUE)
 
 
 }
-\author{
-Thomas A. Gerds <tag@biostat.ku.dk>
-}
 \seealso{
 parseSpecialNames reformulate drop.terms
 }
-
+\author{
+Thomas A. Gerds <tag@biostat.ku.dk>
+}

@@ -24,4 +24,3 @@ it to \code{fit$model.response}.
 \author{
 Thomas A. Gerds
 }
-

@@ -190,11 +190,10 @@ arrowlabel4.x=68)
 
 ##'
 }
-\author{
-Thomas A Gerds \email{tag@biostat.ku.dk}
-}
 \seealso{
 \code{\link{Hist}}\code{\link{SmartControl}}
 }
+\author{
+Thomas A Gerds \email{tag@biostat.ku.dk}
+}
 \keyword{survival}
-

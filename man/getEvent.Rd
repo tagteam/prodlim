@@ -33,11 +33,10 @@ attribute \code{states} of the object is used to generate factor levels.
   getEvent(x)
 
 }
-\author{
-Thomas Alexander Gerds <tag@biostat.ku.dk>
-}
 \seealso{
 \code{\link{Hist}}
 }
+\author{
+Thomas Alexander Gerds <tag@biostat.ku.dk>
+}
 \keyword{survival}
-

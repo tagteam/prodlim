@@ -26,11 +26,10 @@ times that have been used for fitting a prodlim object.
  predictSurvIndividual(x,lag=1)
 
 }
-\author{
-Thomas A. Gerds \email{tag@biostat.ku.dk}
-}
 \seealso{
 \code{\link{predict.prodlim}},\code{\link{predictSurv}},
 }
+\author{
+Thomas A. Gerds \email{tag@biostat.ku.dk}
+}
 \keyword{survival}
-

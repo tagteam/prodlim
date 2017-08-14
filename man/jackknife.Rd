@@ -2,8 +2,8 @@
 % Please edit documentation in R/jackknife.R
 \name{jackknife}
 \alias{jackknife}
-\alias{jackknife.competing.risks}
 \alias{jackknife.survival}
+\alias{jackknife.competing.risks}
 \title{Compute jackknife pseudo values.}
 \usage{
 jackknife(object, times, cause, keepResponse = FALSE, ...)
@@ -51,9 +51,6 @@ jackknife(f,times=c(3,10),cause=1)
 jackknife(f,times=c(3,10,17),cause=2)
 
 }
-\author{
-Thomas Alexander Gerds <tag@biostat.ku.dk>
-}
 \references{
 Andersen PK & Perme MP (2010). Pseudo-observations in survival
 analysis Statistical Methods in Medical Research, 19(1), 71-99.
@@ -61,5 +58,7 @@ analysis Statistical Methods in Medical Research, 19(1), 71-99.
 \seealso{
 \code{\link{prodlim}}
 }
+\author{
+Thomas Alexander Gerds <tag@biostat.ku.dk>
+}
 \keyword{survival}
-

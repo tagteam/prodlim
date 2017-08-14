@@ -47,12 +47,11 @@ This function is invoked and controlled by \code{plot.prodlim}.
 This function should not be called directly. The arguments can be specified
 as \code{Confint.arg} in the call to \code{plot.prodlim}.
 }
-\author{
-Thomas Alexander Gerds <tag@biostat.ku.dk>
-}
 \seealso{
 \code{\link{plot.prodlim}}, \code{\link{atRisk}},
 \code{\link{markTime}}
 }
+\author{
+Thomas Alexander Gerds <tag@biostat.ku.dk>
+}
 \keyword{survival}
-

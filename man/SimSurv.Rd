@@ -25,10 +25,9 @@ This function calls \code{survModel}, then adds  covariates and finally calls \c
 SimSurv(10)
 
 }
-\author{
-Thomas Alexander Gerds
-}
 \references{
 Bender, Augustin & Blettner. Generating survival times to simulate Cox proportional hazards models. Statistics in Medicine, 24: 1713-1723, 2005.
 }
-
+\author{
+Thomas Alexander Gerds
+}

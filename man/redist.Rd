@@ -23,10 +23,9 @@ Kaplan-Meier estimate.
 \examples{
 redist(time=c(.35,0.4,.51,.51,.7,.73),status=c(0,1,1,0,0,1))
 }
-\author{
-Thomas A. Gerds <tag@biostat.ku.dk>
-}
 \seealso{
 prodlim
 }
-
+\author{
+Thomas A. Gerds <tag@biostat.ku.dk>
+}

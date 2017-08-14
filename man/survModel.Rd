@@ -21,4 +21,3 @@ This function requires the \code{lava} package.
 \author{
 Thomas A. Gerds <tag@biostat.ku.dk>
 }
-

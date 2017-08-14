@@ -45,10 +45,9 @@ stopTime(hr,8)
 stopTime(hr,5)
 
 }
-\author{
-Thomas A. Gerds <tag@biostat.ku.dk>
-}
 \seealso{
 Hist
 }
-
+\author{
+Thomas A. Gerds <tag@biostat.ku.dk>
+}

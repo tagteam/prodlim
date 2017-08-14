@@ -23,10 +23,9 @@ uses \code{\link{rgb}} to adjust the intensity of the result.
 dimColor(2,33)
 dimColor("green",133)
 }
-\author{
-Thomas A. Gerds <tag@biostat.ku.dk>
-}
 \seealso{
 rgb col2rgb
 }
-
+\author{
+Thomas A. Gerds <tag@biostat.ku.dk>
+}

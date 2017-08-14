@@ -168,10 +168,9 @@ EHF$prop
 EHF$timevar
 }
 }
-\author{
-Thomas A. Gerds <tag@biostat.ku.dk>
-}
 \seealso{
 model.frame model.design Hist
 }
-
+\author{
+Thomas A. Gerds <tag@biostat.ku.dk>
+}

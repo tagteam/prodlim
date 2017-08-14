@@ -38,9 +38,6 @@ product limit estimators.
 d <- SimSurv(20)
 neighborhood(d$X2)
 }
-\author{
-Thomas Gerds
-}
 \references{
 Stute, W. "Asymptotic Normality of Nearest Neighbor Regression
 Function Estimates", \emph{The Annals of Statistics}, 1984,12,917--926.
@@ -48,5 +45,7 @@ Function Estimates", \emph{The Annals of Statistics}, 1984,12,917--926.
 \seealso{
 \code{\link{dpik}}, \code{\link{prodlim}}
 }
+\author{
+Thomas Gerds
+}
 \keyword{smooth}
-

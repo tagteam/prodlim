@@ -153,11 +153,10 @@ sumfit$table[[2]] # cause 2
 
 # '
 }
-\author{
-Thomas A. Gerds \email{tag@biostat.ku.dk}
-}
 \seealso{
 \code{\link{prodlim}}, \code{\link{summary.Hist}}
 }
+\author{
+Thomas A. Gerds \email{tag@biostat.ku.dk}
+}
 \keyword{survival}
-

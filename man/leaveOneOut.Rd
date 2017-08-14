@@ -2,8 +2,8 @@
 % Please edit documentation in R/leaveOneOut.R
 \name{leaveOneOut}
 \alias{leaveOneOut}
-\alias{leaveOneOut.competing.risks}
 \alias{leaveOneOut.survival}
+\alias{leaveOneOut.competing.risks}
 \title{Compute jackknife pseudo values.}
 \usage{
 leaveOneOut(object, times, cause, lag = FALSE, ...)
@@ -27,10 +27,9 @@ Compute leave-one-out estimates
 \details{
 This function is the work-horse for \code{jackknife}
 }
-\author{
-Thomas Alexander Gerds <tag@biostat.ku.dk>
-}
 \seealso{
 \code{\link{jackknife}}
 }
-
+\author{
+Thomas Alexander Gerds <tag@biostat.ku.dk>
+}

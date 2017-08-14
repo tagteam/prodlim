@@ -28,4 +28,3 @@ SimCompRisk(10)
 \author{
 Thomas Alexander Gerds
 }
-

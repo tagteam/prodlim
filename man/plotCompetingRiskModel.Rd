@@ -23,11 +23,10 @@ plotCompetingRiskModel(labels=c("a","b"))
 plotCompetingRiskModel(labels=c("a","b","c"))
 
 }
-\author{
-Thomas Alexander Gerds <tag@biostat.ku.dk>
-}
 \seealso{
 \code{\link{plotIllnessDeathModel}}, \code{\link{plot.Hist}}
 }
+\author{
+Thomas Alexander Gerds <tag@biostat.ku.dk>
+}
 \keyword{survival}
-

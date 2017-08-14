@@ -117,10 +117,9 @@ md4$prop
 md4$timevar
 
 }
-\author{
-Thomas A. Gerds <tag@biostat.ku.dk>
-}
 \seealso{
 \code{\link{EventHistory.frame}} model.frame terms model.matrix .getXlevels
 }
-
+\author{
+Thomas A. Gerds <tag@biostat.ku.dk>
+}

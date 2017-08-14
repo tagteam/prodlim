@@ -30,4 +30,3 @@ print(d)
 \author{
 Thomas A. Gerds
 }
-

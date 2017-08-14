@@ -2,8 +2,8 @@
 % Please edit documentation in R/predict.prodlim.R
 \name{predict.prodlim}
 \alias{predict.prodlim}
-\alias{predictCuminc}
 \alias{predictSurv}
+\alias{predictCuminc}
 \title{Predicting event probabilities from product limit estimates}
 \usage{
 \method{predict}{prodlim}(object, times, newdata, level.chaos = 1,
@@ -102,11 +102,10 @@ predict(mfit,times=c(-1,0,10,100,1000,10000),newdata=dat[18:21,],mode="matrix")
 predict(mfit,times=c(-1,0,10,100,1000,10000),newdata=dat[18:21,],mode="matrix",bytime=TRUE)
 
 }
-\author{
-Thomas Alexander Gerds <tag@biostat.ku.dk>
-}
 \seealso{
 \code{\link{predictSurvIndividual}}
 }
+\author{
+Thomas Alexander Gerds <tag@biostat.ku.dk>
+}
 \keyword{survival}
-

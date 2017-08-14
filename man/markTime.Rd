@@ -30,12 +30,11 @@ This function is invoked and controlled by \code{plot.prodlim}.
 This function should not be called directly. The arguments can be specified
 as \code{atRisk.arg} in the call to \code{plot.prodlim}.
 }
-\author{
-Thomas Alexander Gerds <tag@biostat.ku.dk>
-}
 \seealso{
 \code{\link{plot.prodlim}}, \code{\link{confInt}},
 \code{\link{atRisk}}
 }
+\author{
+Thomas Alexander Gerds <tag@biostat.ku.dk>
+}
 \keyword{survival}
-

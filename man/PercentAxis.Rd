@@ -24,11 +24,10 @@ scale .
   PercentAxis(2,at=seq(0,1,.25))
 
 }
-\author{
-Thomas Alexander Gerds
-}
 \seealso{
 \code{\link{plot.prodlim}}
 }
+\author{
+Thomas Alexander Gerds
+}
 \keyword{survival}
-

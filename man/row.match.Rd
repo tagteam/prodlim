@@ -34,11 +34,10 @@ x <- data.frame(n=c(3,8),z=c("c","h"))
 row.match(x,tab)
 
 }
-\author{
-Thomas A. Gerds
-}
 \seealso{
 \code{match}
 }
+\author{
+Thomas A. Gerds
+}
 \keyword{misc}
-

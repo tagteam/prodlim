@@ -48,4 +48,3 @@ print(quantile(ff1),na.val="Not reached")
 Thomas Alexander Gerds <tag@biostat.ku.dk>
 }
 \keyword{survival}
-

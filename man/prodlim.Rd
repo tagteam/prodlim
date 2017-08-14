@@ -4,6 +4,7 @@
 \name{prodlim}
 \alias{prodlim}
 \alias{prodlim-package}
+\alias{prodlim}
 \title{Functions for estimating probabilities from right censored data}
 \usage{
 prodlim(formula, data = parent.frame(), subset, na.action = NULL,
@@ -240,11 +241,6 @@ summary(fitd)
 plot(fitd)
 
 }
-\author{
-Thomas A. Gerds \email{tag@biostat.ku.dk}
-
-Thomas A. Gerds <tag@biostat.ku.dk>
-}
 \references{
 Andersen, Borgan, Gill, Keiding (1993) Springer `Statistical
 Models Based on Counting Processes'
@@ -266,7 +262,11 @@ estimate for dependent failure time observations
 \code{\link{predictCuminc}}, \code{\link{Hist}}, \code{\link{neighborhood}},
 \code{\link{Surv}}, \code{\link{survfit}}, \code{\link{strata}},
 }
+\author{
+Thomas A. Gerds \email{tag@biostat.ku.dk}
+
+Thomas A. Gerds <tag@biostat.ku.dk>
+}
 \keyword{cluster}
 \keyword{nonparametric}
 \keyword{survival}
-

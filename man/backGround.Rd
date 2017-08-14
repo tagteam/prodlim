@@ -45,4 +45,3 @@ backGround(bg=c("yellow","green"),fg="red",horizontal=seq(0,1,.1))
 Thomas Alexander Gerds <tag@biostat.ku.dk>
 }
 \keyword{survival}
-

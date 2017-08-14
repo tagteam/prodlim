@@ -30,4 +30,3 @@ List2Matrix(x,depth=1,"X")
 \author{
 Thomas A. Gerds <tag@biostat.ku.dk>
 }
-

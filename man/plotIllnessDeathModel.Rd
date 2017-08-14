@@ -30,11 +30,10 @@ plotIllnessDeathModel(style=2,
                       box2.col="green",
                       box3.col="red")
 }
-\author{
-Thomas Alexander Gerds <tag@biostat.ku.dk>
-}
 \seealso{
 \code{\link{plotCompetingRiskModel}}, \code{\link{plot.Hist}}
 }
+\author{
+Thomas Alexander Gerds <tag@biostat.ku.dk>
+}
 \keyword{survival}
-

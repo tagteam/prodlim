@@ -150,13 +150,12 @@ MultiStateFrame2 <- data.frame(time=c(0,1,2,3,4,0,1,2,0,1),
  with(MultiStateFrame2,Hist(time,event=event,id=id))
 
 }
-\author{
-Thomas A. Gerds \email{tag@biostat.ku.dk}, Arthur Allignol
-\email{arthur.allignol@fdm.uni-freiburg.de}
-}
 \seealso{
 \code{\link{plot.Hist}}, \code{\link{summary.Hist}},
 \code{\link{prodlim}}
 }
+\author{
+Thomas A. Gerds \email{tag@biostat.ku.dk}, Arthur Allignol
+\email{arthur.allignol@fdm.uni-freiburg.de}
+}
 \keyword{survival}
-

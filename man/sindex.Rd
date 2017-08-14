@@ -51,4 +51,3 @@ c(1,fit$surv)[1+sindex(jtimes,etimes)]
 Thomas A. Gerds \email{tag@biostat.ku.dk}
 }
 \keyword{misc}
-

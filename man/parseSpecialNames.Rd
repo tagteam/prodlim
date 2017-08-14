@@ -55,10 +55,9 @@ parseSpecialNames(c("treat(Z,1,u=2)","treat(B,u=2)"),
                   special="treat",
                   arguments=list("u"=NA,"k"=NULL))
 }
-\author{
-Thomas A. Gerds <tag@biostat.ku.dk>
-}
 \seealso{
 model.design
 }
-
+\author{
+Thomas A. Gerds <tag@biostat.ku.dk>
+}
