@@ -87,6 +87,8 @@ void prodlimSurvPlus(double *y,
     for (i=start;i<stop;i++) atrisk += caseweights[i];
   } else{
     if (*delayed==1){
+      /* do not initialize with those that have entry times=0 because by convention in case of ties 
+	 entry happens after events and after censoring  */
       atrisk=0;
       /* sort the delayed entry times */
       qsort(entrytime+start,
@@ -98,7 +100,6 @@ void prodlimSurvPlus(double *y,
       atrisk=(double) stop-start;
     }
   }
-  
   s=(*t);
   if (*weighted==1){
     event[s] = caseweights[start] * status[start];
@@ -107,7 +108,6 @@ void prodlimSurvPlus(double *y,
     event[s] = status[start];
     loss[s] = (1-status[start]);
   }
-  
   for (i=(1+start);i<=stop;i++){
     if (i<stop && y[i]==y[i-1]){ /* for ties  */
       if (*weighted==1){
@@ -123,18 +123,21 @@ void prodlimSurvPlus(double *y,
 	/* delayed entry: find number of subjects that
 	   entered at time[s] */
 	entered=0;
-	while(e<stop && entrytime[e] < y[i-1]){ /*entry happens at t+ events at t*/
+	/*by convention entry happens at t+ events at t*/
+	while(e<stop && entrytime[e] < y[i-1]){
+	  entered++;
 	  /* unless there is a tie between the current
 	     and the next entry-time, add time to list of times, increase s
-	     and move the values of event, loss etc. to the next event time */
-	  entered++;
+	     and move the values of event, loss etc. to the next event time 
+	  */
 	  if (e==start || entrytime[e]>entrytime[e-1]){
-	    nrisk[s]=atrisk+entered;
-	    if (entrytime[e]!=time[s-1]){ /* if entrytime[e]==y[i] then only increase
-					the number at risk but not move the
-					time counter or the values of event, etc.
-				      */
-	      /* Rprintf("e=%d\ts=%d\tentrytime[e]=%1.2f\ty[i-1]=%1.2f\ttime[s]=%1.2f\ti=%d\t\n",e,s,entrytime[e],y[i-1],time[s],i); */
+	    if (s==0 || entrytime[e]!=time[s-1]){
+	      nrisk[s]=atrisk+entered;
+	      /* if entrytime[e]==time[s-1] then only increase
+		 the number at risk (done two lines above)
+		 but dont change the time counter or the values
+		 of event, etc.
+	      */
 	      event[s+1]=event[s];
 	      event[s]=0;
 	      loss[s+1]=loss[s];
@@ -146,7 +149,7 @@ void prodlimSurvPlus(double *y,
 	      s++;
 	    } 
 	  }
-	  e++; /* increase cumulative counter  */
+	  e++; /* increase entry time's cumulative counter  */
 	}
 	atrisk += (double) entered;
       }
@@ -157,9 +160,7 @@ void prodlimSurvPlus(double *y,
       else
 	pl_step(&surv_temp, &hazard_temp, &varhazard_temp, atrisk, event[s], 0);
       surv[s]=surv_temp;
-      /* Rprintf("Before s=%d\thazard_temp=%1.2f\t\n",s,hazard[s]); */
       hazard[s]=hazard_temp;
-      /* Rprintf("After s=%d\thazard_temp=%1.2f\t\n",s,hazard[s]); */
       varhazard[s] = varhazard_temp;
       if (i<stop){
 	atrisk-=(event[s]+loss[s]);
@@ -171,7 +172,6 @@ void prodlimSurvPlus(double *y,
 	  event[s] = status[i];
 	  loss[s] = (1-status[i]);
 	}
-	/* Rprintf("e=%d\tstop=%d\ti=%d\ts=%d\ttime=%1.2f\tstatus=%1.2f\tevent=%1.2f\t\n",e,stop,i,s,time[s],status[i],event[s]);  */
       }
     }
   }

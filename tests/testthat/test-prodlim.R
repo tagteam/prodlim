@@ -1,15 +1,35 @@
-context("Prodlim")
 library(testthat)
+library(prodlim)
+library(data.table)
+context("Prodlim")
+
+test_that("competing risk in case of only one event",{
+    ##
+    set.seed(10)
+    d <- SimSurv(10)
+    setDT(d)
+    d[,event:=factor(event,levels=c(0,1),labels=c("0","2"))]
+    f <- prodlim(Hist(time,event)~X1,data=d)
+    predict(f,cause="2",times=4,newdata=data.frame(X1=1))
+    expect_error(predict(f,cause="1",times=4,newdata=data.frame(X1=1)))
+    set.seed(10)
+    dd <- SimCompRisk(20)
+    F <- prodlim(Hist(time,event)~X1,data=dd)
+    predict(F,cause="1",times=4,newdata=data.frame(X1=0:1))
+    expect_equal(lapply(predict(F,cause=2,times=4,newdata=data.frame(X1=0:1)),round,4),list(`X1=0`=0.0714,`X1=1`=0))
+    expect_error(predict(F,cause=3,times=4,newdata=data.frame(X1=0:1)))
+    expect_error(summary(F,cause=3))
+    expect_error(plot(F,cause=3))
+}
+
 test_that("strata",{
     ## bug in version 1.5.1
-    library(prodlim)
     d <- data.frame(time=1:3,status=c(1,0,1),a=c(1,9,9),b=factor(c(0,1,0)))
     expect_output(prodlim(Hist(time,status)~b+factor(a),data=d))
 }
 
 test_that("prodlim",{
     library(lava)
-    library(prodlim)
     library(riskRegression)
     library(etm)
     ## library(survival)
@@ -119,7 +139,6 @@ test_that("prodlim",{
     ## plot(s2,add=TRUE,col=2,confint=FALSE,lwd=3)
 })
 test_that("weigths, subset and smoothing"){
-    library(prodlim)
     d <- SimSurv(100)
     f1 <- prodlim(Hist(time,status)~X2,data=d)
     f2 <- prodlim(Hist(time,status)~X2,data=d,caseweights=rep(1,100))
@@ -139,7 +158,6 @@ test_that("weigths, subset and smoothing"){
 test_that("weights and delay",{
     library(survival)
     library(survey)
-    library(prodlim)
     library(SmoothHazard)
     library(etm)
     pbc <- pbc[order(pbc$time,-pbc$status),]
@@ -222,7 +240,6 @@ test_that("weights and delay",{
     ## plot(prodlim.delayed.ill,lwd=2,col=2,add=TRUE)
 })
 test_that("interval censored",{
-    library(prodlim)
     library(SmoothHazard)
     m <- idmModel(scale.illtime=1/70,
                   shape.illtime=1.8,
@@ -234,3 +251,22 @@ test_that("interval censored",{
     icens <- prodlim(Hist(time=list(L,R),event=seen.ill)~1,data=d)
     ## plot(icens)
 })
+
+test_that("left truncation: survival"{
+    library(prodlim)
+    library(data.table)
+    library(survival)
+
+    dd <- data.table(entry=c(1,1,56,1,1,225,277,1647,1,1),
+                     time=c(380,46,217,107,223,277,1638,2164,45,40),
+                     status=c(1,0,1,1,0,0,0,1,0,1))
+    prodlim.delayed <- prodlim(Hist(time,status,entry=entry)~1,data=dd)
+    data.table(prodlim.delayed$time,prodlim.delayed$n.risk,prodlim.delayed$n.event,prodlim.delayed$n.lost)
+
+    summary(prodlim.delayed,times=c(0,10,56,267,277,1000,2000))    
+    survfit.delayed <- survfit(Surv(entry,time,status)~1,data=dd)
+    summary.survfit.delayed <- summary(survfit.delayed,times=c(0,10,56,267,277,1000,2000))
+    summary.prodlim.delayed <- summary(prodlim.delayed,times=c(0,10,56,267,277,1000,2000),intervals=1)
+    expect_equal(as.numeric(summary.survfit.delayed$surv),as.numeric(summary.prodlim.delayed$table[,"surv"]))
+    expect_equal(as.numeric(summary.survfit.delayed$n.risk),as.numeric(summary.prodlim.delayed$table[,"n.risk"]))
+}

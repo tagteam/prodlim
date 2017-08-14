@@ -64,12 +64,13 @@
 #' fit <- prodlim(Hist(time,status)~1,data=dat)
 #' 
 #' ## predict the survival probs at selected times 
-#' predict(fit,times=c(10,100,1000))
+#' predict(fit,times=c(3,5,10))
 #' 
-#' ## works also outside the usual range of the Kaplan-Meier
+#' ## NA is returned when the time point is beyond the
+#' ## range of definition of the Kaplan-Meier estimator:
 #' predict(fit,times=c(-1,0,10,100,1000,10000))
 #' 
-#' ## newdata is required if there are strata
+#' ## when there are strata, newdata is required 
 #' ## or neighborhoods (i.e. overlapping strata)
 #' mfit <- prodlim(Hist(time,status)~X1+X2,data=dat)
 #' predict(mfit,times=c(-1,0,10,100,1000,10000),newdata=dat[18:21,])
@@ -88,13 +89,15 @@
                               type=c("surv","cuminc","list"),
                               mode="list",
                               bytime=FALSE,
-                              cause=1,
+                              cause,
                               ...){
-  if (length(times)==0) stop("Argument 'times' has length 0")
-  if (missing(type))
-    type <- switch(object$model,"survival"="surv","competing.risks"="cuminc","list")
-  else
-    type <- switch(type,"survival"="surv","surv"="surv","incidence"="cuminc","cuminc"="cuminc","list")
+    if (missing(cause)) cause <- attr(object$model.response,"states")
+    checkCauses(cause,object)
+    if (length(times)==0) stop("Argument 'times' has length 0")
+    if (missing(type))
+        type <- switch(object$model,"survival"="surv","competing.risks"="cuminc","list")
+    else
+        type <- switch(type,"survival"="surv","surv"="surv","incidence"="cuminc","cuminc"="cuminc","list")
   
   if (type=="surv"){
     predictSurv(object=object,
@@ -145,6 +148,7 @@
       dimensions <- list(time=NT,strata=1)
       predictors <- NULL
       names.strata <- NULL
+      requested.X <- NULL
   }
   else {
       # conditional on factors
@@ -202,15 +206,15 @@
       # neighborhoods
       # --------------------------------------------------------------------
       switch(length(NN.vars)+1,
-             {requested.NN <- NULL
-              fit.NN <- NULL
-              new.order <- order(requested.strata)},
-             {requested.NN <- requested.X[,NN.vars,drop=TRUE]
-              fit.NN <- fit.X[,NN.vars,drop=TRUE]
-              new.order <- order(requested.strata,requested.NN)
-          },
-             stop("Currently only one continuous covariate allowed."),
-             stop("Currently only one continuous covariate allowed."))
+      {requested.NN <- NULL
+          fit.NN <- NULL
+          new.order <- order(requested.strata)},
+      {requested.NN <- requested.X[,NN.vars,drop=TRUE]
+          fit.NN <- fit.X[,NN.vars,drop=TRUE]
+          new.order <- order(requested.strata,requested.NN)
+      },
+      stop("Currently only one continuous covariate allowed."),
+      stop("Currently only one continuous covariate allowed."))
       # findex identifies the individual strata neighborhood combination 
       # --------------------------------------------------------------------
       findex <- .C("findex",
@@ -251,10 +255,10 @@
       ##        order of names needs to
       ##        obey level.chaos
       names.strata <- apply(do.call("cbind",lapply(names(requested.X),function(n){
-                                                            if(is.numeric(requested.X[,n]))
-                                                                paste(n,format(requested.X[,n],digits=2),sep="=")
-                                                            else 
-                                                                paste(n,requested.X[,n],sep="=")})),1,paste,collapse=", ")
+          if(is.numeric(requested.X[,n]))
+              paste(n,format(requested.X[,n],digits=2),sep="=")
+          else 
+              paste(n,requested.X[,n],sep="=")})),1,paste,collapse=", ")
       if (level.chaos==0) {names.strata <- names.strata[new.order]}
       ##     print(names.strata)
       predictors <- predictors
@@ -265,6 +269,7 @@
               predictors=predictors,
               indices=indices,
               dimensions=dimensions,
+              strata=requested.X,
               names.strata=names.strata)
   out
 }
@@ -275,31 +280,32 @@ predictSurv <- function(object,
                         level.chaos=1,
                         mode="list",
                         bytime=FALSE){
-  p <- predict(object,
-               newdata=newdata,
-               level.chaos=level.chaos,
-               times=times,type="list")
-  NT <- p$dimensions$time
-  NR <- p$dimensions$strata
-  pindex <- p$indices$time
-  if (object$covariate.type==1){
-    psurv <- c(1,object$surv)[pindex+1]
-  }
-  else{
-    if (bytime==FALSE){
-      psurv <- split(c(1,object$surv)[pindex+1],
-                     rep(1:NR,rep(NT,NR)))
-      names(psurv) <- p$names.strata
+    p <- predict(object,
+                 newdata=newdata,
+                 level.chaos=level.chaos,
+                 times=times,type="list")
+    NT <- p$dimensions$time
+    NR <- p$dimensions$strata
+    pindex <- p$indices$time
+    if (object$covariate.type==1){
+        psurv <- c(1,object$surv)[pindex+1]
     }
     else{
-      psurv <- split(c(1,object$surv)[pindex+1],rep(1:NT,NR))
-      names(psurv) <- paste("t",times,sep="=")
+        if (bytime==FALSE){
+            psurv <- split(c(1,object$surv)[pindex+1],
+                           rep(1:NR,rep(NT,NR)))
+            names(psurv) <- p$names.strata
+        }
+        else{
+            psurv <- split(c(1,object$surv)[pindex+1],rep(1:NT,NR))
+            names(psurv) <- paste("t",times,sep="=")
+        }
     }
-  }
-  if (mode=="matrix" && NR>1) {
-    psurv <- do.call("rbind",psurv)
-  }
-  psurv
+    if (mode=="matrix" && NR>1) {
+        browser()
+        psurv <- cbind(p$strata,do.call("rbind",psurv))
+    } 
+    psurv
 }
 
 "predictCuminc" <- function(object,

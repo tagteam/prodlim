@@ -8,7 +8,7 @@
 \usage{
 \method{predict}{prodlim}(object, times, newdata, level.chaos = 1,
   type = c("surv", "cuminc", "list"), mode = "list", bytime = FALSE,
-  cause = 1, ...)
+  cause, ...)
 }
 \arguments{
 \item{object}{A fitted object of class "prodlim".}
@@ -84,12 +84,13 @@ dat <- SimSurv(400)
 fit <- prodlim(Hist(time,status)~1,data=dat)
 
 ## predict the survival probs at selected times 
-predict(fit,times=c(10,100,1000))
+predict(fit,times=c(3,5,10))
 
-## works also outside the usual range of the Kaplan-Meier
+## NA is returned when the time point is beyond the
+## range of definition of the Kaplan-Meier estimator:
 predict(fit,times=c(-1,0,10,100,1000,10000))
 
-## newdata is required if there are strata
+## when there are strata, newdata is required 
 ## or neighborhoods (i.e. overlapping strata)
 mfit <- prodlim(Hist(time,status)~X1+X2,data=dat)
 predict(mfit,times=c(-1,0,10,100,1000,10000),newdata=dat[18:21,])

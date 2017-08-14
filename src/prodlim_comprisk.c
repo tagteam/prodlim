@@ -168,12 +168,16 @@ void prodlimCompriskPlus(double* y,
   } else{
     if (*delayed==1){
       atrisk=0;
+      /* do not initialize with those that have entry times=0 because by convention in case of ties 
+	 entry happens after events and after censoring  */
       /* sort the delayed entry times */
       qsort(entrytime+start,
 	    (stop-start),
 	    (size_t) sizeof(double),
 	    (int (*)(const void *, const void *))(doubleNewOrder));
       e=start; /* index for delayed entry */
+      /* initialize the number at risk */
+
     }else{
       atrisk=(double) stop-start; /* (sub-)sample size */
     }
@@ -217,18 +221,19 @@ void prodlimCompriskPlus(double* y,
 	/* delayed entry: find number of subjects that
 	   entered at time[s] */
 	entered=0;
-	while(e<stop && entrytime[e]< y[i-1]){ /*entry happens at t+ events at t*/
+	while(e<stop && entrytime[e]< y[i-1]){ /*entry happens at t+ and events at t*/
 	  entered++;
 	  if (e==start || entrytime[e]>entrytime[e-1]){
 	    /* unless there is a tie between the current
 	       and the next entry-time, add time to list of times, increase s
 	       and move the values of event, loss etc. to the next event time */
 	    nrisk[s]=atrisk+entered;
-	    if (entrytime[e]!=time[s-1]){ /* if entrytime[e]==y[i] then only increase
-					the number at risk but not move the
-					time counter or the values of event, etc.
-				     */
-	      /* Rprintf("e=%d\ts=%d\tentrytime[e]=%1.2f\ty[i-1]=%1.2f\ttime[s-1]=%1.2f\ti=%d\t\n",e,s,entrytime[e],y[i-1],time[s-1],i); */
+	    if (s==0 || entrytime[e]!=time[s-1]){
+	      /* if entrytime[e]==time[s-1] then only increase
+		 the number at risk (done two lines above)
+		 but dont change the time counter or the values
+		 of event, etc.
+	      */
 	      for(j=0; j < (*NS); ++j) { 
 		event[(s+1) * (*NS) + j]=event[s * (*NS) + j];
 		event[s * (*NS) + j]=0;
@@ -249,7 +254,6 @@ void prodlimCompriskPlus(double* y,
 		}
 	      }
 	      time[s]=entrytime[e];
-	      /* Rprintf("e=%d\ts=%d\tentrytime[e]=%1.2f\ttime[s]=%1.2f\t\n",e,s,entrytime[e],time[s]); */
 	      s++;
 	    } 
 	  }
@@ -258,7 +262,6 @@ void prodlimCompriskPlus(double* y,
 	atrisk += (double) entered;
       }
       time[s]=y[i-1];
-      /* Rprintf("\nEventtime:s=%d\ti=%d\ttime[s]=%1.2f\tcause=%1.2f\n",s,i,time[s],cause[i]);  */
       nrisk[s]=atrisk;
       d = 0;
       /* }}} */
