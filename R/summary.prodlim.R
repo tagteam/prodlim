@@ -167,8 +167,8 @@ summary.prodlim <- function(object,
     # {{{ interval-censored
     if (cens.type=="intervalCensored"){
         ltab <- data.frame(time=paste("(",paste(signif(object$time[1,],2),
-                               signif(object$time[2,],2),
-                               sep="-"),"]",sep=""),
+                                                signif(object$time[2,],2),
+                                                sep="-"),"]",sep=""),
                            n.risk=signif(object$n.risk,2),
                            n.event=signif(object$n.event,2),
                            ##    n.lost=object$n.lost,
@@ -182,22 +182,22 @@ summary.prodlim <- function(object,
                 X <- object$X
                 if (NROW(X)>max.tables){
                     warning(call.=TRUE,immediate.=TRUE,paste("\nLife tables are available for",
-                                           NROW(X),
-                                           "different covariate constellations.\n",
-                                           "Shown are the table corresponding to the first row in object$X,",
-                                           "corresponding to the middle row (median of the number of rows in object$X) ",
-                                           "and corresponding to the last row in object$X ...\n",
-                                           "to see more tables use arguments `newdata' and `max.tables'\n"))
+                                                             NROW(X),
+                                                             "different covariate constellations.\n",
+                                                             "Shown are the table corresponding to the first row in object$X,",
+                                                             "corresponding to the middle row (median of the number of rows in object$X) ",
+                                                             "and corresponding to the last row in object$X ...\n",
+                                                             "to see more tables use arguments `newdata' and `max.tables'\n"))
                     X <- X[c(1,round(median(1:NROW(X))),NROW(X)),,drop=FALSE]
                 }
             } else{
-                  X <- unique.data.frame(newdata)
-                  if (NROW(X) < NROW(newdata))
-                      warning("Returned is only one summary for each unique value in newdata.")
-              }
+                X <- unique.data.frame(newdata)
+                if (NROW(X) < NROW(newdata))
+                    warning("Returned is only one summary for each unique value in newdata.")
+            }
         } else {
-              X <- NULL
-          }
+            X <- NULL
+        }
         if (model=="survival") {
             stats <- list(c("surv",1),c("se.surv",0))
             if (!is.null(object$conf.int))
@@ -221,8 +221,8 @@ summary.prodlim <- function(object,
             if (!missing(cause)){
                 cause <- checkCauses(cause=cause,object=object)
             } else{ ## show all causes
-                  cause <- attr(object$model.response,"states")
-              }
+                cause <- attr(object$model.response,"states")
+            }
             ltab <- lifeTab(object=object,
                             times=times,
                             cause=cause,
@@ -237,14 +237,14 @@ summary.prodlim <- function(object,
             }
             else stop(paste("\nCannot find cause: ",cause,".\nFitted were causes: ",paste(names(ltab),collapse=", "),sep=""))
         }else{
-             ltab <- lifeTab(object=object,
-                             times=times,
-                             newdata=X,
-                             stats=stats,
-                             intervals=intervals,
-                             percent=percent,
-                             showTime=showTime)
-         }
+            ltab <- lifeTab(object=object,
+                            times=times,
+                            newdata=X,
+                            stats=stats,
+                            intervals=intervals,
+                            percent=percent,
+                            showTime=showTime)
+        }
     }
     # }}}
     # {{{ output

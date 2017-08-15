@@ -13,7 +13,7 @@
 \arguments{
 \item{object}{A fitted object of class "prodlim".}
 
-\item{times}{Vector of times at which to return the estimated probabilities.}
+\item{times}{Vector of times at which to return the estimated probabilities (survival or absolute event risks).}
 
 \item{newdata}{A data frame with the same variable names as those that
 appear on the right hand side of the 'prodlim' formula.  If there are
@@ -42,8 +42,10 @@ predicted probabilities will have a column for each time and a row for each
 newdata. Only when \code{object$covariate.type>1} and more than one time is
 given.}
 
-\item{cause}{The cause for predicting the cause-specific cumulative
-incidence function in competing risk models.}
+\item{cause}{Character (other classes are converted with \code{as.character}).
+The cause for predicting the cause-specific cumulative
+incidence function in competing risk models, that is the absolute risk of 
+\code{cause} events between time zero and \code{times} .}
 
 \item{\dots}{Only for compatibility reasons.}
 }

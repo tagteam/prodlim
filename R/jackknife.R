@@ -8,7 +8,8 @@
 #' @aliases jackknife jackknife.survival jackknife.competing.risks
 #' @param object Object of class \code{"prodlim"}.
 #' @param times Time points at which to compute pseudo values.
-#' @param cause For competing risks the cause of failure.
+#' @param cause Character (other classes are converted with \code{as.character}).
+#' For competing risks the cause of failure.
 #' @param keepResponse If \code{TRUE} add the model response,
 #' i.e. event time, event status, etc. to the result.
 #' @param ... not used
@@ -39,15 +40,17 @@
 ##' 
 #' @export
 jackknife <- function(object,times,cause,keepResponse=FALSE,...){
-  if (object$model=="survival")
-    jackknife.survival(object=object,times=times,keepResponse=keepResponse,...)
-  else if (object$model=="competing.risks")
-    jackknife.competing.risks(object=object,
-                              times=times,
-                              cause=cause,
-                              keepResponse=keepResponse,
-                              ...)
-  else stop("No method for jackknifing this object.")
+    if (!missing(cause)) cause <- checkCauses(cause,object)
+    else cause <- attr(object$model.response,which="states")[[1]]
+    if (object$model=="survival")
+        jackknife.survival(object=object,times=times,keepResponse=keepResponse,...)
+    else if (object$model=="competing.risks")
+        jackknife.competing.risks(object=object,
+                                  times=times,
+                                  cause=cause,
+                                  keepResponse=keepResponse,
+                                  ...)
+    else stop("No method for jackknifing this object.")
 }
 
 #' @export

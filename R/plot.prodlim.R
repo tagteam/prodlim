@@ -22,9 +22,10 @@
 #'     \code{prodlim} function.
 #' @param type Either \code{"surv"} or \code{"cuminc"} controls what
 # part of the object is plotted.  Defaults to \code{object$type}.
-#' @param cause determines the cause of the cumulative incidence
-#' function.  Currently one cause is allowed at a time, but you may
-#' call the function again with add=TRUE to add the lines of the other
+#' @param cause Character (other classes are converted with \code{as.character}).
+#' \code{cause} determines the cause of the cumulative incidence
+#' function.  Currently one cause is allowed at a time, but you can
+#' call the function again with \code{add=TRUE} to add the lines of the other
 #' causes.
 #' @param select Select which lines to plot. This can be used when
 #'     there are many strata or many competing risks to select a
@@ -288,7 +289,7 @@
 #' @export 
 plot.prodlim <- function(x,
                          type,
-                         cause=1,
+                         cause,
                          select,
                          newdata,
                          add = FALSE,
@@ -313,7 +314,6 @@ plot.prodlim <- function(x,
                          minAtrisk=0,
                          limit=10,
                          ...){
-
     # }}}
     # {{{  backward compatibility
     ##   args=match.call(expand=TRUE)
@@ -342,99 +342,103 @@ plot.prodlim <- function(x,
   if (model=="competing.risks" && type=="surv")
       stop("To plot the event-free survival curve, please fit a suitable model: prodlim(Hist(time,status!=0)~....")
   
-  if (cens.type=="intervalCensored")
-      plot.times <- sort(unique(x$time[2,]))
-  else{
-      plot.times <- sort(unique(x$time))
-      if (plot.times[1]>timeOrigin) plot.times <- c(timeOrigin,plot.times)
-      else plot.times <- c(timeOrigin,plot.times[plot.times>timeOrigin])
-  }
-  if (length(x$clustervar)>0)
-      nRisk <- x$n.risk[,1]
-  else
-      nRisk <- x$n.risk
-  if (minAtrisk>0 && any(nRisk<=minAtrisk)){
-      if (all(nRisk<=minAtrisk)){
-          return(plot(0,0,type="n",xlim=c(min(plot.times), max(plot.times)),ylim=c(0, 1),axes=FALSE))
-      }
-      criticalTime <- min(x$time[nRisk<=minAtrisk])
-      plot.times <- plot.times[plot.times<criticalTime]
-      ## if (sum(nEvent[nRisk>minAtrisk])<=1)
-  }
-  if (missing(newdata)) {
-      newdata <- x$X
-      if (NROW(newdata)>limit)
-          newdata <- newdata[c(1,round(median(1:NROW(newdata))),NROW(newdata)),,drop=FALSE]          
-  }
-  ## restrict plot.times to xlim
-  if (!missing(xlim)){
-      if (xlim[1]>plot.times[1]) plot.times <- plot.times[plot.times>=xlim[1]]
-      if (xlim[2]<plot.times[length(plot.times)]) plot.times <- unique(c(plot.times[plot.times<=xlim[2]],xlim[2]))
-  }
-  ## if (missing(newdata) && NROW(newdata)>limit)
-  ## newdata <- newdata[c(1,round(median(1:NROW(newdata))),NROW(newdata)),,drop=FALSE]
-  ## browser()
-  stacked <- cause[1]=="stacked"
-  if (stacked){
-      confint <- FALSE
-      if (model!="competing.risks") stop("Stacked plot works only for competing risks models.")
-      if (NROW(newdata)>1) stop("Stacked plot works only for one covariate stratum.")
-  }else{
-       if (length(cause)!=1){
-           warning("Currently only the cumulative incidence of a single cause can be plotted in one go. Use argument add=TRUE to add the lines of the other causes. For now I use the first cause")
-           cause <- cause[1]
-       }
-   }
-  ## Y <- predict(x,times=plot.times,newdata=newdata,level.chaos=1,type=type,cause=cause,mode="list")
-  startValue=ifelse(type=="surv",1,0)
-  if (type=="hazard" && model!="survival")
-      stats=list(c("cause.hazard",0))
-  else
-      stats=list(c(type,startValue))
-  if (model=="survival" && type=="cuminc") {
-      startValue=1
-      stats=list(c("surv",startValue))
-  }
-  if (confint==TRUE)
-      stats=c(stats,list(c("lower",startValue),c("upper",startValue)))
-  if (x$cens.type=="intervalCensored"){
-      stop("FIXME: There is no plot method implemented for intervalCensored data.")
-  }
-  if  (model=="competing.risks"){
-      if (stacked) ## all causes
-          cause <- attributes(x$model.response)$states
-      else
-          cause <- checkCauses(cause,x)
-      sumX <- lifeTab(x,
-                      times=plot.times,
-                      cause=cause,
-                      newdata=newdata,
-                      stats=stats,
-                      percent=FALSE)
-  }
-  else{
-      sumX <- lifeTab(x,
-                      times=plot.times,
-                      newdata=newdata,
-                      stats=stats,
-                      percent=FALSE)
-  }
-  if (model=="competing.risks"){
-      if (stacked == FALSE){
-          sumX <- sumX[[cause]]
-      } else {
+    if (cens.type=="intervalCensored")
+        plot.times <- sort(unique(x$time[2,]))
+    else{
+        plot.times <- sort(unique(x$time))
+        if (plot.times[1]>timeOrigin) plot.times <- c(timeOrigin,plot.times)
+        else plot.times <- c(timeOrigin,plot.times[plot.times>timeOrigin])
+    }
+    if (length(x$clustervar)>0)
+        nRisk <- x$n.risk[,1]
+    else
+        nRisk <- x$n.risk
+    if (minAtrisk>0 && any(nRisk<=minAtrisk)){
+        if (all(nRisk<=minAtrisk)){
+            return(plot(0,0,type="n",xlim=c(min(plot.times), max(plot.times)),ylim=c(0, 1),axes=FALSE))
+        }
+        criticalTime <- min(x$time[nRisk<=minAtrisk])
+        plot.times <- plot.times[plot.times<criticalTime]
+        ## if (sum(nEvent[nRisk>minAtrisk])<=1)
+    }
+    if (missing(newdata)) {
+        newdata <- x$X
+        if (NROW(newdata)>limit)
+            newdata <- newdata[c(1,round(median(1:NROW(newdata))),NROW(newdata)),,drop=FALSE]          
+    }
+    ## restrict plot.times to xlim
+    if (!missing(xlim)){
+        if (xlim[1]>plot.times[1]) plot.times <- plot.times[plot.times>=xlim[1]]
+        if (xlim[2]<plot.times[length(plot.times)]) plot.times <- unique(c(plot.times[plot.times<=xlim[2]],xlim[2]))
+    }
+    ## if (missing(newdata) && NROW(newdata)>limit)
+    ## newdata <- newdata[c(1,round(median(1:NROW(newdata))),NROW(newdata)),,drop=FALSE]
+    if (missing(cause)){
+        cause <- attr(x$model.response,which="states")[1]
+        stacked <- FALSE
+    } else{
+        stacked <- cause[1]=="stacked"
+        if (stacked) ## all causes
+            cause <- attributes(x$model.response)$states
+        else
+            cause <- checkCauses(cause,x)
+    }
+    if (stacked){
+        confint <- FALSE
+        if (model!="competing.risks") stop("Stacked plot works only for competing risks models.")
+        if (NROW(newdata)>1) stop("Stacked plot works only for one covariate stratum.")
+    }else{
+        if (length(cause)!=1){
+            warning("Currently only the cumulative incidence of a single cause can be plotted in one go. Use argument add=TRUE to add the lines of the other causes. For now I use the first cause")
+            cause <- cause[1]
+        }
+    }
+    ## Y <- predict(x,times=plot.times,newdata=newdata,level.chaos=1,type=type,cause=cause,mode="list")
+    startValue=ifelse(type=="surv",1,0)
+    if (type=="hazard" && model!="survival")
+        stats=list(c("cause.hazard",0))
+    else
+        stats=list(c(type,startValue))
+    if (model=="survival" && type=="cuminc") {
+        startValue=1
+        stats=list(c("surv",startValue))
+    }
+    if (confint==TRUE)
+        stats=c(stats,list(c("lower",startValue),c("upper",startValue)))
+    if (x$cens.type=="intervalCensored"){
+        stop("FIXME: There is no plot method implemented for intervalCensored data.")
+    }
+    if  (model=="competing.risks"){
+        sumX <- lifeTab(x,
+                        times=plot.times,
+                        cause=cause,
+                        newdata=newdata,
+                        stats=stats,
+                        percent=FALSE)
+    }
+    else{
+        sumX <- lifeTab(x,
+                        times=plot.times,
+                        newdata=newdata,
+                        stats=stats,
+                        percent=FALSE)
+    }
+    if (model=="competing.risks"){
+        if (stacked == FALSE){
+            sumX <- sumX[[cause]]
+        } else {
             ## there is at most one stratum for each cause
             if (!is.null(newdata))
                 sumX <- lapply(sumX,function(cc)cc[[1]])
         }
-  }
-  ## cover both no covariate and single newdata:
-  if (!is.null(dim(sumX))) sumX <- list(sumX)
-  if (model=="survival" && type=="cuminc"){
-      Y <- lapply(sumX,function(x)1-x[,"surv"])
-      names(Y) <- names(sumX)
-      nlines <- length(Y)
-  } else{
+    }
+    ## cover both no covariate and single newdata:
+    if (!is.null(dim(sumX))) sumX <- list(sumX)
+    if (model=="survival" && type=="cuminc"){
+        Y <- lapply(sumX,function(x)1-x[,"surv"])
+        names(Y) <- names(sumX)
+        nlines <- length(Y)
+    } else{
         Y <- lapply(sumX,function(x)x[,type])
         names(Y) <- names(sumX)
         if (!missing(select)){

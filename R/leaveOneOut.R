@@ -9,12 +9,16 @@
 #' @param object Object of class \code{"prodlim"}.
 #' @param times time points at which to compute leave-one-out
 #' event/survival probabilities.
-#' @param cause For competing risks the cause of interest. 
+#' @param cause Character (other classes are converted with \code{as.character}).
+#' For competing risks the cause of interest. 
 #' @param lag For survival models only. If \code{TRUE} lag the result, i.e. compute
 #' S(t-) instead of S(t).
 #' @param ... not used
 #' @export
 leaveOneOut <- function(object,times,cause,lag=FALSE,...){
+    if (missing(cause)) cause <- attr(object$model.response,which="states")[[1]]
+    else
+        cause <- checkCauses(cause,object)
     if (object$model=="survival")
         leaveOneOut.survival(object=object,times=times,lag=lag,...)
     else if (object$model=="competing.risks")

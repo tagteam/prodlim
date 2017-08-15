@@ -5,10 +5,10 @@
 \alias{lines.prodlim}
 \title{Plotting event probabilities over time}
 \usage{
-\method{plot}{prodlim}(x, type, cause = 1, select, newdata, add = FALSE,
-  col, lty, lwd, ylim, xlim, ylab, xlab = "Time", timeconverter,
-  legend = TRUE, logrank = FALSE, marktime = FALSE, confint = TRUE,
-  automar, atrisk = ifelse(add, FALSE, TRUE), timeOrigin = 0, axes = TRUE,
+\method{plot}{prodlim}(x, type, cause, select, newdata, add = FALSE, col, lty,
+  lwd, ylim, xlim, ylab, xlab = "Time", timeconverter, legend = TRUE,
+  logrank = FALSE, marktime = FALSE, confint = TRUE, automar,
+  atrisk = ifelse(add, FALSE, TRUE), timeOrigin = 0, axes = TRUE,
   background = TRUE, percent = TRUE, minAtrisk = 0, limit = 10, ...)
 }
 \arguments{
@@ -17,9 +17,10 @@
 
 \item{type}{Either \code{"surv"} or \code{"cuminc"} controls what}
 
-\item{cause}{determines the cause of the cumulative incidence
-function.  Currently one cause is allowed at a time, but you may
-call the function again with add=TRUE to add the lines of the other
+\item{cause}{Character (other classes are converted with \code{as.character}).
+\code{cause} determines the cause of the cumulative incidence
+function.  Currently one cause is allowed at a time, but you can
+call the function again with \code{add=TRUE} to add the lines of the other
 causes.}
 
 \item{select}{Select which lines to plot. This can be used when

@@ -8,7 +8,7 @@
 #' 
 #' @aliases predict.prodlim predictSurv predictCuminc
 #' @param object A fitted object of class "prodlim".
-#' @param times Vector of times at which to return the estimated probabilities.
+#' @param times Vector of times at which to return the estimated probabilities (survival or absolute event risks).
 #' @param newdata A data frame with the same variable names as those that
 #' appear on the right hand side of the 'prodlim' formula.  If there are
 #' covariates this argument is required.
@@ -31,8 +31,10 @@
 #' predicted probabilities will have a column for each time and a row for each
 #' newdata. Only when \code{object$covariate.type>1} and more than one time is
 #' given.
-#' @param cause The cause for predicting the cause-specific cumulative
-#' incidence function in competing risk models.
+#' @param cause Character (other classes are converted with \code{as.character}).
+#' The cause for predicting the cause-specific cumulative
+#' incidence function in competing risk models, that is the absolute risk of 
+#' \code{cause} events between time zero and \code{times} . 
 #' @param \dots Only for compatibility reasons.
 #' @return \code{type=="surv"} A list or a matrix with survival probabilities
 #' for all times and all newdata.
@@ -92,7 +94,7 @@
                               cause,
                               ...){
     if (missing(cause)) cause <- attr(object$model.response,"states")
-    checkCauses(cause,object)
+    else cause <- checkCauses(cause,object)
     if (length(times)==0) stop("Argument 'times' has length 0")
     if (missing(type))
         type <- switch(object$model,"survival"="surv","competing.risks"="cuminc","list")

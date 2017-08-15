@@ -14,7 +14,8 @@ leaveOneOut(object, times, cause, lag = FALSE, ...)
 \item{times}{time points at which to compute leave-one-out
 event/survival probabilities.}
 
-\item{cause}{For competing risks the cause of interest.}
+\item{cause}{Character (other classes are converted with \code{as.character}).
+For competing risks the cause of interest.}
 
 \item{lag}{For survival models only. If \code{TRUE} lag the result, i.e. compute
 S(t-) instead of S(t).}

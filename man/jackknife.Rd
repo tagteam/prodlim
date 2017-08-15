@@ -13,7 +13,8 @@ jackknife(object, times, cause, keepResponse = FALSE, ...)
 
 \item{times}{Time points at which to compute pseudo values.}
 
-\item{cause}{For competing risks the cause of failure.}
+\item{cause}{Character (other classes are converted with \code{as.character}).
+For competing risks the cause of failure.}
 
 \item{keepResponse}{If \code{TRUE} add the model response,
 i.e. event time, event status, etc. to the result.}
