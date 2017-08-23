@@ -330,26 +330,27 @@ predictSurv <- function(object,
         if (missing(cause))
             cause <- attributes(object$model.response)$states
         else
-            causes <- checkCauses(cause,object)
+            cause <- checkCauses(cause,object)
     }
     out <- lapply(cause,function(thisCause){
-                      if (NR == 1){
-                          pcuminc <- c(0,object$cuminc[[thisCause]])[pindex+1]
-                          if (mode=="matrix")
-                              pcuminc <- matrix(pcuminc,nrow=1)
-                      }
-                      else{
-                          pcuminc <- split(c(0,object$cuminc[[thisCause]])[pindex+1],
-                                           rep(1:NR,rep(NT,NR)))
-                          names(pcuminc) <- p$names.strata
-                          if (mode=="matrix" && NR>1) {
-                              pcuminc <- do.call("rbind",pcuminc)
-                          }
-                      }
-                      pcuminc})
+        if (NR == 1){
+            pcuminc <- c(0,object$cuminc[[thisCause]])[pindex+1]
+            if (mode=="matrix")
+                pcuminc <- matrix(pcuminc,nrow=1)
+        }
+        else{
+            pcuminc <- split(c(0,object$cuminc[[thisCause]])[pindex+1],
+                             rep(1:NR,rep(NT,NR)))
+            names(pcuminc) <- p$names.strata
+            if (mode=="matrix" && NR>1) {
+                pcuminc <- do.call("rbind",pcuminc)
+            }
+        }
+        pcuminc})
     if (length(cause)==1){
-        out[[1]]}
-    else{
-        names(out) <- names(object$cuminc)[cause]
-        out}
+        out[[1]]
+    } else{
+        names(out) <- cause
+        out
+    }
 }
