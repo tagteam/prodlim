@@ -225,7 +225,6 @@
 ##' plot(fitd)
 ##' 
 #' @export
-##' @author Thomas A. Gerds <tag@@biostat.ku.dk>
 "prodlim" <- function(formula,
                       data = parent.frame(),
                       subset,
