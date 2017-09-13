@@ -52,7 +52,7 @@ atRisk <- function(x,
                    ...){
     if (missing(times)) times <- seq(0,x$maxtime,x$maxtime/10)
     if (x$model=="competing.risks"){
-        px <- lifeTab(object=x,times=times,cause=1,newdata=newdata,stats=NULL)[[1]]
+        px <- lifeTab(object=x,times=times,cause=getStates(x)[1],newdata=newdata,stats=NULL)[[1]]
     }
     else if (x$model=="survival"){
         px <- lifeTab(object=x,times=times,newdata=newdata,stats=NULL)

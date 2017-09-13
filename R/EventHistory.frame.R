@@ -161,11 +161,11 @@ EventHistory.frame <- function(formula,
             ||
             (match("$",formula.names,nomatch=0)+match("[",formula.names,nomatch=0)>0)){
             stop("Invalid specification of formula. Perhaps forgotten right hand side?\nNote that any subsetting, ie data$var or data[,\"var\"], is invalid for this function.")}
-        else{
-            if (!(any(match(c("survival::Surv","Surv","prodlim::Hist","Hist"),
-                            formula.names,nomatch=0))))
-                stop("formula is NOT a proper survival formula,\nwhich must have a `Surv' or `Hist' object as response.")
-        }
+        else{ 
+                if (!(any(match(c("survival::Surv","Surv","prodlim::Hist","Hist"),
+                                formula.names,nomatch=0))))
+                    stop("formula is NOT a proper survival formula,\nwhich must have a `Surv' or `Hist' object as response.")
+            }
     }
     # }}}
     # {{{call model.frame
@@ -191,8 +191,7 @@ EventHistory.frame <- function(formula,
 
     # {{{ extract response
     if (response==TRUE && attr(Terms,"response")!=0){
-        event.history <- model.response(model.frame(update(formula,".~1"),
-                                                    data=mm))
+        event.history <- model.response(model.frame(update(formula,".~1"),data=mm))
         # }}}
         # {{{ Fix for those who use `Surv' instead of `Hist' 
         if (match("Surv",class(event.history),nomatch=0)!=0){

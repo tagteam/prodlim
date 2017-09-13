@@ -264,8 +264,6 @@ estimate for dependent failure time observations
 }
 \author{
 Thomas A. Gerds \email{tag@biostat.ku.dk}
-
-Thomas A. Gerds <tag@biostat.ku.dk>
 }
 \keyword{cluster}
 \keyword{nonparametric}

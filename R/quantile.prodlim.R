@@ -52,6 +52,7 @@
             out <- do.call("cbind",lapply(c("surv","lower","upper"),function(w){
                 sumw <- sum[,w,drop=TRUE]
                 notna= is.na(sumw) | sumw==0 | sumw ==1
+                if (all(notna)) return(NA)
                 xxx=as.numeric(sumw[!notna])
                 ttt=as.numeric(sum[,"time"][!notna])
                 found <- 2+sindex(jump.times=xxx,eval.times=q,comp="greater",strict=FALSE)
@@ -75,6 +76,7 @@
             out <- do.call("cbind",lapply(c("cuminc","lower","upper"),function(w){
                 sumw <- sum[,w,drop=TRUE]
                 notna= is.na(sumw) | sumw==0 | sumw ==1
+                if (all(notna)) return(NA)
                 xxx=as.numeric(sumw[!notna])
                 ttt=as.numeric(sum[,"time"][!notna])
                 found <- 2+sindex(jump.times=xxx,eval.times=q,comp="smaller",strict=FALSE)
