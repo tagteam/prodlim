@@ -388,7 +388,10 @@ plot.prodlim <- function(x,
         if (model!="competing.risks") stop("Stacked plot works only for competing risks models.")
         if (NROW(newdata)>1) stop("Stacked plot works only for one covariate stratum.")
     }else{
-        if (length(cause)!=1){
+        if (length(cause)==0){
+            cause <- attributes(x$model.response)$states[[1]]
+        }
+        if (length(cause)>1){
             warning("Currently only the cumulative incidence of a single cause can be plotted in one go. Use argument add=TRUE to add the lines of the other causes. For now I use the first cause")
             cause <- cause[1]
         }

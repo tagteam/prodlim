@@ -22,6 +22,12 @@ Quantiles for Kaplan-Meier and Aalen-Johansen estimates.
 library(lava)
 set.seed(1)
 d=SimSurv(30)
+
+# Quantiles of the potential followup time
+g=prodlim(Hist(time,status)~1,data=d,reverse=TRUE)
+quantile(g)
+
+# survival time
 f=prodlim(Hist(time,status)~1,data=d)
 f1=prodlim(Hist(time,status)~X1,data=d)
 # default: median and IQR

@@ -94,7 +94,11 @@
                               cause,
                               ...){
     if (missing(cause)) cause <- attr(object$model.response,"states")
-    else cause <- checkCauses(cause,object)
+    else {
+        iscause <- try(cause <- checkCauses(cause,object),silent=TRUE)
+        if (class(iscause)[1]=="try-error") {
+        }
+    }
     if (length(times)==0) stop("Argument 'times' has length 0")
     if (missing(type))
         type <- switch(object$model,"survival"="surv","competing.risks"="cuminc","list")
