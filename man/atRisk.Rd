@@ -45,6 +45,8 @@ most atrisk row from the inner plotting region: par()$mgp[2].}
 
 \item{adjust.labels}{If \code{TRUE} the labels are left adjusted.}
 
+\item{show.censored}{If \code{TRUE} the cumulative number of subjects lost to follow up is shown in parentheses.}
+
 \item{...}{Further arguments that are passed to the function
 \code{mtext}.}
 }

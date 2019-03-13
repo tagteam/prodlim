@@ -26,6 +26,7 @@
 #' @param dist If \code{line} is missing, the distance of the upper
 #' most atrisk row from the inner plotting region: par()$mgp[2].
 #' @param adjust.labels If \code{TRUE} the labels are left adjusted.
+#' @param show.censored If \code{TRUE} the cumulative number of subjects lost to follow up is shown in parentheses.
 #' @param ... Further arguments that are passed to the function
 #' \code{mtext}.
 #' @return Nil
@@ -137,7 +138,10 @@ atRisk <- function(x,
             }
             if (is.list(ncens[[1]]))
                 ncens <- unlist(ncens,recursive=FALSE)
-            atrisk.text <- paste0(as.character(sumx[[y]])," (",ncens[[y]],")")
+            atrisk.text <- paste0(as.character(sumx[[y]]),
+                                  " (",
+                                  cumsum(ncens[[y]]),
+                                  ")")
         }
         mtext(text=atrisk.text,
               side=1,
