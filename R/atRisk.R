@@ -49,13 +49,14 @@ atRisk <- function(x,
                    adj,
                    dist,
                    adjust.labels=TRUE,
+                   show.censored=FALSE,
                    ...){
     if (missing(times)) times <- seq(0,x$maxtime,x$maxtime/10)
     if (x$model=="competing.risks"){
-        px <- lifeTab(object=x,times=times,cause=getStates(x)[1],newdata=newdata,stats=NULL)[[1]]
+        px <- lifeTab(object=x,times=times,cause=getStates(x)[1],newdata=newdata,stats=NULL,intervals=show.censored)[[1]]
     }
     else if (x$model=="survival"){
-        px <- lifeTab(object=x,times=times,newdata=newdata,stats=NULL)
+        px <- lifeTab(object=x,times=times,newdata=newdata,stats=NULL,intervals=show.censored)
     }
     if (is.matrix(px) || is.data.frame(px))
         sumx <- lapply(data.frame(px)[,grep("n.risk",colnames(px)),drop=FALSE],function(x)x)
@@ -117,7 +118,13 @@ atRisk <- function(x,
     if (length(col)==nlines/2) ## 1 cluster level
         col <- rep(col,rep(2,length(col)))
     lapply(1:nlines,function(y){
-               mtext(text=as.character(sumx[[y]]),
+        if (show.censored==FALSE){
+            atrisk.text <- as.character(sumx[[y]])
+        }else{
+            ncens <- lapply(data.frame(px)[,grep("n.lost",colnames(px)),drop=FALSE],function(x)x)
+            atrisk.text <- paste0(as.character(sumx[[y]])," (",ncens[[y]],")")
+        }
+               mtext(text=atrisk.text,
                                side=1,
                                at=times,
                                line=rep(line[y],length(times)),

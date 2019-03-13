@@ -6,8 +6,8 @@
 \usage{
 \method{plot}{Hist}(x, nrow, ncol, stateLabels, arrowLabels,
   arrowLabelStyle = "symbolic", arrowLabelSymbol = "lambda",
-  changeArrowLabelSide, tagBoxes = FALSE, startCountZero = TRUE, oneFitsAll,
-  margin, cex, verbose = FALSE, ...)
+  changeArrowLabelSide, tagBoxes = FALSE, startCountZero = TRUE,
+  oneFitsAll, margin, cex, verbose = FALSE, ...)
 }
 \arguments{
 \item{x}{An object of class \code{Hist}.}

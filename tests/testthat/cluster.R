@@ -9,4 +9,4 @@ test_that("clustersruv",{
     d <- prodlim(Hist(midtimeX,eventX=="pn")~1,data=clusterTestData[clusterTestData$AnyCrownFracture==2,])
     expect_equal(round(as.numeric(summary(a)$table[[1]][,c("se.surv")]),5),c(0,0.20951,0.10476,0.10476,NA,NA,NA,NA))
     expect_equal(summary(b), summary(c))
-}
+})

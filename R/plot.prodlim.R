@@ -118,7 +118,7 @@
 ##' ### marginal Kaplan-Meier estimator
 ##' kmfit <- prodlim(Hist(time, status) ~ 1, data = dat)
 ##' plot(kmfit)
-##'
+##' plot(kmfit,atrisk.show.censored=1L,atrisk.at=seq(0,12,3))
 ##' plot(kmfit,timeconverter="years2months")
 ##' 
 ##' # change time range
@@ -536,7 +536,7 @@ plot.prodlim <- function(x,
                                titlecol=1,
                                title=atriskDefaultTitle,
                                labels=atriskDefaultLabels,
-                               times=atriskDefaultPosition)
+                               times=atriskDefaultPosition,show.censored=FALSE)
     if (!missing(select) && (!(model=="competing.risks" && stacked))){
         atrisk.DefaultArgs$newdata <- atrisk.DefaultArgs$newdata[select,,drop=FALSE]
     }

@@ -5,18 +5,21 @@
 #' @param object object either obtained with \code{Hist} or \code{prodlim} 
 #' @export
 checkCauses <- function(cause,object){
-    cause <- unique(cause)
-    if (!is.character(cause)) cause <- as.character(cause)
-    fitted.causes <- prodlim::getStates(object)
-    if (!(all(cause %in% fitted.causes))){
-        stop(paste0("Cannot find requested cause(s) in object.\n\n",
-                    "Requested cause(s): ",
-                    paste0(cause,collapse=", "),
-                    "\n Available causes: ",
-                    paste(fitted.causes,collapse=", "),"\n"))
+    if (!is.null(cause)){
+        cause <- unique(cause)
+        if (!is.character(cause)) cause <- as.character(cause)
+        fitted.causes <- prodlim::getStates(object)
+        if (!is.null(fitted.causes)){
+            if (!(all(cause %in% fitted.causes))){
+                stop(paste0("Cannot find requested cause(s) in object.\n\n",
+                            "Requested cause(s): ",
+                            paste0(cause,collapse=", "),
+                            "\n Available causes: ",
+                            paste(fitted.causes,collapse=", "),"\n"))
+            }
+        }
+        cause
     }
-    cause
 }
-
 #----------------------------------------------------------------------
 ### checkCauses.R ends here

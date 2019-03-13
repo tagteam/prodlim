@@ -4,7 +4,6 @@
 \name{prodlim}
 \alias{prodlim}
 \alias{prodlim-package}
-\alias{prodlim}
 \title{Functions for estimating probabilities from right censored data}
 \usage{
 prodlim(formula, data = parent.frame(), subset, na.action = NULL,
@@ -89,8 +88,6 @@ Object of class "prodlim". See \code{\link{print.prodlim}}, \code{\link{predict.
 \code{\link{summary.prodlim}}, \code{\link{plot.prodlim}}.
 }
 \description{
-Functions for estimating probabilities from right censored data
-
 Nonparametric estimation in event history analysis. Featuring fast
 algorithms and user friendly syntax adapted from the survival package.  The
 product limit algorithm is used for right censored data; the

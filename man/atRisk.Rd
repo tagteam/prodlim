@@ -5,8 +5,9 @@
 \title{Drawing numbers of subjects at-risk of experiencing an event below
 Kaplan-Meier and Aalen-Johansen plots.}
 \usage{
-atRisk(x, newdata, times, line, col, labelcol = NULL, interspace, cex, labels,
-  title = "", titlecol = NULL, pos, adj, dist, adjust.labels = TRUE, ...)
+atRisk(x, newdata, times, line, col, labelcol = NULL, interspace, cex,
+  labels, title = "", titlecol = NULL, pos, adj, dist,
+  adjust.labels = TRUE, show.censored = FALSE, ...)
 }
 \arguments{
 \item{x}{an object of class `prodlim' as returned by the

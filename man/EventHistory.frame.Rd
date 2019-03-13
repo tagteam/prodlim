@@ -5,9 +5,10 @@
 \title{Event history frame}
 \usage{
 EventHistory.frame(formula, data, unspecialsDesign = TRUE, specials,
-  specialsFactor = TRUE, specialsDesign = FALSE, stripSpecials = NULL,
-  stripArguments = NULL, stripAlias = NULL, stripUnspecials = NULL,
-  dropIntercept = TRUE, check.formula = TRUE, response = TRUE)
+  specialsFactor = TRUE, specialsDesign = FALSE,
+  stripSpecials = NULL, stripArguments = NULL, stripAlias = NULL,
+  stripUnspecials = NULL, dropIntercept = TRUE, check.formula = TRUE,
+  response = TRUE)
 }
 \arguments{
 \item{formula}{Formula whose left hand side specifies the event

@@ -42,5 +42,5 @@ test_that("pseudo",{
     a <- system.time(jack <- with(ddd,pseudoci(time,event,ttt)))
     b <- system.time({jack2 <- jackknife.competing.risks(fff,times=ttt)})
     expect_less_than(a,b)
-}
+})
 

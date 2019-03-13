@@ -40,16 +40,17 @@
 ##' 
 #' @export
 jackknife <- function(object,times,cause,keepResponse=FALSE,...){
-    if (!missing(cause)) cause <- checkCauses(cause,object)
-    else cause <- attr(object$model.response,which="states")[[1]]
     if (object$model=="survival")
         jackknife.survival(object=object,times=times,keepResponse=keepResponse,...)
-    else if (object$model=="competing.risks")
+    else if (object$model=="competing.risks"){
+        if (!missing(cause)) cause <- checkCauses(cause,object)
+        else cause <- attr(object$model.response,which="states")[[1]]
         jackknife.competing.risks(object=object,
                                   times=times,
                                   cause=cause,
                                   keepResponse=keepResponse,
                                   ...)
+    }
     else stop("No method for jackknifing this object.")
 }
 

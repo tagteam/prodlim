@@ -332,11 +332,18 @@ plot.Hist <- function(x,
   else
     arrowLabel.cex <- rep(theCex,N)
   ## boxes
-  boxDefaults <- data.frame(name=paste("box",1:NS,sep=""),xpd=TRUE,stringsAsFactors=FALSE)
+  boxDefaults <- data.frame(name=paste("box",1:NS,sep=""),
+                            xpd=TRUE,
+                            stringsAsFactors=FALSE)
   ## box labels
   boxLabelDefaults <- data.frame(name=paste("label",1:NS,sep=""),stringsAsFactors=FALSE,label=stateLabs)
   ## arrows
-  arrowDefaults <- data.frame(name=paste("arrow",1:N,sep=""),code=2,lwd=1,headoffset=strwidth("ab",cex=arrowLabel.cex),length=.13,stringsAsFactors=FALSE)
+  arrowDefaults <- data.frame(name=paste("arrow",1:N,sep=""),
+                              code=2,
+                              lwd=1,
+                              headoffset=strwidth("ab",cex=arrowLabel.cex),
+                              length=.13,
+                              stringsAsFactors=FALSE)
   arrowDefaults <- cbind(arrowDefaults,ordered.transitions)
   ## arrowlabels
   if (missing(changeArrowLabelSide))

@@ -308,8 +308,8 @@ predictSurv <- function(object,
         }
     }
     if (mode=="matrix" && NR>1) {
-        browser()
-        psurv <- cbind(p$strata,do.call("rbind",psurv))
+        ## psurv <- cbind(p$strata,do.call("rbind",psurv))
+        psurv <- do.call("rbind",psurv)
     } 
     psurv
 }
