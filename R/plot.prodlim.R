@@ -171,7 +171,7 @@
 ##' 
 ##' ### Kaplan-Meier in discrete strata
 ##' kmfitX <- prodlim(Hist(time, status) ~ X1, data = dat)
-##' plot(kmfitX)
+##' plot(kmfitX,atrisk.show.censored=1L)
 ##' # move legend
 ##' plot(kmfitX,legend.x="bottomleft",atRisk.cex=1.3,
 ##'      atrisk.title="No. subjects")
@@ -248,6 +248,7 @@
 ##' ### marginal Aalen-Johansen estimator
 ##' ajfit <- prodlim(Hist(time, event) ~ 1, data = datCR)
 ##' plot(ajfit) # same as plot(ajfit,cause=1)
+##' plot(ajfit,atrisk.show.censored=1L)
 ##' 
 ##' # cause 2
 ##' plot(ajfit,cause=2)

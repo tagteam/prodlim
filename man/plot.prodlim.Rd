@@ -153,7 +153,7 @@ dat <- SimSurv(100)
 ### marginal Kaplan-Meier estimator
 kmfit <- prodlim(Hist(time, status) ~ 1, data = dat)
 plot(kmfit)
-
+plot(kmfit,atrisk.show.censored=1L,atrisk.at=seq(0,12,3))
 plot(kmfit,timeconverter="years2months")
 
 # change time range
@@ -206,7 +206,7 @@ plot(kmfit,
 
 ### Kaplan-Meier in discrete strata
 kmfitX <- prodlim(Hist(time, status) ~ X1, data = dat)
-plot(kmfitX)
+plot(kmfitX,atrisk.show.censored=1L)
 # move legend
 plot(kmfitX,legend.x="bottomleft",atRisk.cex=1.3,
      atrisk.title="No. subjects")
@@ -283,6 +283,7 @@ with(datCR,plot(Hist(time,event)))
 ### marginal Aalen-Johansen estimator
 ajfit <- prodlim(Hist(time, event) ~ 1, data = datCR)
 plot(ajfit) # same as plot(ajfit,cause=1)
+plot(ajfit,atrisk.show.censored=1L)
 
 # cause 2
 plot(ajfit,cause=2)
