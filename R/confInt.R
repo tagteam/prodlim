@@ -1,5 +1,5 @@
 #' Add point-wise confidence limits to the graphs of Kaplan-Meier and
-#' Aalen-Johansen estimates of survival and cumulative incidence.
+#' Aalen-Johansen estimates.
 #' 
 #' This function is invoked and controlled by \code{plot.prodlim}.
 #' 
@@ -10,8 +10,8 @@
 #' function.
 #' @param times where to compute point-wise confidence limits
 #' @param newdata see \code{plot.prodlim}
-#' @param type Either \code{"cuminc"} or \code{"survival"} passed to
-#' summary.prodlim as \code{surv=ifelse(type=="cuminc",FALSE,TRUE)}.
+#' @param type Either \code{"risk"} (AKA \code{"cuminc"}) or \code{"survival"} passed to
+#' summary.prodlim as \code{surv=ifelse(type=="risk",FALSE,TRUE)}.
 #' @param citype If \code{"shadow"} then confidence limits are drawn as colored
 #' shadows.  Otherwise, dotted lines are used to show the upper and lower
 #' confidence limits.
@@ -40,9 +40,10 @@ confInt <- function(x,
                     lwd,
                     density=55,
                     ...){
+    if (type=="cuminc") type <- "risk"
     ## if (citype=="shadow" && length(times)>100 && exact==FALSE)
     ## times <- seq(min(times),max(times),diff(range(times)/100))
-    sumx <- summary(x,times=times,newdata=newdata,cause=cause,verbose=FALSE,surv=ifelse(type=="cuminc",FALSE,TRUE))$table
+    sumx <- summary(x,times=times,newdata=newdata,cause=cause,verbose=FALSE,surv=ifelse(type=="risk",FALSE,TRUE))$table
     if (x$model=="competing.risks" && x$covariate.type>1) sumx <- sumx[[1]]
     ## if (x$model=="survival" && x$covariate.type==1) sumx <- list(sumx)
     if (!is.list(sumx)) sumx <- list(sumx)
