@@ -96,7 +96,7 @@ void icens_prodlim(double *L,
 		   int *maxstep,
 		   int *niter) {
   
-  int i, j, s, done=0, step=0, n, ns, start, stop;
+  int i, j, s, done=0, step=0, ns, start, stop;
   /*   int verbose; */
   double atrisk, pl, haz, varhaz, diff, survL, survR, lenOBS, nom;
   
