@@ -226,7 +226,7 @@ test_that("weights and delay",{
     ## we round the event times to have some ties
     testdata <- round(sim(mod,250),1)
     ## the data enter with delay into the intermediate state (ill)
-    ## thus, to estimate the cumulative incidence of
+    ## thus, to estimate the absolute risk cumulative incidence of
     ## the absorbing state (death) after illness we 
     ## have left-truncated data
     illdata <- testdata[testdata$illstatus==1,]

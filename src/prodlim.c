@@ -18,7 +18,35 @@
 #include <R.h>
 #include "prodlim.h"
 
-void prodlimSRC(double *y,double *status,int *cause,double *entrytime,double *caseweights,int *cluster,int *N,int *NS,int *NC,int *NU,int *size,double *time,double *nrisk,double *event,double *lost,double *surv,double *cuminc,double *hazard,double *varhazard,double *extra_double,int *max_nc,int *ntimes,int *size_strata,int *first_strata,int *reverse,int *model,int *independent,int *delayed,int *weighted) {
+void prodlimSRC(double *y,
+		double *status,
+		int *cause,
+		double *entrytime,
+		double *caseweights,
+		int *cluster,
+		int *N,
+		int *NS,
+		int *NC,
+		int *NU,
+		int *size,
+		double *time,
+		double *nrisk,
+		double *event,
+		double *lost,
+		double *surv,
+		double *risk,
+		double *hazard,
+		double *varhazard,
+		double *extra_double,
+		int *max_nc,
+		int *ntimes,
+		int *size_strata,
+		int *first_strata,
+		int *reverse,
+		int *model,
+		int *independent,
+		int *delayed,
+		int *weighted) {
   int t, u, start, stop, size_temp;
   t=0;
   start=0;
@@ -59,16 +87,16 @@ void prodlimSRC(double *y,double *status,int *cause,double *entrytime,double *ca
     }
     else{
       if (*model==1){
-	double *cuminc_temp, *cuminc_lag, *v1, *v2;
-	cuminc_temp = extra_double;
-	cuminc_lag = extra_double + *NS;
+	double *risk_temp, *risk_lag, *v1, *v2;
+	risk_temp = extra_double;
+	risk_lag = extra_double + *NS;
 	v1 = extra_double + *NS + *NS;
 	v2 = extra_double + *NS + *NS + *NS;
 	if (*weighted==1 || *delayed==1){
-	  prodlimCompriskPlus(y,status,cause,entrytime,caseweights,NS,time,nrisk,event,lost,surv,cuminc,hazard,varhazard,cuminc_temp,cuminc_lag,v1,v2,&t,start,stop,delayed,weighted);
+	  prodlimCompriskPlus(y,status,cause,entrytime,caseweights,NS,time,nrisk,event,lost,surv,risk,hazard,varhazard,risk_temp,risk_lag,v1,v2,&t,start,stop,delayed,weighted);
 	}
 	else{
-	  prodlim_comprisk(y,status,cause,NS,time,nrisk,event,lost,surv,cuminc,hazard,varhazard,cuminc_temp,cuminc_lag,v1,v2,&t,start,stop);
+	  prodlim_comprisk(y,status,cause,NS,time,nrisk,event,lost,surv,risk,hazard,varhazard,risk_temp,risk_lag,v1,v2,&t,start,stop);
 	}
       }
     }

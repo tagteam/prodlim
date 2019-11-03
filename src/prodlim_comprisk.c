@@ -21,9 +21,9 @@ void prodlim_comprisk(double* y,
 		      double* event, 
 		      double* loss, 
 		      double* surv,
-		      double* cuminc,
+		      double* risk,
 		      double* cause_hazard,
-		      double* varcuminc,
+		      double* varrisk,
 		      double* I, /* current cumulative incidence */ 
 		      double*I_lag, /* time lagged cumulative incidence */ 
 		      double* v1,
@@ -73,12 +73,12 @@ void prodlim_comprisk(double* y,
       nrisk[s]=n;
       d = 0;
       /* }}} */
-      /* {{{ loop over causes: compute cuminc */
+      /* {{{ loop over causes: compute risk */
       for(j=0; j < (*NS); ++j) {
 	cause_hazard[s * (*NS) + j] = (event[s * (*NS) + j] / n);
 	I_lag[j] = I[j];
 	I[j] += S * cause_hazard[s * (*NS) + j];
-	cuminc[s * (*NS) + j] = I[j];
+	risk[s * (*NS) + j] = I[j];
 	d += event[s * (*NS) + j];
       }
       /* }}} */
@@ -95,7 +95,7 @@ void prodlim_comprisk(double* y,
 	v2[j] += (I[j] * I[j]) * (d / (n * (n - d)))
 	  + ((S_lag * S_lag) * (n - d1) * d1) / (n * n * n)
 	  + (2 * I[j] * S_lag * d1) / (n * n);
-	varcuminc[s * (*NS) + j] = (I[j] * I[j]) *  varH - 2 * I[j] * v1[j] + v2[j];
+	varrisk[s * (*NS) + j] = (I[j] * I[j]) *  varH - 2 * I[j] * v1[j] + v2[j];
 	/* varH is greenwood's formula */
 	/* variance estimate Korn & Dorey (1992), Stat in Med, Vol 11, page 815 */
 	/* I1 = (I[j] - I_lag[j]) / 2; */
@@ -129,9 +129,9 @@ void prodlimCompriskPlus(double* y,
 			 double* event, 
 			 double* loss, 
 			 double* surv,
-			 double* cuminc,
+			 double* risk,
 			 double* cause_hazard,
-			 double* varcuminc,
+			 double* varrisk,
 			 double* I, /* current cumulative incidence */ 
 			 double* I_lag, /* time lagged cumulative incidence */ 
 			 double* v1,
@@ -243,14 +243,14 @@ void prodlimCompriskPlus(double* y,
 	      if (entrytime[e]<y[start]){
 		surv[s]=1;
 		for(j=0; j < (*NS); ++j) {
-		  cuminc[s * (*NS) + j]=0;
-		  varcuminc[s * (*NS) + j]=0;
+		  risk[s * (*NS) + j]=0;
+		  varrisk[s * (*NS) + j]=0;
 		}
 	      } else{
 		surv[s]=S_lag;
 		for(j=0; j < (*NS); ++j) {
-		  cuminc[s * (*NS) + j]=cuminc[(s-1) * (*NS) + j];
-		  varcuminc[s * (*NS) + j]=varcuminc[(s-1) * (*NS) + j];
+		  risk[s * (*NS) + j]=risk[(s-1) * (*NS) + j];
+		  varrisk[s * (*NS) + j]=varrisk[(s-1) * (*NS) + j];
 		}
 	      }
 	      time[s]=entrytime[e];
@@ -265,12 +265,12 @@ void prodlimCompriskPlus(double* y,
       nrisk[s]=atrisk;
       d = 0;
       /* }}} */
-      /* {{{ loop over causes: compute cuminc */
+      /* {{{ loop over causes: compute risk */
       for(j=0; j < (*NS); ++j) {
 	cause_hazard[s * (*NS) + j] = (event[s * (*NS) + j] / atrisk);
 	I_lag[j] = I[j];
 	I[j] += S * cause_hazard[s * (*NS) + j];
-	cuminc[s * (*NS) + j] = I[j];
+	risk[s * (*NS) + j] = I[j];
 	d += event[s * (*NS) + j];
       }
       /* }}} */
@@ -287,7 +287,7 @@ void prodlimCompriskPlus(double* y,
 	v2[j] += (I[j] * I[j]) * (d / (atrisk * (atrisk - d)))
 	  + ((S_lag * S_lag) * (atrisk - d1) * d1) / (atrisk * atrisk * atrisk)
 	  + (2 * I[j] * S_lag * d1) / (atrisk * atrisk);
-	varcuminc[s * (*NS) + j] = (I[j] * I[j]) *  varH - 2 * I[j] * v1[j] + v2[j];
+	varrisk[s * (*NS) + j] = (I[j] * I[j]) *  varH - 2 * I[j] * v1[j] + v2[j];
 	/* varH is greenwood's formula */
 	/* variance estimate Korn & Dorey (1992), Stat in Med, Vol 11, page 815 */
 	/* I1 = (I[j] - I_lag[j]) / 2; */

@@ -79,8 +79,8 @@ else the product limit version of the self-consistent estimate.}
 includes all the L and R endpoints of the observed intervals.}
 
 \item{type}{In two state models either \code{"surv"} for the Kaplan-Meier estimate of the survival
-function or \code{"cuminc"} for 1-Kaplan-Meier. Default is \code{"surv"} when \code{reverse==FALSE} and \code{"cuminc"} when \code{reverse==TRUE}.
-In competing risks models it has to be \code{"cuminc"}
+function or \code{"risk"} for 1-Kaplan-Meier. Default is \code{"surv"} when \code{reverse==FALSE} and \code{"risk"} when \code{reverse==TRUE}.
+In competing risks models it has to be \code{"risk"}
 Aalen-Johansen estimate of the cumulative incidence function.}
 }
 \value{
@@ -121,11 +121,8 @@ formula is replaced by the formula of Ying \& Wei (1994).
 (3) Competing risk models can be specified via \code{\link{Hist}} response
 objects in \code{formula}.
 
-The Aalen-Johansen estimator is applied for estimating the cumulative
-incidence functions for all causes.  The advantage over the function
-\code{cuminc} of the cmprsk package are user-friendly model specification
-via \code{\link{Hist}} and sophisticated print, summary, predict and plot
-methods.
+The Aalen-Johansen estimator is applied for estimating the absolute risk of the competing causes, i.e., the cumulative
+incidence functions.
 
 Under construction:
 
@@ -256,7 +253,7 @@ estimate for dependent failure time observations
 }
 \seealso{
 \code{\link{predictSurv}}, \code{\link{predictSurvIndividual}},
-\code{\link{predictCuminc}}, \code{\link{Hist}}, \code{\link{neighborhood}},
+\code{\link{predictAbsrisk}}, \code{\link{Hist}}, \code{\link{neighborhood}},
 \code{\link{Surv}}, \code{\link{survfit}}, \code{\link{strata}},
 }
 \author{

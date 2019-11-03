@@ -3,7 +3,7 @@
 \name{confInt}
 \alias{confInt}
 \title{Add point-wise confidence limits to the graphs of Kaplan-Meier and
-Aalen-Johansen estimates of survival and cumulative incidence.}
+Aalen-Johansen estimates.}
 \usage{
 confInt(x, times, newdata, type, citype, cause, col, lty, lwd,
   density = 55, ...)
@@ -16,8 +16,8 @@ function.}
 
 \item{newdata}{see \code{plot.prodlim}}
 
-\item{type}{Either \code{"cuminc"} or \code{"survival"} passed to
-summary.prodlim as \code{surv=ifelse(type=="cuminc",FALSE,TRUE)}.}
+\item{type}{Either \code{"risk"} (AKA \code{"cuminc"}) or \code{"survival"} passed to
+summary.prodlim as \code{surv=ifelse(type=="risk",FALSE,TRUE)}.}
 
 \item{citype}{If \code{"shadow"} then confidence limits are drawn as colored
 shadows.  Otherwise, dotted lines are used to show the upper and lower

@@ -16,21 +16,21 @@
 \item{x}{an object of class `prodlim' as returned by the
 \code{prodlim} function.}
 
-\item{type}{Either \code{"surv"} or \code{"cuminc"} controls what}
+\item{type}{Either \code{"surv"} or \code{"risk"} AKA \code{"cuminc"}. Controls what
+part of the object is plotted.  Defaults to \code{object$type}.}
 
-\item{cause}{Character (other classes are converted with \code{as.character}).
-\code{cause} determines the cause of the cumulative incidence
-function.  Currently one cause is allowed at a time, but you can
+\item{cause}{For competing risk models. Character (other classes are converted with \code{as.character}).
+The argument \code{cause} determines the event of interest. Currently one cause is allowed at a time, but you can
 call the function again with \code{add=TRUE} to add the lines of the other
-causes.}
+causes. Also, if \code{cause="stacked"} is specified the absolute risks of all causes are stacked.}
 
 \item{select}{Select which lines to plot. This can be used when
 there are many strata or many competing risks to select a
 subset of the lines.  However, a more clean way to select
-covariate stratat is to use argument \code{newdata}.  Another
-application is when there are many competing risks and it is
-desired (for the stacked plot) to stack and show only a subset
-of the cumulative incidence functions.}
+covariate strata is to use the argument \code{newdata}. Another
+application is when there are several competing risks and the 
+ stacked plot (\code{cause="stacked"}) should only show a selected subset
+of the available causes.}
 
 \item{newdata}{a data frame containing covariate strata for which
 to show curves. When omitted element \code{X} of object
@@ -52,7 +52,7 @@ to show curves. When omitted element \code{X} of object
 
 \item{xlab}{label for the x-axis}
 
-\item{timeconverter}{The strings are allowed:
+\item{timeconverter}{The following options are supported:
 "days2years" (conversion factor: 1/365.25)
 "months2years" (conversion factor: 1/12)
 "days2months" (conversion factor 1/30.4368499)
@@ -123,7 +123,7 @@ and the last row in \code{X} are shown. Otherwise all lines of
 The (invisible) object.
 }
 \description{
-Function to plot survival and cumulative incidence curves against time.
+Function to plot survival probabilities or absolute risks (cumulative incidence function) against time.
 }
 \details{
 From version 1.1.3 on the arguments legend.args, atrisk.args, confint.args
@@ -163,7 +163,7 @@ plot(kmfit,xlim=c(0,4))
 plot(kmfit,percent=FALSE)
 
 # mortality instead of survival
-plot(kmfit,type="cuminc")
+plot(kmfit,type="risk")
 
 # change axis label and position of ticks
 plot(kmfit,

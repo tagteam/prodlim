@@ -27,8 +27,8 @@ be shown.  Defaults to 20.}
 survival probabilities. Only available for
 \code{object$model=="survival"}.}
 
-\item{cause}{The cause for predicting the cause-specific cumulative
-incidence function in competing risk models.}
+\item{cause}{For competing risk models. The event of interest for which predictions of the absolute risks are obtained by evaluating the cause-specific cumulative
+incidence functions at  \code{times}.}
 
 \item{intervals}{Logical. If TRUE count events and censored in
 intervals between the values of \code{times}.}
@@ -91,7 +91,7 @@ summary(fit0,times=c(1,5,10,12),percent=TRUE,intervals=TRUE)
 sx <- summary(fit0,times=c(1,5,10,12),percent=TRUE,intervals=TRUE)
 print(sx,digits=3)
 
-## show cumulative incidences (1-survival)
+## show absolute risks, i.e., cumulative incidences (1-survival)
 summary(fit0,times=c(1,5,10,12),surv=FALSE,percent=TRUE,intervals=TRUE)
 
 # Stratified Kaplan-Meier
@@ -126,7 +126,7 @@ print(summary(fit4,
 print(summary(fit4,
               times=c(1,5,10),
               newdata=data.frame(age=c(20,50,70),sex=c("female","male","male")),
-              intervals=TRUE,collapse=TRUE,
+              intervals=TRUE,
               percent=TRUE),digits=3)
 
 ## assess results from summary

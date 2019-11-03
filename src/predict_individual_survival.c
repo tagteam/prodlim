@@ -22,5 +22,4 @@ void predict_individual_survival(double *pred,
     else
       pred[i] = surv[first[i] - 1 + j - *lag];
   }
-
 }

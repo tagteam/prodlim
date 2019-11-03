@@ -3,12 +3,13 @@
 \name{predict.prodlim}
 \alias{predict.prodlim}
 \alias{predictSurv}
+\alias{predictAbsrisk}
 \alias{predictCuminc}
 \title{Predicting event probabilities from product limit estimates}
 \usage{
 \method{predict}{prodlim}(object, times, newdata, level.chaos = 1,
-  type = c("surv", "cuminc", "list"), mode = "list", bytime = FALSE,
-  cause, ...)
+  type = c("surv", "risk", "cuminc", "list"), mode = "list",
+  bytime = FALSE, cause, ...)
 }
 \arguments{
 \item{object}{A fitted object of class "prodlim".}
@@ -22,18 +23,18 @@ covariates this argument is required.}
 \item{level.chaos}{Integer specifying the sorting of the output: `0' sort by
 time and newdata; `1' only by time; `2' no sorting at all}
 
-\item{type}{Choice between "surv","cuminc","list":
+\item{type}{Choice between "surv","risk","cuminc","list":
 
 "surv": predict survival probabilities only survival models
 
-"cuminc": predict cumulative incidences only competing risk models
+"risk"/"cuminc": predict absolute risk, i.e., cumulative incidence function.
 
 "list": find the indices corresponding to times and newdata. See value.
 
-Defaults to "surv" for two-state models and to "cuminc" for competing risk
+Defaults to "surv" for two-state models and to "risk" for competing risk
 models.}
 
-\item{mode}{Only for \code{type=="surv"} and \code{type=="cuminc"}. Can
+\item{mode}{Only for \code{type=="surv"} and \code{type=="risk"}. Can
 either be "list" or "matrix". For "matrix" the predicted probabilities will
 be returned in matrix form.}
 
@@ -43,9 +44,9 @@ newdata. Only when \code{object$covariate.type>1} and more than one time is
 given.}
 
 \item{cause}{Character (other classes are converted with \code{as.character}).
-The cause for predicting the cause-specific cumulative
-incidence function in competing risk models, that is the absolute risk of 
-\code{cause} events between time zero and \code{times} .}
+The cause for predicting the absolute risk of an event, i.e., the cause-specific cumulative
+incidence function, in competing risk models. At any time after time zero this is the absolute risk of 
+an event of type \code{cause} to occur between time zero and \code{times} .}
 
 \item{\dots}{Only for compatibility reasons.}
 }
@@ -53,7 +54,7 @@ incidence function in competing risk models, that is the absolute risk of
 \code{type=="surv"} A list or a matrix with survival probabilities
 for all times and all newdata.
 
-\code{type=="cuminc"} A list or a matrix with cumulative incidences for all
+\code{type=="risk"} or \code{type=="cuminc"} A list or a matrix with cumulative incidences for all
 times and all newdata.
 
 \code{type=="list"} A list with the following components:

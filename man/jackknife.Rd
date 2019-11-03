@@ -26,8 +26,8 @@ Compute jackknife pseudo values.
 }
 \details{
 Compute jackknife pseudo values based on marginal Kaplan-Meier estimate of
-survival, or based on marginal Aalen-Johansen estimate of cumulative
-incidence.
+survival, or based on marginal Aalen-Johansen estimate of the absolute risks, i.e., the cumulative
+incidence function.
 }
 \note{
 The R-package pseudo does a similar job, and appears to be a little faster in small samples, but much slower in large samples. See examples.
@@ -46,10 +46,11 @@ jackknife(f,times=c(3,5))
 jackknife(f,times=c(3,5),keepResponse=TRUE)
 
 # pseudo-values for competing risk models
-d=SimCompRisk(10) 
+set.seed(15)
+d=SimCompRisk(15) 
 f=prodlim(Hist(time,event)~1,data=d) 
-jackknife(f,times=c(3,10),cause=1)
-jackknife(f,times=c(3,10,17),cause=2)
+jackknife(f,times=c(3,5),cause=1)
+jackknife(f,times=c(1,3,5),cause=2)
 
 }
 \references{
