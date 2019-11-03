@@ -75,7 +75,7 @@
             out <- lapply(sumx$table,getQ)
         }
     } else{
-        ## cumulative incidence, competing risks
+        ## absolute risks, cumulative incidence, competing risks
         if (missing(q)) q <- c(0,0.25,0.5,0.75,1)
         sumx <- summary(x,newdata=x$X,times=x$time,showTime=TRUE,verbose=FALSE,cause=cause)
         getQ <- function(sum){
@@ -96,7 +96,7 @@
             out <- out[,c("q","quantile","lower","upper")]
             out}
         if (sumx$cotype==1)
-            out <- list("quantiles.cuminc"=getQ(sumx$table[[1]]))
+            out <- list("quantiles.risk"=getQ(sumx$table[[1]]))
         else {
             out <- lapply(sumx$table[[1]],getQ)
         }
