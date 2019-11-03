@@ -184,8 +184,8 @@ EventHistory.frame <- function(formula,
     # {{{ get all variables and remove missing values
     ## use the stripped formula because, otherwise
     ## it may be hard to know what variables are, e.g.,
-    ## FGR uses cov2(var,tf=qfun) where qfun is a function 
-    mm <- na.omit(get_all_vars(formula(Terms),data))
+    ## FGR uses cov2(var,tf=qfun) where qfun is a function
+    mm <- na.omit(get_all_vars(formula(Terms),data=data))
     if (NROW(mm) == 0) stop("No (non-missing) observations")
     # }}}
 
