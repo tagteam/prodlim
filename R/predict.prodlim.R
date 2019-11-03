@@ -6,7 +6,7 @@
 #' Predicted (survival) probabilities are returned that can be plotted,
 #' summarized and used for inverse of probability of censoring weighting.
 #' 
-#' @aliases predict.prodlim predictSurv predictCuminc
+#' @aliases predict.prodlim predictSurv predictAbsrisk predictCuminc
 #' @param object A fitted object of class "prodlim".
 #' @param times Vector of times at which to return the estimated probabilities (survival or absolute event risks).
 #' @param newdata A data frame with the same variable names as those that
@@ -14,17 +14,17 @@
 #' covariates this argument is required.
 #' @param level.chaos Integer specifying the sorting of the output: `0' sort by
 #' time and newdata; `1' only by time; `2' no sorting at all
-#' @param type Choice between "surv","cuminc","list":
+#' @param type Choice between "surv","risk","cuminc","list":
 #' 
 #' "surv": predict survival probabilities only survival models
 #' 
-#' "cuminc": predict cumulative incidences only competing risk models
+#' "risk"/"cuminc": predict absolute risk, i.e., cumulative incidence function.
 #' 
 #' "list": find the indices corresponding to times and newdata. See value.
 #' 
-#' Defaults to "surv" for two-state models and to "cuminc" for competing risk
+#' Defaults to "surv" for two-state models and to "risk" for competing risk
 #' models.
-#' @param mode Only for \code{type=="surv"} and \code{type=="cuminc"}. Can
+#' @param mode Only for \code{type=="surv"} and \code{type=="risk"}. Can
 #' either be "list" or "matrix". For "matrix" the predicted probabilities will
 #' be returned in matrix form.
 #' @param bytime Logical. If TRUE and \code{mode=="matrix"} the matrix with
@@ -32,14 +32,14 @@
 #' newdata. Only when \code{object$covariate.type>1} and more than one time is
 #' given.
 #' @param cause Character (other classes are converted with \code{as.character}).
-#' The cause for predicting the cause-specific cumulative
-#' incidence function in competing risk models, that is the absolute risk of 
-#' \code{cause} events between time zero and \code{times} . 
+#' The cause for predicting the absolute risk of an event, i.e., the cause-specific cumulative
+#' incidence function, in competing risk models. At any time after time zero this is the absolute risk of 
+#' an event of type \code{cause} to occur between time zero and \code{times} . 
 #' @param \dots Only for compatibility reasons.
 #' @return \code{type=="surv"} A list or a matrix with survival probabilities
 #' for all times and all newdata.
 #' 
-#' \code{type=="cuminc"} A list or a matrix with cumulative incidences for all
+#' \code{type=="risk"} or \code{type=="cuminc"} A list or a matrix with cumulative incidences for all
 #' times and all newdata.
 #' 
 #' \code{type=="list"} A list with the following components:
@@ -88,7 +88,7 @@
                               times,
                               newdata,
                               level.chaos=1,
-                              type=c("surv","cuminc","list"),
+                              type=c("surv","risk","cuminc","list"),
                               mode="list",
                               bytime=FALSE,
                               cause,
@@ -101,9 +101,9 @@
     }
     if (length(times)==0) stop("Argument 'times' has length 0")
     if (missing(type))
-        type <- switch(object$model,"survival"="surv","competing.risks"="cuminc","list")
+        type <- switch(object$model,"survival"="surv","competing.risks"="risk","list")
     else
-        type <- switch(type,"survival"="surv","surv"="surv","incidence"="cuminc","cuminc"="cuminc","list")
+        type <- switch(type,"survival"="surv","surv"="surv","risk"="risk","cuminc"="risk","list")
   
   if (type=="surv"){
     predictSurv(object=object,
@@ -114,8 +114,8 @@
                 bytime=bytime)
   }
   else{
-    if (type=="cuminc"){
-      predictCuminc(object=object,
+    if (type=="risk"){
+      predictAbsrisk(object=object,
                     times=times,
                     newdata=newdata,
                     level.chaos=level.chaos,
@@ -314,7 +314,7 @@ predictSurv <- function(object,
     psurv
 }
 
-"predictCuminc" <- function(object,
+"predictAbsrisk" <- function(object,
                             times,
                             newdata,
                             level.chaos=1,
@@ -338,19 +338,19 @@ predictSurv <- function(object,
     }
     out <- lapply(cause,function(thisCause){
         if (NR == 1){
-            pcuminc <- c(0,object$cuminc[[thisCause]])[pindex+1]
+            prisk <- c(0,object$cuminc[[thisCause]])[pindex+1]
             if (mode=="matrix")
-                pcuminc <- matrix(pcuminc,nrow=1)
+                prisk <- matrix(prisk,nrow=1)
         }
         else{
-            pcuminc <- split(c(0,object$cuminc[[thisCause]])[pindex+1],
+            prisk <- split(c(0,object$cuminc[[thisCause]])[pindex+1],
                              rep(1:NR,rep(NT,NR)))
-            names(pcuminc) <- p$names.strata
+            names(prisk) <- p$names.strata
             if (mode=="matrix" && NR>1) {
-                pcuminc <- do.call("rbind",pcuminc)
+                prisk <- do.call("rbind",prisk)
             }
         }
-        pcuminc})
+        prisk})
     if (length(cause)==1){
         out[[1]]
     } else{
