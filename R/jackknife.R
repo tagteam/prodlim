@@ -1,8 +1,8 @@
 #' Compute jackknife pseudo values.
 #' 
 #' Compute jackknife pseudo values based on marginal Kaplan-Meier estimate of
-#' survival, or based on marginal Aalen-Johansen estimate of cumulative
-#' incidence.
+#' survival, or based on marginal Aalen-Johansen estimate of the absolute risks, i.e., the cumulative
+#' incidence function.
 #' 
 #' @title Compute jackknife pseudo values.
 #' @aliases jackknife jackknife.survival jackknife.competing.risks
@@ -33,10 +33,11 @@
 ##' jackknife(f,times=c(3,5),keepResponse=TRUE)
 ##' 
 ##' # pseudo-values for competing risk models
-##' d=SimCompRisk(10) 
+##' set.seed(15)
+##' d=SimCompRisk(15) 
 ##' f=prodlim(Hist(time,event)~1,data=d) 
-##' jackknife(f,times=c(3,10),cause=1)
-##' jackknife(f,times=c(3,10,17),cause=2)
+##' jackknife(f,times=c(3,5),cause=1)
+##' jackknife(f,times=c(1,3,5),cause=2)
 ##' 
 #' @export
 jackknife <- function(object,times,cause,keepResponse=FALSE,...){
@@ -56,32 +57,32 @@ jackknife <- function(object,times,cause,keepResponse=FALSE,...){
 
 #' @export
 jackknife.survival <- function(object,times,keepResponse=FALSE,...){
-  S <- predict(object,times=times,newdata=object$model.response)
-  Sk <- leaveOneOut.survival(object,times,...)
-  N <- NROW(Sk)
-  Jk <- t(N*S-t((N-1)*Sk))
-  colnames(Jk) <- paste("t",times,sep=".")
-  if (keepResponse==TRUE){
-    Jk <- cbind(object$model.response,Jk)
-  }
-  ## re-order the pseudo-values  
-  Jk <- Jk[object$originalDataOrder,,drop=FALSE]
-  Jk
+    S <- predict(object,times=times,newdata=object$model.response)
+    Sk <- leaveOneOut.survival(object,times,...)
+    N <- NROW(Sk)
+    Jk <- t(N*S-t((N-1)*Sk))
+    colnames(Jk) <- paste("t",times,sep=".")
+    if (keepResponse==TRUE){
+        Jk <- cbind(object$model.response,Jk)
+    }
+    ## re-order the pseudo-values  
+    Jk <- Jk[object$originalDataOrder,,drop=FALSE]
+    Jk
 }
 #' @export
 jackknife.competing.risks <- function(object,times,cause,keepResponse=FALSE,...){
-  F <- predict(object,times=times,newdata=object$model.response,cause=cause)
-  Fk <- leaveOneOut.competing.risks(object,times,cause=cause,...)
-  N <- NROW(Fk)
-  Jk <- t(N*F-t((N-1)*Fk))
-  colnames(Jk) <- paste("t",times,sep=".")
-  if (keepResponse==TRUE){
-    Jk <- cbind(object$model.response,Jk)
-    colnames(Jk)[(NCOL(Jk)-length(times)+1):NCOL(Jk)] <- paste("t",times,sep=".")
-  }
-  ## re-order the pseudo-values
-  Jk <- Jk[object$originalDataOrder,,drop=FALSE]
-  Jk
+    F <- predict(object,times=times,newdata=object$model.response,cause=cause)
+    Fk <- leaveOneOut.competing.risks(object,times,cause=cause,...)
+    N <- NROW(Fk)
+    Jk <- t(N*F-t((N-1)*Fk))
+    colnames(Jk) <- paste("t",times,sep=".")
+    if (keepResponse==TRUE){
+        Jk <- cbind(object$model.response,Jk)
+        colnames(Jk)[(NCOL(Jk)-length(times)+1):NCOL(Jk)] <- paste("t",times,sep=".")
+    }
+    ## re-order the pseudo-values
+    Jk <- Jk[object$originalDataOrder,,drop=FALSE]
+    Jk
 }
 
 
