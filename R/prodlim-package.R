@@ -3,9 +3,9 @@
 ## author: Thomas Alexander Gerds
 ## created: Apr 24 2015 (09:08) 
 ## Version: 
-## last-updated: Mar  6 2017 (12:32) 
+## last-updated: Oct 11 2019 (06:51) 
 ##           By: Thomas Alexander Gerds
-##     Update #: 8
+##     Update #: 9
 #----------------------------------------------------------------------
 ## 
 ### Commentary: 
@@ -20,7 +20,8 @@
 #' @name prodlim
 #' @useDynLib prodlim, .registration=TRUE
 #' @importFrom survival survdiff Surv cluster
-#' @importFrom stats quantile 
+#' @importFrom stats quantile
+#' @importFrom grDevices rainbow 
 #' @import lava
 #' @importFrom Rcpp sourceCpp
 ## --> importFrom KernSmooth dpik
