@@ -33,11 +33,8 @@
 ##' (3) Competing risk models can be specified via \code{\link{Hist}} response
 ##' objects in \code{formula}.
 ##' 
-##' The Aalen-Johansen estimator is applied for estimating the cumulative
-##' incidence functions for all causes.  The advantage over the function
-##' \code{cuminc} of the cmprsk package are user-friendly model specification
-##' via \code{\link{Hist}} and sophisticated print, summary, predict and plot
-##' methods.
+##' The Aalen-Johansen estimator is applied for estimating the absolute risk of the competing causes, i.e., the cumulative
+##' incidence functions. 
 ##' 
 ##' Under construction:
 ##' 
@@ -102,14 +99,14 @@
 ##' the nonparametric maximum likelihood estimate.  Defaults to 7
 ##' meaning exp(-7).
 ##' @param type In two state models either \code{"surv"} for the Kaplan-Meier estimate of the survival
-##' function or \code{"cuminc"} for 1-Kaplan-Meier. Default is \code{"surv"} when \code{reverse==FALSE} and \code{"cuminc"} when \code{reverse==TRUE}.
-##' In competing risks models it has to be \code{"cuminc"}
+##' function or \code{"risk"} for 1-Kaplan-Meier. Default is \code{"surv"} when \code{reverse==FALSE} and \code{"risk"} when \code{reverse==TRUE}.
+##' In competing risks models it has to be \code{"risk"}
 ##' Aalen-Johansen estimate of the cumulative incidence function.
 ##' @return Object of class "prodlim". See \code{\link{print.prodlim}}, \code{\link{predict.prodlim}}, predict,
 ##' \code{\link{summary.prodlim}}, \code{\link{plot.prodlim}}.
 ##' @author Thomas A. Gerds \email{tag@@biostat.ku.dk}
 ##' @seealso \code{\link{predictSurv}}, \code{\link{predictSurvIndividual}},
-##' \code{\link{predictCuminc}}, \code{\link{Hist}}, \code{\link{neighborhood}},
+##' \code{\link{predictAbsrisk}}, \code{\link{Hist}}, \code{\link{neighborhood}},
 ##' \code{\link{Surv}}, \code{\link{survfit}}, \code{\link{strata}},
 ##' @references Andersen, Borgan, Gill, Keiding (1993) Springer `Statistical
 ##' Models Based on Counting Processes'
@@ -266,10 +263,10 @@
     }else{
         model.type <- match(attr(event.history,"model"),c("survival","competing.risks","multi.states"))
     }
-    if (missing(type)) type <- switch(model.type,"survival"=ifelse(reverse,"cuminc","surv"),"cuminc")
+    if (missing(type)) type <- switch(model.type,"survival"=ifelse(reverse,"risk","surv"),"risk")
     else {
         type <- tolower(type)
-        stopifnot(match(type,c("surv","cuminc"),nomatch=0)!=0)
+        stopifnot(match(type,c("surv","risk"),nomatch=0)!=0)
     }
     cens.type <- attr(response,"cens.type")
     #  if (force.multistate==TRUE) model.type <- 3
@@ -535,7 +532,7 @@
         # {{{  two state model
         if (clustered){
             ## right censored clustered
-            fit <- .C("prodlimSRC",as.double(response[,"time"]),as.double(response[,"status"]),integer(0),as.double(entrytime),as.double(caseweights),as.integer(cluster),as.integer(N),integer(0),as.integer(NC),as.integer(NU),as.integer(size.strata),time=double(N),nrisk=double(2*N),nevent=double(2*N),ncens=double(2*N),surv=double(N),cuminc=double(0),hazard=double(N),var.hazard=double(N+N),extra.double=double(4 * max(NC)),max.nc=as.integer(max(NC)),ntimes=integer(1),ntimes.strata=integer(NU),first.strata=integer(NU),reverse=integer(0),model=as.integer(0),independent=as.integer(0),delayed=as.integer(delayed),weighted=as.integer(weighted),PACKAGE="prodlim")
+            fit <- .C("prodlimSRC",as.double(response[,"time"]),as.double(response[,"status"]),integer(0),as.double(entrytime),as.double(caseweights),as.integer(cluster),as.integer(N),integer(0),as.integer(NC),as.integer(NU),as.integer(size.strata),time=double(N),nrisk=double(2*N),nevent=double(2*N),ncens=double(2*N),surv=double(N),risk=double(0),hazard=double(N),var.hazard=double(N+N),extra.double=double(4 * max(NC)),max.nc=as.integer(max(NC)),ntimes=integer(1),ntimes.strata=integer(NU),first.strata=integer(NU),reverse=integer(0),model=as.integer(0),independent=as.integer(0),delayed=as.integer(delayed),weighted=as.integer(weighted),PACKAGE="prodlim")
             NT <- fit$ntimes
             Cout <- list("time"=fit$time[1:NT],"n.risk"=matrix(fit$nrisk,ncol=2,byrow=FALSE,dimnames=list(NULL,c("n.risk","cluster.n.risk")))[1:NT,],"n.event"=matrix(fit$nevent,ncol=2,byrow=FALSE,dimnames=list(NULL,c("n.event","cluster.n.event")))[1:NT,],"n.lost"=matrix(fit$ncens,ncol=2,byrow=FALSE,dimnames=list(NULL,c("n.lost","cluster.n.lost")))[1:NT,],"surv"=fit$surv[1:NT],"se.surv"=fit$surv[1:NT]*sqrt(pmax(0,fit$var.hazard[N+(1:NT)])),"naive.se.surv"=fit$surv[1:NT]*sqrt(pmax(0,fit$var.hazard[1:NT])),"hazard"=fit$hazard[1:NT],"first.strata"=fit$first.strata,"size.strata"=fit$ntimes.strata,"model"="survival")
             Cout$maxtime <- max(Cout$time)
@@ -635,7 +632,7 @@
                       nevent=double(N * NS),
                       ncens=double(N),
                       surv=double(N),
-                      cuminc=double(N * NS),
+                      risk=double(N * NS),
                       cause.hazard = double(N * NS),
                       var.hazard=double(N * NS),
                       extra.double=double(4 * NS),
@@ -664,7 +661,7 @@
                          "n.risk"=fit$nrisk[1:NT],
                          "n.event"=gatherC(fit$nevent),
                          "n.lost"=fit$ncens[1:NT],
-                         "cuminc"=gatherC(fit$cuminc),
+                         "cuminc"=gatherC(fit$risk),
                          "var.cuminc"=gatherC(fit$var.hazard),
                          "se.cuminc"=gatherC(sqrt(pmax(0,fit$var.hazard))),
                          "surv"=fit$surv[1:NT],
@@ -699,8 +696,8 @@
         else{
             if (is.numeric(conf.int)){
                 if (!(0<conf.int && conf.int<1)) conf.int <- 0.95
-                ## pointwise confidence intervals for cumulative incidence probabilities
-                # variance for cuminc (Korn & Dorey (1992), Stat in Med, Vol 11, page 815)
+                ## pointwise confidence intervals for absolute risks (cumulative incidence function)
+                # variance for absolute risk (Korn & Dorey (1992), Stat in Med, Vol 11, page 815)
                 zval <- qnorm(1- (1-conf.int)/2, 0,1)
                 lower <- lapply(1:NS, function(state){
                     pmax(Cout$cuminc[[state]] - zval * Cout$se.cuminc[[state]],0)})
