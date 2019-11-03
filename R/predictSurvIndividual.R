@@ -1,8 +1,7 @@
 #' Predict individual survival probabilities
 #' 
 #' Function to extract the predicted probabilities at the individual event
-#' times that have been used for fitting a prodlim object.
-#' 
+#' times that have been used for fitting a prodlim object. 
 #' 
 #' @param object A fitted object of class "prodlim".
 #' @param lag Integer. `0' means predictions at the individual times, 1 means
@@ -31,6 +30,16 @@ predictSurvIndividual <- function(object,
         findex <- row.match(object$model.matrix,object$X)
         ## if (any(is.na(findex)))
         ## stop("Cannot identify all rows in object$model.matrix in ")
-        psurv <- .C("predict_individual_survival",pred=double(N),as.double(object$surv),as.double(object$time),as.double(obs.times),as.integer(object$first.strata[findex]),as.integer(object$size.strata[findex]),as.integer(N),as.integer(lag),NAOK=FALSE,PACKAGE="prodlim")$pred}
+        psurv <- .C("predict_individual_survival",
+                    pred=double(N),
+                    as.double(object$surv),
+                    as.double(object$time),
+                    as.double(obs.times),
+                    as.integer(object$first.strata[findex]),
+                    as.integer(object$size.strata[findex]),
+                    as.integer(N),
+                    as.integer(lag),
+                    NAOK=FALSE,
+                    PACKAGE="prodlim")$pred}
     psurv
 }
