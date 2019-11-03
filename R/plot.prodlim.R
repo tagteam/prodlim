@@ -580,30 +580,29 @@ plot.prodlim <- function(x,
   # }}}
 # {{{  backward compatibility
 
-  if (match("legend.args",names(allArgs),nomatch=FALSE)){
-      legend.DefaultArgs <- c(args[[match("legend.args",names(allArgs),nomatch=FALSE)]],legend.DefaultArgs)
-      legend.DefaultArgs <- legend.DefaultArgs[!duplicated(names(legend.DefaultArgs))]
-  }
-  if (match("confint.args",names(allArgs),nomatch=FALSE)){
-      confint.DefaultArgs <- c(args[[match("confint.args",names(allArgs),nomatch=FALSE)]],confint.DefaultArgs)
-      confint.DefaultArgs <- confint.DefaultArgs[!duplicated(names(confint.DefaultArgs))]
-  }
-  if (match("atrisk.args",names(allArgs),nomatch=FALSE)){
-      atrisk.DefaultArgs <- c(args[[match("atrisk.args",names(allArgs),nomatch=FALSE)]],atrisk.DefaultArgs)
-      atrisk.DefaultArgs <- atrisk.DefaultArgs[!duplicated(names(atrisk.DefaultArgs))]
-  }
-  if (length(list(...)) && match("legend.legend",names(list(...)),nomatch=FALSE) && any(sapply(newdata,is.factor))){
-      message("Since version 1.5.1 prodlim obeys the order of factor levels.\nThis may break old code which explicitly defines the legend labels.")
-  }
-  
-  smartA <- SmartControl(call=  list(...),
-                         keys=c("plot","lines","atrisk","legend","confint","background","marktime","axis1","axis2"),
-                         ignore=c("x","type","cause","newdata","add","col","lty","lwd","ylim","xlim","xlab","ylab","legend","marktime","confint","automar","atrisk","timeOrigin","percent","axes","atrisk.args","confint.args","legend.args"),
-                         defaults=list("plot"=plot.DefaultArgs,"atrisk"=atrisk.DefaultArgs,"lines"=lines.DefaultArgs,"legend"=legend.DefaultArgs,"confint"=confint.DefaultArgs,"marktime"=marktime.DefaultArgs,"background"=background.DefaultArgs,"axis1"=axis1.DefaultArgs,"axis2"=axis2.DefaultArgs),
-                         forced=list("plot"=list(axes=FALSE),"axis1"=list(side=1)),
-                         ignore.case=TRUE,
-                         replaceDefaults=FALSE,
-                         verbose=TRUE)
+    if (match("legend.args",names(allArgs),nomatch=FALSE)){
+        legend.DefaultArgs <- c(args[[match("legend.args",names(allArgs),nomatch=FALSE)]],legend.DefaultArgs)
+        legend.DefaultArgs <- legend.DefaultArgs[!duplicated(names(legend.DefaultArgs))]
+    }
+    if (match("confint.args",names(allArgs),nomatch=FALSE)){
+        confint.DefaultArgs <- c(args[[match("confint.args",names(allArgs),nomatch=FALSE)]],confint.DefaultArgs)
+        confint.DefaultArgs <- confint.DefaultArgs[!duplicated(names(confint.DefaultArgs))]
+    }
+    if (match("atrisk.args",names(allArgs),nomatch=FALSE)){
+        atrisk.DefaultArgs <- c(args[[match("atrisk.args",names(allArgs),nomatch=FALSE)]],atrisk.DefaultArgs)
+        atrisk.DefaultArgs <- atrisk.DefaultArgs[!duplicated(names(atrisk.DefaultArgs))]
+    }
+    ## if (length(list(...)) && match("legend.legend",names(list(...)),nomatch=FALSE) && any(sapply(newdata,is.factor))){
+    ## message("Since version 1.5.1 prodlim obeys the order of factor levels.\nThis may break old code which explicitly defines the legend labels.")
+    ## }
+    smartA <- SmartControl(call=  list(...),
+                           keys=c("plot","lines","atrisk","legend","confint","background","marktime","axis1","axis2"),
+                           ignore=c("x","type","cause","newdata","add","col","lty","lwd","ylim","xlim","xlab","ylab","legend","marktime","confint","automar","atrisk","timeOrigin","percent","axes","atrisk.args","confint.args","legend.args"),
+                           defaults=list("plot"=plot.DefaultArgs,"atrisk"=atrisk.DefaultArgs,"lines"=lines.DefaultArgs,"legend"=legend.DefaultArgs,"confint"=confint.DefaultArgs,"marktime"=marktime.DefaultArgs,"background"=background.DefaultArgs,"axis1"=axis1.DefaultArgs,"axis2"=axis2.DefaultArgs),
+                           forced=list("plot"=list(axes=FALSE),"axis1"=list(side=1)),
+                           ignore.case=TRUE,
+                           replaceDefaults=FALSE,
+                           verbose=TRUE)
 
   # }}}
   # {{{  setting margin parameters

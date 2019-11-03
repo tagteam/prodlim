@@ -149,37 +149,40 @@
     ## to avoid problems we pick the first element 
     cens.code <- as.character(cens.code[[1]])
     
-  # {{{ resolving the `time' argument
-  if (is.matrix(time)) time <- data.frame(time)
-  if (class(time)=="list"){
-    if (length(time) !=2 || length(time[[1]])!=length(time[[2]]))
-      stop("Argument time has a wrong format")
-    time <- data.frame(time)
-  }
-  if (is.data.frame(time)){
-    cens.type <- "intervalCensored"
-    L <- time[[1]]
-    R <- time[[2]]
-    N <- length(L)
-    stopifnot(is.numeric(L))
-    stopifnot(is.numeric(R))
-    stopifnot(all(L<=R || is.na(R)))
-    status <- rep(2,N)
-    status[L==R] <- 1
-    status[is.infinite(R) | is.na(R) | (L!=R & as.character(R)==cens.code)] <- 0
-    ## the last part of the condition achieves to things:
-    ##     1. for multi-state models allow transitions to a censored state
-    ##     2. to ignore this, if an event occured exactly at time 0 and 0 is the cens.code
-    R[status==0] <- Inf
-  }
-  else{
-    stopifnot(is.numeric(time))
-    cens.type <- "rightCensored"
-    N <- length(time)
-    status <- rep(1,N) ## temporary dummy
-  }
-  # }}}
-  # {{{ resolving the `entry' argument
+                                        # {{{ resolving the `time' argument
+    if (is.matrix(time)) time <- data.frame(time)
+    if (class(time)=="list"){
+        if (length(time) !=2 || length(time[[1]])!=length(time[[2]]))
+            stop("Argument time has a wrong format")
+        time <- data.frame(time)
+    }
+    if (is.data.frame(time)){
+        cens.type <- "intervalCensored"
+        L <- time[[1]]
+        R <- time[[2]]
+        N <- length(L)
+        stopifnot(is.numeric(L))
+        stopifnot(is.numeric(R))
+        wrong <- L>R
+        wrong[is.na(R)] <- FALSE
+        stopifnot(all(wrong==FALSE))
+        rm(wrong)
+        status <- rep(2,N)
+        status[L==R] <- 1
+        status[is.infinite(R) | is.na(R) | (L!=R & as.character(R)==cens.code)] <- 0
+        ## the last part of the condition achieves to things:
+        ##     1. for multi-state models allow transitions to a censored state
+        ##     2. to ignore this, if an event occured exactly at time 0 and 0 is the cens.code
+        R[status==0] <- Inf
+    }
+    else{
+        stopifnot(is.numeric(time))
+        cens.type <- "rightCensored"
+        N <- length(time)
+        status <- rep(1,N) ## temporary dummy
+    }
+                                        # }}}
+                                        # {{{ resolving the `entry' argument
 
   if (is.null(entry))
       entry.type <- ""

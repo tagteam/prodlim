@@ -40,10 +40,10 @@ confInt <- function(x,
                     lwd,
                     density=55,
                     ...){
-    if (type=="cuminc") type <- "risk"
+    if (type=="risk") type <- "cuminc"
     ## if (citype=="shadow" && length(times)>100 && exact==FALSE)
     ## times <- seq(min(times),max(times),diff(range(times)/100))
-    sumx <- summary(x,times=times,newdata=newdata,cause=cause,verbose=FALSE,surv=ifelse(type=="risk",FALSE,TRUE))$table
+    sumx <- summary(x,times=times,newdata=newdata,cause=cause,verbose=FALSE,surv=ifelse(type=="cuminc",FALSE,TRUE))$table
     if (x$model=="competing.risks" && x$covariate.type>1) sumx <- sumx[[1]]
     ## if (x$model=="survival" && x$covariate.type==1) sumx <- list(sumx)
     if (!is.list(sumx)) sumx <- list(sumx)
