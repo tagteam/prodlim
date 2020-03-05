@@ -743,7 +743,7 @@ plot.prodlim <- function(x,
             if (lrform[[2]][[1]]==as.name("Hist"))
                 lrform[[2]][[1]] <- as.name("Surv")
             ## require(survival)
-            lrtest <- survival::survdiff(eval(lrform),data=eval(x$call$data))
+            lrtest <- survival::survdiff(eval(lrform),data=eval(x$call$data),subset=eval(x$call$subset))
             if (length(lrtest$n) == 1) {
                 p <- 1 - pchisq(lrtest$chisq, 1)
             } else{

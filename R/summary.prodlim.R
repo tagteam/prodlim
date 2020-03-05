@@ -145,14 +145,14 @@ summary.prodlim <- function(object,
                             showTime=TRUE,
                             asMatrix=FALSE,
                             ...) {
-                                        # }}}
-                                        # {{{  classify the situation
+    # }}}
+    # {{{  classify the situation
     cens.type <- object$cens.type         # uncensored, right or interval censored
     model <- object$model                 # survival, competing risks or multi-state
     ## cluster <- object$clustervar          # clustered data?
     cotype <- object$covariate.type       # no, discrete, continuous or both
-                                        # }}}
-                                        # {{{  times
+    # }}}
+    # {{{  times
     jump.times <- object$time
     if (missing(times) && (length(times <- jump.times) > 50)) 
         times <- quantile(sort(unique(jump.times)))
@@ -163,8 +163,8 @@ summary.prodlim <- function(object,
                 paste("\n","Time(s) ",paste(times[times>max(jump.times)],collapse=", "),
                       " are beyond the maximal follow-up time ",max(jump.times),"\n"))
     ntimes <- length(times)
-                                        # }}}
-                                        # {{{ interval-censored
+    # }}}
+    # {{{ interval-censored
     if (cens.type=="intervalCensored"){
         ltab <- data.frame(time=paste("(",paste(signif(object$time[1,],2),
                                                 signif(object$time[2,],2),
@@ -175,8 +175,8 @@ summary.prodlim <- function(object,
                            surv=object$surv)
     }
     else{
-                                        # }}}
-                                        # {{{ with covariates
+        # }}}
+        # {{{ with covariates
         if (cotype>1){
             if (missing(newdata) || length(newdata)==0){
                 X <- object$X
@@ -236,7 +236,7 @@ summary.prodlim <- function(object,
                 ltab <- ltab[Found]
             }
             else stop(paste("\nCannot find cause: ",cause,".\nFitted were causes: ",paste(names(ltab),collapse=", "),sep=""))
-        }else{
+        }else{ ## survival model
             ltab <- lifeTab(object=object,
                             times=times,
                             newdata=X,
@@ -246,8 +246,8 @@ summary.prodlim <- function(object,
                             showTime=showTime)
         }
     }
-                                        # }}}
-                                        # {{{ output
+    # }}}
+    # {{{ output
     if (asMatrix!=FALSE) asMatrix <- TRUE
     if (model=="competing.risks"){
         ## out <- list(table=ltab,cause=cause)

@@ -4,9 +4,19 @@
 \alias{summary.prodlim}
 \title{Summary method for prodlim objects.}
 \usage{
-\method{summary}{prodlim}(object, times, newdata, max.tables = 20,
-  surv = TRUE, cause, intervals = FALSE, percent = FALSE,
-  showTime = TRUE, asMatrix = FALSE, ...)
+\method{summary}{prodlim}(
+  object,
+  times,
+  newdata,
+  max.tables = 20,
+  surv = TRUE,
+  cause,
+  intervals = FALSE,
+  percent = FALSE,
+  showTime = TRUE,
+  asMatrix = FALSE,
+  ...
+)
 }
 \arguments{
 \item{object}{An object with class `prodlim' derived with

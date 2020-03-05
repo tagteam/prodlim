@@ -7,9 +7,17 @@
 \alias{predictCuminc}
 \title{Predicting event probabilities from product limit estimates}
 \usage{
-\method{predict}{prodlim}(object, times, newdata, level.chaos = 1,
-  type = c("surv", "risk", "cuminc", "list"), mode = "list",
-  bytime = FALSE, cause, ...)
+\method{predict}{prodlim}(
+  object,
+  times,
+  newdata,
+  level.chaos = 1,
+  type = c("surv", "risk", "cuminc", "list"),
+  mode = "list",
+  bytime = FALSE,
+  cause,
+  ...
+)
 }
 \arguments{
 \item{object}{A fitted object of class "prodlim".}

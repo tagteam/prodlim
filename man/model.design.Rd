@@ -4,9 +4,16 @@
 \alias{model.design}
 \title{Extract a design matrix and specials from a model.frame}
 \usage{
-model.design(terms, data, xlev = NULL, dropIntercept = FALSE,
-  maxOrder = 1, unspecialsDesign = TRUE, specialsFactor = FALSE,
-  specialsDesign = FALSE)
+model.design(
+  terms,
+  data,
+  xlev = NULL,
+  dropIntercept = FALSE,
+  maxOrder = 1,
+  unspecialsDesign = TRUE,
+  specialsFactor = FALSE,
+  specialsDesign = FALSE
+)
 }
 \arguments{
 \item{terms}{terms object as obtained either with function \code{terms} or \code{strip.terms}.}

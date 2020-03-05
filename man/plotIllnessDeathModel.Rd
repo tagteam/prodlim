@@ -25,7 +25,7 @@ Plotting an illness-death-model using \code{plot.Hist}.
 plotIllnessDeathModel()
 plotIllnessDeathModel(style=2)
 plotIllnessDeathModel(style=2,
-                      stateLabels=c("a","b\\nc","d"),
+                      stateLabels=c("a","b\nc","d"),
                       box1.col="yellow",
                       box2.col="green",
                       box3.col="red")

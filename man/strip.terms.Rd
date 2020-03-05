@@ -4,8 +4,14 @@
 \alias{strip.terms}
 \title{Strip special functions from terms}
 \usage{
-strip.terms(terms, specials, alias.names = NULL, unspecials = NULL,
-  arguments, keep.response = TRUE)
+strip.terms(
+  terms,
+  specials,
+  alias.names = NULL,
+  unspecials = NULL,
+  arguments,
+  keep.response = TRUE
+)
 }
 \arguments{
 \item{terms}{Terms object}

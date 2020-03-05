@@ -5,12 +5,35 @@
 \alias{lines.prodlim}
 \title{Plotting event probabilities over time}
 \usage{
-\method{plot}{prodlim}(x, type, cause, select, newdata, add = FALSE, col,
-  lty, lwd, ylim, xlim, ylab, xlab = "Time", timeconverter,
-  legend = TRUE, logrank = FALSE, marktime = FALSE, confint = TRUE,
-  automar, atrisk = ifelse(add, FALSE, TRUE), timeOrigin = 0,
-  axes = TRUE, background = TRUE, percent = TRUE, minAtrisk = 0,
-  limit = 10, ...)
+\method{plot}{prodlim}(
+  x,
+  type,
+  cause,
+  select,
+  newdata,
+  add = FALSE,
+  col,
+  lty,
+  lwd,
+  ylim,
+  xlim,
+  ylab,
+  xlab = "Time",
+  timeconverter,
+  legend = TRUE,
+  logrank = FALSE,
+  marktime = FALSE,
+  confint = TRUE,
+  automar,
+  atrisk = ifelse(add, FALSE, TRUE),
+  timeOrigin = 0,
+  axes = TRUE,
+  background = TRUE,
+  percent = TRUE,
+  minAtrisk = 0,
+  limit = 10,
+  ...
+)
 }
 \arguments{
 \item{x}{an object of class `prodlim' as returned by the

@@ -123,15 +123,17 @@ void prodlimSurvPlus(double *y,
 	/* delayed entry: find number of subjects that
 	   entered at time[s] */
 	entered=0;
-	/*by convention entry happens at t+ events at t*/
-	while(e<stop && entrytime[e] < y[i-1]){
+	/* by convention entry happens at t+ events at t */
+	while((e<stop) && (entrytime[e] < y[i-1])){
 	  entered++;
 	  /* unless there is a tie between the current
 	     and the next entry-time, add time to list of times, increase s
 	     and move the values of event, loss etc. to the next event time 
 	  */
-	  if (e==start || entrytime[e]>entrytime[e-1]){
-	    if (s==0 || entrytime[e]!=time[s-1]){
+	  /* FIXED: 17 Nov 2019 (12:50) */
+	  if ((e+1>=stop) || entrytime[e] < entrytime[e+1]){ /* it has to be the last tie of the current entry time */
+	  /* WRONG: 17 Nov 2019 (12:50) if (e==start || entrytime[e]>entrytime[e-1]){ */
+	    if (s==0 || entrytime[e]!=time[s-1]){ /* only if entry time is not a tie with the current event/censored time*/
 	      nrisk[s]=atrisk+entered;
 	      /* if entrytime[e]==time[s-1] then only increase
 		 the number at risk (done two lines above)

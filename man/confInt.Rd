@@ -5,8 +5,19 @@
 \title{Add point-wise confidence limits to the graphs of Kaplan-Meier and
 Aalen-Johansen estimates.}
 \usage{
-confInt(x, times, newdata, type, citype, cause, col, lty, lwd,
-  density = 55, ...)
+confInt(
+  x,
+  times,
+  newdata,
+  type,
+  citype,
+  cause,
+  col,
+  lty,
+  lwd,
+  density = 55,
+  ...
+)
 }
 \arguments{
 \item{x}{an object of class `prodlim' as returned by the \code{prodlim}

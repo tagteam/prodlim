@@ -4,8 +4,15 @@
 \alias{backGround}
 \title{Background and grid color control.}
 \usage{
-backGround(xlim, ylim, bg = "white", fg = "gray77",
-  horizontal = NULL, vertical = NULL, border = "black")
+backGround(
+  xlim,
+  ylim,
+  bg = "white",
+  fg = "gray77",
+  horizontal = NULL,
+  vertical = NULL,
+  border = "black"
+)
 }
 \arguments{
 \item{xlim}{Limits for the xaxis, defaults to par("usr")[1:2].}

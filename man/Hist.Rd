@@ -4,8 +4,14 @@
 \alias{Hist}
 \title{Create an event history response variable}
 \usage{
-Hist(time, event, entry = NULL, id = NULL, cens.code = "0",
-  addInitialState = FALSE)
+Hist(
+  time,
+  event,
+  entry = NULL,
+  id = NULL,
+  cens.code = "0",
+  addInitialState = FALSE
+)
 }
 \arguments{
 \item{time}{for right censored data a numeric vector of event times -- for

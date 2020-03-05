@@ -4,8 +4,17 @@
 \alias{SmartControl}
 \title{Function to facilitate the control of arguments passed to subroutines.}
 \usage{
-SmartControl(call, keys, ignore, defaults, forced, split,
-  ignore.case = TRUE, replaceDefaults, verbose = TRUE)
+SmartControl(
+  call,
+  keys,
+  ignore,
+  defaults,
+  forced,
+  split,
+  ignore.case = TRUE,
+  replaceDefaults,
+  verbose = TRUE
+)
 }
 \arguments{
 \item{call}{A list of named arguments, as for example can be obtained via

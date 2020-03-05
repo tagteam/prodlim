@@ -3,14 +3,26 @@
 \docType{package}
 \name{prodlim}
 \alias{prodlim}
-\alias{prodlim-package}
 \title{Functions for estimating probabilities from right censored data}
 \usage{
-prodlim(formula, data = parent.frame(), subset, na.action = NULL,
-  reverse = FALSE, conf.int = 0.95, bandwidth = NULL, caseweights,
-  discrete.level = 3, x = TRUE, maxiter = 1000, grid, tol = 7,
+prodlim(
+  formula,
+  data = parent.frame(),
+  subset,
+  na.action = NULL,
+  reverse = FALSE,
+  conf.int = 0.95,
+  bandwidth = NULL,
+  caseweights,
+  discrete.level = 3,
+  x = TRUE,
+  maxiter = 1000,
+  grid,
+  tol = 7,
   method = c("npmle", "one.step", "impute.midpoint", "impute.right"),
-  exact = TRUE, type)
+  exact = TRUE,
+  type
+)
 }
 \arguments{
 \item{formula}{A formula whose left hand side is a \code{Hist}
@@ -122,7 +134,7 @@ formula is replaced by the formula of Ying \& Wei (1994).
 objects in \code{formula}.
 
 The Aalen-Johansen estimator is applied for estimating the absolute risk of the competing causes, i.e., the cumulative
-incidence functions.
+incidence functions. 
 
 Under construction:
 

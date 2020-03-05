@@ -4,10 +4,23 @@
 \alias{plot.Hist}
 \title{Box-arrow diagrams for multi-state models.}
 \usage{
-\method{plot}{Hist}(x, nrow, ncol, stateLabels, arrowLabels,
-  arrowLabelStyle = "symbolic", arrowLabelSymbol = "lambda",
-  changeArrowLabelSide, tagBoxes = FALSE, startCountZero = TRUE,
-  oneFitsAll, margin, cex, verbose = FALSE, ...)
+\method{plot}{Hist}(
+  x,
+  nrow,
+  ncol,
+  stateLabels,
+  arrowLabels,
+  arrowLabelStyle = "symbolic",
+  arrowLabelSymbol = "lambda",
+  changeArrowLabelSide,
+  tagBoxes = FALSE,
+  startCountZero = TRUE,
+  oneFitsAll,
+  margin,
+  cex,
+  verbose = FALSE,
+  ...
+)
 }
 \arguments{
 \item{x}{An object of class \code{Hist}.}
@@ -76,11 +89,11 @@ complex graphs.
 SurvFrame <- data.frame(time=1:10,status=c(0,1,1,0,0,1,0,0,1,0))
 SurvHist <- with(SurvFrame,Hist(time,status))
 plot(SurvHist)
-plot(SurvHist,box2.col=2,box2.label="experienced\\nR user")
+plot(SurvHist,box2.col=2,box2.label="experienced\nR user")
 plot(SurvHist,
      box2.col=2,
      box1.label="newby",
-     box2.label="experienced\\nR user",
+     box2.label="experienced\nR user",
      oneFitsAll=FALSE,
      arrow1.length=.5,
      arrow1.label="",
@@ -90,7 +103,7 @@ plot(SurvHist,
 plot(SurvHist,
      box2.col=2,
      box1.label="newby",
-     box2.label="experienced\\nR user",
+     box2.label="experienced\nR user",
      oneFitsAll=FALSE,
      arrow1.length=.5,
      arrow1.label="",
@@ -101,7 +114,7 @@ plot(SurvHist,
 plot(SurvHist,
      box2.col=2,
      box1.label="newby",
-     box2.label="experienced\\nR user",
+     box2.label="experienced\nR user",
      oneFitsAll=FALSE,
      arrow1.length=.5,
      arrow1.label="",
@@ -123,14 +136,14 @@ CRHist <- with(comprisk.model,Hist(time,status,cens.code=2))
 plot(CRHist)
 plot(CRHist,arrow1.label=paste(expression(eta(s,u))))
 
-plot(CRHist,box2.label="This\\nis\\nstate 2",arrow1.label=paste(expression(gamma[1](t))))
-plot(CRHist,box3.label="Any\\nLabel",arrow2.label="any\\nlabel")
+plot(CRHist,box2.label="This\nis\nstate 2",arrow1.label=paste(expression(gamma[1](t))))
+plot(CRHist,box3.label="Any\nLabel",arrow2.label="any\nlabel")
 
 ## change the layout
 plot(CRHist,
      box1.label="Alive",
-     box2.label="Dead\\n cause 1",
-     box3.label="Dead\\n cause 2",
+     box2.label="Dead\n cause 1",
+     box3.label="Dead\n cause 2",
      arrow1.label=paste(expression(gamma[1](t))),
      arrow2.label=paste(expression(eta[2](t))),
      box1.col=2,
@@ -152,18 +165,18 @@ plot(CRHist2,box1.row=2)
 
 ## illness-death models
 illness.death.frame <- data.frame(time=1:4,
-				  from=c("Disease\\nfree",
-                                      "Disease\\nfree",
+				  from=c("Disease\nfree",
+                                      "Disease\nfree",
                                       "Diseased",
-                                      "Disease\\nfree"),
+                                      "Disease\nfree"),
 				  to=c("0","Diseased","Dead","Dead"))
 IDHist <- with(illness.death.frame,Hist(time,event=list(from,to)))
 plot(IDHist)
 
 ## illness-death with recovery
 illness.death.frame2 <- data.frame(time=1:5,
-from=c("Disease\\nfree","Disease\\nfree","Diseased","Diseased","Disease\\nfree"),
-to=c("0","Diseased","Disease\\nfree","Dead","Dead"))
+from=c("Disease\nfree","Disease\nfree","Diseased","Diseased","Disease\nfree"),
+to=c("0","Diseased","Disease\nfree","Dead","Dead"))
 IDHist2 <- with(illness.death.frame2,Hist(time,event=list(from,to)))
 plot(IDHist2)
 
@@ -178,10 +191,10 @@ d <- data.frame(time=1:5,from=c(1,1,1,2,2),to=c(2,3,4,3,4))
 h <- with(d,Hist(time,event=list(from,to)))
 plot(h,
 tagBoxes=TRUE,
-stateLabels=c("Remission\\nwithout\\nGvHD",
-    "Remission\\nwith\\nGvHD",
+stateLabels=c("Remission\nwithout\nGvHD",
+    "Remission\nwith\nGvHD",
     "Relapse",
-    "Death\\nwithout\\nrelapse"),
+    "Death\nwithout\nrelapse"),
 arrowLabelSymbol='alpha',
 arrowlabel3.x=35,
 arrowlabel3.y=53,

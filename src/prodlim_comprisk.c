@@ -223,7 +223,9 @@ void prodlimCompriskPlus(double* y,
 	entered=0;
 	while(e<stop && entrytime[e]< y[i-1]){ /*entry happens at t+ and events at t*/
 	  entered++;
-	  if (e==start || entrytime[e]>entrytime[e-1]){
+	  /* FIXED: 17 Nov 2019 (12:50) */
+	  if ((e+1>=stop) || entrytime[e] < entrytime[e+1]){ /* it has to be the last tie of the current entry time */
+	  /* WRONG: 17 Nov 2019 (12:50) if (e==start || entrytime[e]>entrytime[e-1]){ */
 	    /* unless there is a tie between the current
 	       and the next entry-time, add time to list of times, increase s
 	       and move the values of event, loss etc. to the next event time */
