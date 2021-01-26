@@ -747,7 +747,7 @@ plot.prodlim <- function(x,
             if (length(lrtest$n) == 1) {
                 p <- 1 - pchisq(lrtest$chisq, 1)
             } else{
-                if (is.matrix(x$obs)) {
+                if (is.matrix(lrtest$obs)) {
                     etmp <- apply(lrtest$exp, 1, sum)
                 }
                 else {
@@ -756,10 +756,14 @@ plot.prodlim <- function(x,
                 df <- (sum(1 * (etmp > 0))) - 1
                 p <- 1 - pchisq(lrtest$chisq, df)
             }
-            if (length(smartA$legend$title))
-                smartA$legend$title <- paste(smartA$legend$title," Log-rank: p=",format.pval(p,digits=logrank,eps=0.0001))
-            else
-                smartA$legend$title <- paste(" Log-rank: ",format.pval(p,digits=logrank,eps=0.0001))
+            pform <- format.pval(p,digits=logrank,eps=0.0001)
+            pbelow <- length(grep("<",pform))>0
+            pform <- if (pbelow) paste0("p ",pform) else paste0("p = ",pform)
+            if (length(smartA$legend$title)){
+                smartA$legend$title <- paste(smartA$legend$title," Log-rank: ",pform)
+            } else{
+                smartA$legend$title <- paste("Log-rank: ",pform)
+            }
         }
         par(xpd=TRUE)
         do.call("legend",smartA$legend)

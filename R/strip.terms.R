@@ -104,14 +104,20 @@ strip.terms <- function(terms,
     if (do.alias){
         for (spc in specials){
             ali <- alias.names[[spc]]
-            termLabels <- sub(paste("^(",paste(ali,collapse="|"),")\\(",sep=""),
-                              paste(spc,"(",sep=""),
-                              termLabels)
-            ## remove alias specials
-            newspecials <- unique(c(specials,names(terms.specials)))
-            catch <- match(unlist(alias.names),newspecials,nomatch=0)
-            newspecials <- newspecials[-catch]
+            if (length(ali)>0){
+                ## replace alias with real name
+                termLabels <- sub(paste("^(",paste(ali,collapse="|"),")\\(",sep=""),
+                                  paste(spc,"(",sep=""),
+                                  termLabels)
+            }
         }
+    }
+    ## now remove alias specials
+    newspecials <- unique(c(specials,names(terms.specials)))
+    anames <- unlist(alias.names)
+    if (length(anames)>0){
+        catch <- match(anames,newspecials,nomatch=0)
+        newspecials <- newspecials[-catch]
     }
     if (do.unspecials||do.alias){
         aform <- reformulate(termLabels,response,intercept)

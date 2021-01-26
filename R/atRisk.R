@@ -59,18 +59,25 @@ atRisk <- function(x,
     else if (x$model=="survival"){
         px <- lifeTab(object=x,times=times,newdata=newdata,stats=NULL,intervals=show.censored)
     }
-    if (is.matrix(px) || is.data.frame(px))
+    if (is.matrix(px) || is.data.frame(px)){
+        # remove first time interval which is [0,0]
+        if (show.censored==TRUE) px <- px[-1,,drop=FALSE]
         sumx <- lapply(data.frame(px)[,grep("n.risk",colnames(px)),drop=FALSE],function(x)x)
+    }
     else
         sumx <- lapply(px,function(v){
             u <- v[,grep("n.risk",colnames(v)),drop=FALSE]
             if (NCOL(u)>1){
+                # remove first time interval which is [0,0]
+                if (show.censored==TRUE) u <- u[-1,,drop=FALSE]
                 ulist <- lapply(1:NCOL(u),function(i)u[,i])
                 names(ulist) <- colnames(u)
                 ulist
             }
-            else
+            else{
+                if (show.censored==TRUE) u <- u[-1]
                 u
+            }
         })
     if (is.list(sumx[[1]]))
         sumx <- unlist(sumx,recursive=FALSE)
