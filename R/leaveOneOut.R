@@ -81,6 +81,7 @@ leaveOneOut.competing.risks <- function(object,times,cause,...){
     time <- object$time[Dall>0]
     Y <- object$n.risk[Dall>0]
     D <- D[Dall>0]
+    Dall <- Dall[Dall>0]
     NU <- length(time)
     obstimes <- mr[,"time"]
     status <- mr[,"status"]
@@ -88,13 +89,15 @@ leaveOneOut.competing.risks <- function(object,times,cause,...){
     N <- length(obstimes)
     ## idea: see leaveOneOut.survival
     found <- sindex(jump.times=time,eval.times=times)
+    ## print(cbind(D,Dall,time,Y))
     loo <- .C("loo_comprisk",
               Y = as.double(Y),
               D=as.double(D),
               Dall=as.double(Dall),
               time=as.double(time),
               obsT=as.double(obstimes),
-              status=as.double(status*(E==cause)),
+              status=as.double(status),
+              event=as.double(status*(E==cause)),
               S=double(NU),
               F=double(NU),
               loo=double(N),

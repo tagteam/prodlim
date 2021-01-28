@@ -64,11 +64,12 @@ void loo_surv(double *Y,
 
 
 void loo_comprisk(double *Y,
-		  double *Dall,
 		  double *D,
+		  double *Dall,
 		  double *time,
 		  double *obsT,
 		  double *status,
+		  double *event,
 		  double *S,
 		  double *F,
 		  double *loo,
@@ -100,7 +101,7 @@ void loo_comprisk(double *Y,
 	    time[t]
 	  */
 	  naall = (Dall[t]-status[k])/(Y[t]-1);
-	  na = (D[t]-status[k])/(Y[t]-1);
+	  na = (D[t]-event[k])/(Y[t]-1);
 	}
 	else{
 	  /* do nothing */
@@ -116,7 +117,7 @@ void loo_comprisk(double *Y,
 	aj += na;
       else
 	aj += S[t-1] * na;
-      if (k==0) Rprintf("t=%d\nS[t]=%1.2f\taj=%1.2f\tnaall=%1.2f\t\n",t,S[t],aj,naall);
+      /* if (k==0) Rprintf("t=%d\tD[t]=%1.2f\tY[t]=%1.2f\tS[t]=%1.2f\tna=%1.2f\tnaall=%1.2f\t\n",t,D[t],Y[t],S[t],na,naall); */
       F[t]=aj;
     }
     for (p=0; p<*NP;p++){
