@@ -12,8 +12,8 @@ extern void icens_prodlim(void *, void *, void *, void *, void *, void *, void *
 extern void iindexSRC(void *, void *, void *, void *, void *, void *, void *);
 extern void IntIndexSRC(void *, void *, void *, void *, void *, void *, void *, void *, void *, void *);
 extern void life_table(void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *);
-extern void loo_comprisk(void *, void *, void *, void *, void *, void *, void *, void *, void *);
-extern void loo_surv(void *, void *, void *, void *, void *, void *, void *, void *);
+extern void loo_comprisk(void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *);
+extern void loo_surv(void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *);
 extern void neighborhoodSRC(void *, void *, void *, void *, void *, void *, void *, void *);
 extern void neighborsSRC(void *, void *, void *, void *, void *);
 extern void predict_individual_survival(void *, void *, void *, void *, void *, void *, void *, void *);
@@ -30,8 +30,8 @@ static const R_CMethodDef CEntries[] = {
     {"iindexSRC",                   (DL_FUNC) &iindexSRC,                    7},
     {"IntIndexSRC",                 (DL_FUNC) &IntIndexSRC,                 10},
     {"life_table",                  (DL_FUNC) &life_table,                  13},
-    {"loo_comprisk",                (DL_FUNC) &loo_comprisk,                 9},
-    {"loo_surv",                    (DL_FUNC) &loo_surv,                     8},
+    {"loo_comprisk",                (DL_FUNC) &loo_comprisk,                13},
+    {"loo_surv",                    (DL_FUNC) &loo_surv,                    12},
     {"neighborhoodSRC",             (DL_FUNC) &neighborhoodSRC,              8},
     {"neighborsSRC",                (DL_FUNC) &neighborsSRC,                 5},
     {"predict_individual_survival", (DL_FUNC) &predict_individual_survival,  8},

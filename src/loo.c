@@ -1,21 +1,24 @@
 /*
-  (2011) Thomas A. Gerds 
+  (2011, 2020) Thomas A. Gerds 
   --------------------------------------------------------------------
   distributed under the terms of the GNU public license 
 */
 	      
 #include <math.h>
 #include <R.h>
-
 void loo_surv(double *Y,
 	      double *D,
 	      double *time,
 	      double *obsT,
 	      double *status,
-	      double *S, 
+	      double *S,
+	      double *loo,
 	      int *N,
-	      int *NT){
-  int k, t;
+	      int *NT,
+	      int *NP,
+	      int *pos,
+	      int *lag){
+  int k, t, p;
   double na,pl;
   for (k=0; k<*N;k++){
     /* Rprintf("\n"); */
@@ -47,31 +50,44 @@ void loo_surv(double *Y,
       }
       /* compute the product-limit estimate */
       pl *= (1-na);
-      S[k+(*N)*t]=pl;
-      /* Rprintf("t=%d\tk=%d\tD[t]=%1.2f\tY[t]=%1.2f\tna=%1.2f\tS[k](t)=%1.2f\n",t,k,D[t],Y[t],na,S[k+(*N)*t]); */
+      S[t]=pl;
+    }
+    for (p=0; p<*NP;p++){
+    if (*lag==1){
+      if (pos[p]<=1) loo[k+(*N)*p]=1; else loo[k+(*N)*p] = S[pos[p]-2];
+    }else{
+      if (pos[p]==0) loo[k+(*N)*p]=1; else loo[k+(*N)*p] = S[pos[p]-1];
+    }
     }
   }
 }
 
+
 void loo_comprisk(double *Y,
+		  double *Dall,
 		  double *D,
 		  double *time,
 		  double *obsT,
 		  double *status,
-		  double *lagSurv,
-		  double *F, 
+		  double *S,
+		  double *F,
+		  double *loo,
 		  int *N,
-		  int *NT){
-  int k, t;
-  double na,aj;
+		  int *NT,
+		  int *NP,
+		  int *pos){
+  int k, t, p;
+  double na,naall,aj,pl;
   for (k=0; k<*N;k++){
     /* compute the Nelson-Aalen estimate */
     aj=0;
+    pl=1;
     for (t=0; t<*NT;t++){
       if (obsT[k]>time[t]){
 	/* decrease the number at risk
 	   because k was in the risk set at time[t]
 	*/
+	naall = Dall[t]/(Y[t]-1);
 	na = D[t]/(Y[t]-1);
       }
       else{
@@ -83,16 +99,28 @@ void loo_comprisk(double *Y,
 	    because k was in the risk set at
 	    time[t]
 	  */
+	  naall = (Dall[t]-status[k])/(Y[t]-1);
 	  na = (D[t]-status[k])/(Y[t]-1);
 	}
 	else{
 	  /* do nothing */
+	  naall = Dall[t]/Y[t];
 	  na = D[t]/Y[t];
 	}
       }
+      /* calculate the event-free Kaplan-Meier estimate*/
+      pl *= (1-naall);
+      S[t]=pl;
       /* compute the Aalen-Johansen estimate */
-      aj += lagSurv[t * (*N) + k] * na;
-      F[k+(*N)*t]=aj;
+      if (t==0)
+	aj += na;
+      else
+	aj += S[t-1] * na;
+      if (k==0) Rprintf("t=%d\nS[t]=%1.2f\taj=%1.2f\tnaall=%1.2f\t\n",t,S[t],aj,naall);
+      F[t]=aj;
+    }
+    for (p=0; p<*NP;p++){
+      if (pos[p]==0) loo[k+(*N)*p]=1; else loo[k+(*N)*p] = F[pos[p]-1];
     }
   }
 }
