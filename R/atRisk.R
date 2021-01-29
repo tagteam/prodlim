@@ -52,7 +52,7 @@ atRisk <- function(x,
                    adjust.labels=TRUE,
                    show.censored=FALSE,
                    ...){
-    if (missing(times)) times <- seq(0,x$maxtime,x$maxtime/10)
+    if (missing(times)) times <- seq(0,x$maxtime,x$maxtime/10) else times <- sort(unique(times))
     if (x$model=="competing.risks"){
         px <- lifeTab(object=x,times=times,cause=getStates(x)[1],newdata=newdata,stats=NULL,intervals=FALSE)[[1]]
     }
