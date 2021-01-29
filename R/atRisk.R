@@ -54,31 +54,26 @@ atRisk <- function(x,
                    ...){
     if (missing(times)) times <- seq(0,x$maxtime,x$maxtime/10)
     if (x$model=="competing.risks"){
-        px <- lifeTab(object=x,times=times,cause=getStates(x)[1],newdata=newdata,stats=NULL,intervals=show.censored)[[1]]
+        px <- lifeTab(object=x,times=times,cause=getStates(x)[1],newdata=newdata,stats=NULL,intervals=FALSE)[[1]]
     }
     else if (x$model=="survival"){
-        px <- lifeTab(object=x,times=times,newdata=newdata,stats=NULL,intervals=show.censored)
+        px <- lifeTab(object=x,times=times,newdata=newdata,stats=NULL,intervals=FALSE)
     }
     if (is.matrix(px) || is.data.frame(px)){
-        # remove first time interval which is [0,0]
-        if (show.censored==TRUE) px <- px[-1,,drop=FALSE]
         sumx <- lapply(data.frame(px)[,grep("n.risk",colnames(px)),drop=FALSE],function(x)x)
-    }
-    else
+    } else{
         sumx <- lapply(px,function(v){
             u <- v[,grep("n.risk",colnames(v)),drop=FALSE]
             if (NCOL(u)>1){
-                # remove first time interval which is [0,0]
-                if (show.censored==TRUE) u <- u[-1,,drop=FALSE]
                 ulist <- lapply(1:NCOL(u),function(i)u[,i])
                 names(ulist) <- colnames(u)
                 ulist
             }
             else{
-                if (show.censored==TRUE) u <- u[-1]
                 u
             }
         })
+    }
     if (is.list(sumx[[1]]))
         sumx <- unlist(sumx,recursive=FALSE)
     if (all(sapply(sumx,NCOL))==1)
@@ -129,10 +124,17 @@ atRisk <- function(x,
         if (show.censored==FALSE){
             atrisk.text <- as.character(sumx[[y]])
         }else{
-            if (is.matrix(px) || is.data.frame(px)){
-                ncens <- lapply(data.frame(px)[,grep("n.lost",colnames(px)),drop=FALSE],function(x)x)
+            if (x$model=="competing.risks"){
+                qx <- lifeTab(object=x,times=times,cause=getStates(x)[1],newdata=newdata,stats=NULL,intervals=TRUE)[[1]]
+            }
+            else if (x$model=="survival"){
+                qx <- lifeTab(object=x,times=times,newdata=newdata,stats=NULL,intervals=TRUE)
+            }
+            ## print(qx)
+            if (is.matrix(qx) || is.data.frame(qx)){
+                ncens <- lapply(data.frame(qx)[,grep("n.lost",colnames(qx)),drop=FALSE],function(x)x)
             }else{
-                ncens <- lapply(px,function(v){
+                ncens <- lapply(qx,function(v){
                     u <- v[,grep("n.lost",colnames(v)),drop=FALSE]
                     if (NCOL(u)>1){
                         ulist <- lapply(1:NCOL(u),function(i)u[,i])
