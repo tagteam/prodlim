@@ -7,40 +7,52 @@
 #' @param x An object of class \code{Hist}.
 #' @param nrow the number of graphic rows
 #' @param ncol the number of graphic columns
+#' @param box.width the widths of the boxes on the scale from 0 to 100
+#' @param box.height the heights of the boxes on the scale from 0 to 100
+#' @param box.padding how much room there should be between the label and the border of a box.
+#' Two values on the scale from 0 to 100: the first for the horizontal
+#' x-direction and the second for the vertical y-direction padding. 
+#' @param xbox.position the x box positions (left lower corner) on the scale from 0 to 100.
+#' @param ybox.position the y box positions (left lower corner) on the scale from 0 to 100.
 #' @param stateLabels Vector of names to appear in the boxes (states).
-#' Defaults to attr(x,"state.names").  The boxes can also be individually
-#' labeled by smart arguments of the form \code{box3.label="diseased"}, see
-#' examples.
-#' @param arrowLabels Vector of labels to appear in the boxes (states). One for
-#' each arrow.  The arrows can also be individually labeled by smart arguments
-#' of the form \code{arrow1.label=paste(expression(eta(s,u)))}, see examples.
-#' @param arrowLabelStyle Either "symbolic" for automated symbolic arrow
-#' labels, or "count" for arrow labels that reflect the number of transitions
-#' in the data.
-#' @param arrowLabelSymbol Symbol for automated symbolic arrow labels. Defaults
-#' to "lambda".
-#' @param changeArrowLabelSide A vector of mode logical (TRUE,FALSE) one for
-#' each arrow to change the side of the arrow on which the label is placed.
-#' @param tagBoxes Logical. If TRUE the boxes are numbered in the upper left
-#' corner. The size can be controlled with smart argument boxtags.cex. The
-#' default is boxtags.cex=1.28.
-#' @param startCountZero Control states numbers for symbolic arrow labels and
-#' box tags.
-#' @param oneFitsAll If \code{FALSE} then boxes have individual size, depending
-#' on the size of the label, otherwise all boxes have the same size dependent
-#' on the largest label.
-#' @param margin Set the figure margin via \code{par(mar=margin)}. Less than 4
-#' values are repeated.
-#' @param cex Initial cex value for the state and the arrow \code{labels}.
+#'     Defaults to attr(x,"state.names").  The boxes can also be
+#'     individually labeled by smart arguments of the form
+#'     \code{box3.label="diseased"}, see examples.
+#' @param arrowLabels Vector of labels to appear in the boxes
+#'     (states). One for each arrow.  The arrows can also be
+#'     individually labeled by smart arguments of the form
+#'     \code{arrow1.label=paste(expression(eta(s,u)))}, see examples.
+#' @param arrowLabelStyle Either "symbolic" for automated symbolic
+#'     arrow labels, or "count" for arrow labels that reflect the
+#'     number of transitions in the data.
+#' @param arrowLabelSymbol Symbol for automated symbolic arrow
+#'     labels. Defaults to "lambda".
+#' @param changeArrowLabelSide A vector of mode logical (TRUE,FALSE)
+#'     one for each arrow to change the side of the arrow on which the
+#'     label is placed.
+#' @param curved The curvature of curved arrows via diagram::curvedarrow. Experimental. Values between 0 (no curvature) and 1 are meaningful. 
+#' @param tagBoxes Logical. If TRUE the boxes are numbered in the
+#'     upper left corner. The size can be controlled with smart
+#'     argument boxtags.cex. The default is boxtags.cex=1.28.
+#' @param startCountZero Control states numbers for symbolic arrow
+#'     labels and box tags.
+#' @param oneFitsAll If \code{FALSE} then boxes have individual size,
+#'     depending on the size of the label, otherwise all boxes have
+#'     the same size dependent on the largest label.
+#' @param margin Set the figure margin via
+#'     \code{par(mar=margin)}. Less than 4 values are repeated.
+#' @param cex Initial cex value for the state and the arrow
+#'     \code{labels}.
+#' @param rasta For construction purposes.
 #' @param verbose If TRUE echo various things.
-#' @param \dots Smart control of arguments for the subroutines text (box
-#' label), rect (box), arrows, text (arrow label). Thus the three dots can be
-#' used to draw individual boxes with individual labels, arrows and arrow
-#' labels. E.g. arrow2.label="any label" changes the label of the second arrow.
-#' See examples.
+#' @param \dots Smart control of arguments for the subroutines text
+#'     (box label), rect (box), arrows, text (arrow label). Thus the
+#'     three dots can be used to draw individual boxes with individual
+#'     labels, arrows and arrow labels. E.g. arrow2.label="any label"
+#'     changes the label of the second arrow.  See examples.
 #' @note Use the functionality of the unix program `dot'
-#' http://www.graphviz.org/About.php via R package Rgraphviz to obtain more
-#' complex graphs.
+#'     http://www.graphviz.org/About.php via R package Rgraphviz to
+#'     obtain more complex graphs.
 #' @author Thomas A Gerds \email{tag@@biostat.ku.dk}
 #' @seealso \code{\link{Hist}}\code{\link{SmartControl}}
 #' @keywords survival
@@ -152,7 +164,7 @@
 ##' 
 ##' d <- data.frame(time=1:5,from=c(1,1,1,2,2),to=c(2,3,4,3,4))
 ##' h <- with(d,Hist(time,event=list(from,to)))
-##' plot(h,
+##' plot(h,box.padding=c(5,2),
 ##' tagBoxes=TRUE,
 ##' stateLabels=c("Remission\nwithout\nGvHD",
 ##'     "Remission\nwith\nGvHD",
@@ -169,16 +181,23 @@
 plot.Hist <- function(x,
                       nrow,
                       ncol,
+                      box.width,
+                      box.height,
+                      box.padding,
+                      xbox.position,
+                      ybox.position,
                       stateLabels,
                       arrowLabels,
                       arrowLabelStyle="symbolic",
                       arrowLabelSymbol='lambda',
                       changeArrowLabelSide,
+                      curved,
                       tagBoxes=FALSE,
                       startCountZero=TRUE,                      
                       oneFitsAll,
                       margin,
                       cex,
+                      rasta=FALSE,
                       verbose=FALSE,
                       ...){
     # {{{ margin 
@@ -277,13 +296,14 @@ plot.Hist <- function(x,
                           "3"=c(1,2,ncol),
                           "4"=c(1,1,ncol,ncol),
                           "5"=c(1,1,ceiling((ncol-1)/2),ncol,ncol),
-                          "6"=c(1,3,3,5,6,6))
+                          "6"=c(1,3,3,5,6,6),rep(1:ncol,length.out=NS))
         box.row <- switch(as.character(NS),
                           "2"=c(1,1),
                           "3"=c(nrow,1,nrow),
                           "4"=c(1,nrow,1,nrow),
                           "5"=c(1,nrow,ceiling(nrow/2),1,nrow),
-                          "6"=c(3,1,6,4,1,6))
+                          "6"=c(3,1,6,4,1,6),
+                          rep(1:nrow,length.out=NS))
     }
     else{ # survival or competing risks
         ## adjustRowsInColumn <- rep(1,ncol)
@@ -297,7 +317,9 @@ plot.Hist <- function(x,
         }
     }
     if (is.null(box.row) || is.null(box.col))
-        stop("Please specify the layout for this ",NS," state model (")
+        stop(paste0("Please specify the layout for this ",NS," state model in either of the following two ways:\n",
+                    paste0("box",1:NS,".row=")
+                    ))
     layoutDefaults <- data.frame(name=paste("box",1:NS,sep=""),
                                  row=box.row,
                                  column=box.col,
@@ -323,188 +345,198 @@ plot.Hist <- function(x,
   # }}}
     # {{{ default values
 
-  if (missing(cex))
-    theCex <- 2
-  else
-    theCex <- cex
-  if (found <- match("arrowLabel.cex",names(thecall),nomatch=0))
-    arrowLabel.cex <- thecall[[found]]
-  else
-    arrowLabel.cex <- rep(theCex,N)
-  ## boxes
-  boxDefaults <- data.frame(name=paste("box",1:NS,sep=""),
-                            xpd=TRUE,
-                            stringsAsFactors=FALSE)
-  ## box labels
-  boxLabelDefaults <- data.frame(name=paste("label",1:NS,sep=""),stringsAsFactors=FALSE,label=stateLabs)
-  ## arrows
-  arrowDefaults <- data.frame(name=paste("arrow",1:N,sep=""),
-                              code=2,
-                              lwd=1,
-                              headoffset=strwidth("ab",cex=arrowLabel.cex),
-                              length=.13,
+    if (missing(cex))
+        theCex <- 2
+    else
+        theCex <- cex
+    if (found <- match("arrowLabel.cex",names(thecall),nomatch=0))
+        arrowLabel.cex <- thecall[[found]]
+    else
+        arrowLabel.cex <- rep(theCex,N)
+    ## boxes
+    boxDefaults <- data.frame(name=paste("box",1:NS,sep=""),
+                              xpd=TRUE,
                               stringsAsFactors=FALSE)
-  arrowDefaults <- cbind(arrowDefaults,ordered.transitions)
-  ## arrowlabels
-  if (missing(changeArrowLabelSide))
-    changeArrowLabelSide <- rep(FALSE,N)
-  arrowlabelDefaults <- data.frame(name=paste("arrowlabel",1:N,sep=""),
-                                   label=arrowLabelStyle,
-                                   x=NA,
-                                   y=NA,
-                                   stringsAsFactors=FALSE,
-                                   cex=arrowLabel.cex)
-  arrowlabelDefaults <- cbind(arrowlabelDefaults,ordered.transitions)
-  arrowlabelDefaults$numfrom <- factor(arrowlabelDefaults$from,levels=states,labels=numstateLabels)
-  arrowlabelDefaults$numto <- factor(arrowlabelDefaults$to,levels=states,labels=numstateLabels)
-  if (missing(arrowLabels)){
-    arrowLabels <- NULL
-  }
-  arrowLabels.p <- TRUE
+    ## box labels
+    boxLabelDefaults <- data.frame(name=paste("label",1:NS,sep=""),stringsAsFactors=FALSE,label=stateLabs)
+    ## arrows
+    arrowDefaults <- data.frame(name=paste("arrow",1:N,sep=""),
+                                code=2,
+                                lwd=1,
+                                headoffset=strwidth("ab",cex=arrowLabel.cex),
+                                length=.13,
+                                stringsAsFactors=FALSE)
+    arrowDefaults <- cbind(arrowDefaults,ordered.transitions)
+    ## arrowlabels
+    if (missing(changeArrowLabelSide))
+        changeArrowLabelSide <- rep(FALSE,N)
+    arrowlabelDefaults <- data.frame(name=paste("arrowlabel",1:N,sep=""),
+                                     label=arrowLabelStyle,
+                                     x=NA,
+                                     y=NA,
+                                     stringsAsFactors=FALSE,
+                                     cex=arrowLabel.cex)
+    arrowlabelDefaults <- cbind(arrowlabelDefaults,ordered.transitions)
+    arrowlabelDefaults$numfrom <- factor(arrowlabelDefaults$from,levels=states,labels=numstateLabels)
+    arrowlabelDefaults$numto <- factor(arrowlabelDefaults$to,levels=states,labels=numstateLabels)
+    if (missing(arrowLabels)){
+        arrowLabels <- NULL
+    }
+    arrowLabels.p <- TRUE
     if (length(arrowLabels)>0 &&is.logical(arrowLabels) && arrowLabels==FALSE){
-    arrowLabels <- rep("",N)
-    arrowLabels.p <- FALSE
-  }
-  else{
-    if (length(arrowLabels)==0){
-      arrowLabels <- lapply(1:N,function(i){
-        bquote(paste(expression(.(as.name(arrowLabelSymbol))[.(paste(as.character(arrowlabelDefaults$numfrom[i]),
-            as.character(arrowlabelDefaults$numto[i]),
-            sep=""))](t))))
-      })
-    } else{
-      stopifnot(length(arrowLabels)==N)
+        arrowLabels <- rep("",N)
+        arrowLabels.p <- FALSE
     }
-  }
-  arrowlabelhits <- match(paste("arrow",1:N,".label",sep=""),names(thecall),nomatch=0)
-  for (i in 1:N){
-    if (arrowlabelhits[i]!=0){
-      arrowLabels[[i]] <- thecall[[arrowlabelhits[i]]]
+    else{
+        if (length(arrowLabels)==0){
+            arrowLabels <- lapply(1:N,function(i){
+                bquote(paste(expression(.(as.name(arrowLabelSymbol))[.(paste(as.character(arrowlabelDefaults$numfrom[i]),
+                                                                             as.character(arrowlabelDefaults$numto[i]),
+                                                                             sep=""))](t))))
+            })
+        } else{
+            stopifnot(length(arrowLabels)==N)
+        }
     }
-  }
+    arrowlabelhits <- match(paste("arrow",1:N,".label",sep=""),names(thecall),nomatch=0)
+    for (i in 1:N){
+        if (arrowlabelhits[i]!=0){
+            arrowLabels[[i]] <- thecall[[arrowlabelhits[i]]]
+        }
+    }
 
-  # }}}
+    # }}}
     # {{{ compute box dimensions relative to cex of box labels
-
-  ## to find the cex for the box labels, first initialize
-  boxLabelCex <- rep(theCex,NS)
-  ## then look for label.cex
-  if (theLabelCex <- match("label.cex",names(thecall),nomatch=0)){
-    boxLabelCex <- rep(thecall[[theLabelCex]],NS)
-  }
-  # finally adjust for box individual values 
-  if (any(iLabelCex <- match(paste("label",1:NS,".cex",sep=""),names(thecall),nomatch=0))){
-    for (i in 1:NS){
-      if ((argi <- iLabelCex[i])!=0)
-        boxLabelCex[i] <- thecall[[argi]]
+    
+    ## to find the cex for the box labels, first initialize
+    boxLabelCex <- rep(theCex,NS)
+    ## then look for label.cex
+    if (theLabelCex <- match("label.cex",names(thecall),nomatch=0)){
+        boxLabelCex <- rep(thecall[[theLabelCex]],NS)
     }
-  }
-  ## state.cex <- max(boxLabelCex)
-  if (length(boxLabelCex)<length(stateLabs))
-    boxLabelCex <- rep(boxLabelCex,length.out=length(stateLabs))
-  state.width <- sapply(1:length(stateLabs),function(i){strwidth(stateLabs[i],cex=boxLabelCex[i])})
-  state.height <- sapply(1:length(stateLabs),function(i){strheight(stateLabs[i],cex=boxLabelCex[i])})
-  ## state.width <- sapply(stateLabs,strwidth,cex=boxLabelCex)
-  ## state.height <- sapply(stateLabs,strheight,cex=boxLabelCex)
+    # finally adjust for box individual values 
+    if (any(iLabelCex <- match(paste("label",1:NS,".cex",sep=""),names(thecall),nomatch=0))){
+        for (i in 1:NS){
+            if ((argi <- iLabelCex[i])!=0)
+                boxLabelCex[i] <- thecall[[argi]]
+        }
+    }
 
-  if (missing(oneFitsAll))
-    oneFitsAll <- length(unique(boxLabelCex))==1
-  if (oneFitsAll==TRUE){
-    max.width <- max(state.width)
-    max.height <- max(state.height)
-    ##     box.width <- max.width + xbox.rule * max.width
-    ##     box.height <- max.height + ybox.rule * max.height
-    box.width <- max.width + strwidth("ab",cex=max(boxLabelCex))
-    box.height <- max.height + strwidth("ab",cex=max(boxLabelCex))
-    ## really need to check this for each row:
-    ##     if ((ncol * box.width) > Xlim) warning("The horizontal dimensions of the boxes are too big -- change layout or tune parameters `label.cex' and/or `xbox.rule'.")
-    ##     if ((nrow * box.height) > Ylim) warning("The verticalf dimensions of the boxes are too big -- change layout or tune parameters `label.cex' and/or `ybox.rule'.")
-  }
-  else{
-    box.width <- state.width + strwidth("ab",cex=boxLabelCex)
-    box.height <- state.height + strwidth("ab",cex=boxLabelCex)
-  }
-
-  if (length(box.height)==1) box.height <- rep(box.height,NS)
-  if (length(box.width)==1) box.width <- rep(box.width,NS)
-  # }}}
+    if (length(boxLabelCex)<length(stateLabs))
+        boxLabelCex <- rep(boxLabelCex,length.out=length(stateLabs))
+    state.width <- sapply(1:length(stateLabs),function(i){strwidth(stateLabs[i],cex=boxLabelCex[i])})
+    state.height <- sapply(1:length(stateLabs),function(i){strheight(stateLabs[i],cex=boxLabelCex[i])})
+    if (missing(oneFitsAll)){
+        oneFitsAll <- length(unique(boxLabelCex))==1
+    }
+    estimate.box.width <- missing(box.width)
+    estimate.box.height <- missing(box.height)
+    estimate.box.padding <- missing(box.padding)
+    if (estimate.box.padding)
+        box.padding <- rep(strwidth("ab",cex=max(boxLabelCex)),2)
+        ## box.padding <- rep(0,2)
+    else
+        box.padding <- rep(box.padding,length.out=2)
+    if (estimate.box.width){
+        state.width <- pmin(Xlim/ncol,state.width)
+        box.width <- if (oneFitsAll==TRUE) rep(max(state.width),NS) + box.padding[[1]] else state.width + box.padding[[1]]
+    }else{
+        state.height <- pmin(Xlim/ncol,state.height)
+        box.width <- rep(box.width,length.out=NS)
+    }
+    if (estimate.box.height){
+        box.height <- if (oneFitsAll==TRUE) rep(max(state.height),NS) + box.padding[[2]] else state.height + box.padding[[2]]
+    }else{
+        box.height <- rep(box.height,length.out=NS)
+    }
+    if ((estimate.box.height||estimate.box.width||estimate.box.padding) && is.null(attr(.Device,"filepath"))){
+        warning("The dimension of the boxes may depend on the current graphical device",
+                "\nin the sense that the layout and centering of text may change when you resize the",
+                " graphical device and call the same plot.")
+    }
+    names(box.height) <- paste0("box",1:NS)
+    names(box.width) <- paste0("box",1:NS)
+    thecall$box.height=round(box.height,4)
+    thecall$box.width=round(box.width,4)
+    # }}}
     # {{{ arrange the boxes in the layout
-
-  boxCol <- sapply(layout,function(x){x$column})
-  if (any(boxCol>ncol)) ncol <- max(boxCol)
-  boxRow <- sapply(layout,function(x){x$row})
-  if (any(boxRow>ncol)) nrow <- max(boxRow)
-  ybox.position <- numeric(NS)
-  names(ybox.position) <- paste("box",numstates,sep="")
-  # {{{y box positions
-  for (x in 1:ncol){
-      ## For each column find y positions for boxes
-      boxesInColumn <- names(boxCol)[boxCol==x]
-      boxesInColumnNumbers <- as.numeric(sapply(strsplit(boxesInColumn,"box"),function(x)x[[2]]))
-      if (length(boxesInColumn)>0){
-          ## if (adjustRowsInColumn[x]==1 && all(match(paste(boxesInColumn,"row",sep="."),names(thecall),nomatch=0)==0)){
-          # adjust the y position of the boxes according to the number of boxes in column
-          ## yPossible <- centerBoxes(Ylim,box.height[boxesInColumnNumbers],nrow,boxRow[boxesInColumn])
-          ## for (b in 1:length(boxesInColumn))
-          ## ybox.position[boxesInColumn[b]] <- yPossible[b]
-          ## }
-          ## else{
-          yPossible <- centerBoxes(Ylim,box.height[boxesInColumnNumbers],nrow,boxRow[boxesInColumn])
-          for (b in 1:length(boxesInColumn)){
-              ybox.position[boxesInColumn[b]] <- yPossible[b]
-              ## }
-          }
-      }
-  }
-  ## row 1 is on top but the y-axis starts at the button
-  ## therefore need to transform
-  ybox.position <- 100-(ybox.position+box.height)
-  # }}}
-  # {{{x box positions
-  xbox.position <- numeric(NS)
-  names(xbox.position) <- paste("box",numstates,sep="")
-  for (x in 1:nrow){
-      ## For each row find x positions for boxes
-      boxesInRow <- names(boxRow)[boxRow==x]
-      boxesInRowNumbers <- as.numeric(sapply(strsplit(boxesInRow,"box"),function(x)x[[2]]))
-      if (length(boxesInRow)>0){
-          ## if (adjustColsInRow[x]==1 && all(match(paste(boxesInRow,"row",sep="."),names(thecall),nomatch=0)==0)){
-          # adjust the x position of the boxes according to the number of boxes in row
-          ## xpossible <- centerBoxes(Ylim,box.height[boxesInRowNumbers],ncol,boxCol[boxesInRow])
-          ## for (b in 1:length(boxesInRow))
-          ## xbox.position[boxesInRow[b]] <- xpossible[b]
-          ## }
-          ## else{
-          if (sum(box.width[boxesInRowNumbers])>Xlim)
-              stop(paste("Sum of box widths in row",x,"exceed limit",Xlim))
-          xpossible <- centerBoxes(Xlim,box.width[boxesInRowNumbers],ncol,boxCol[boxesInRow])
-          ## if (any(xpossible<0)) browser()
-          for (b in 1:length(boxesInRow)){
-              xbox.position[boxesInRow[b]] <- xpossible[b]
-          }
-          ## }
-      }
-  }
-  # }}}
-  xtext.position <- xbox.position + (box.width - state.width)/2
-  ytext.position <- ybox.position + (box.height - state.height)/2
-  if (verbose){
-      cat("\n\nBoxlabel data:\n\n")
-      print(data.frame(stateLabs,
-                       boxCol,
-                       boxRow,
-                       x.pos=round(xbox.position,2),
-                       y.pos=round(ybox.position,2),
-                       width=round(box.width,2),
-                       label.width=round(state.width,2),
-                       label.height=round(state.height,2),
-                       boxLabelCex))
-  }
-  boxDefaults <- cbind(boxDefaults,xleft=xbox.position,ybottom=ybox.position,xright=xbox.position+box.width,ytop=ybox.position+box.height)
-  boxLabelDefaults <- cbind(boxLabelDefaults,
-                            x=xtext.position,
-                            y=ytext.position,
-                            cex=boxLabelCex)
+    boxCol <- sapply(layout,function(x){x$column})
+    if (any(boxCol>ncol)) ncol <- max(boxCol)
+    boxRow <- sapply(layout,function(x){x$row})
+    if (any(boxRow>ncol)) nrow <- max(boxRow)
+    if (missing(ybox.position)){
+        ybox.position <- numeric(NS)
+        names(ybox.position) <- paste("box",numstates,sep="")
+        # {{{y box positions
+        for (x in 1:ncol){
+            ## For each column find y positions for boxes
+            boxesInColumn <- names(boxCol)[boxCol==x]
+            boxesInColumnNumbers <- as.numeric(sapply(strsplit(boxesInColumn,"box"),function(x)x[[2]]))
+            if (length(boxesInColumn)>0){
+                yPossible <- centerBoxes(Ylim,box.height[boxesInColumnNumbers],nrow,boxRow[boxesInColumn])
+                for (b in 1:length(boxesInColumn)){
+                    ybox.position[boxesInColumn[b]] <- yPossible[b]
+                }
+            }
+        }
+        ## row 1 is on top but the y-axis starts at the bottom
+        ## therefore need to transform
+        ybox.position <- 100-(ybox.position+box.height)
+    }else{
+        stopifnot(length(ybox.position)==NS)
+        names(ybox.position) <- paste("box",numstates,sep="")
+    }
+    # }}}
+    # {{{x box positions
+    if (missing(xbox.position)){
+        xbox.position <- numeric(NS)
+        names(xbox.position) <- paste("box",numstates,sep="")
+        for (x in 1:nrow){
+            ## For each row find x positions for boxes
+            boxesInRow <- names(boxRow)[boxRow==x]
+            boxesInRowNumbers <- as.numeric(sapply(strsplit(boxesInRow,"box"),function(x)x[[2]]))
+            if (length(boxesInRow)>0){
+                if (sum(box.width[boxesInRowNumbers])>Xlim)
+                    stop(paste("Sum of box widths in row",x,"exceed limit",Xlim))
+                xpossible <- centerBoxes(Xlim,box.width[boxesInRowNumbers],ncol,boxCol[boxesInRow])
+                for (b in 1:length(boxesInRow)){
+                    xbox.position[boxesInRow[b]] <- xpossible[b]
+                }
+            }
+        }
+ 
+    }else{
+        stopifnot(length(xbox.position)==NS)
+        names(xbox.position) <- paste("box",numstates,sep="")
+    }
+    # }}}
+    
+    thecall$xbox.position=round(xbox.position,4)
+    thecall$ybox.position=round(ybox.position,4)
+    xtext.position <- xbox.position + pmax(0,box.width - state.width)/2
+    ytext.position <- ybox.position + pmax(0,box.height - state.height)/2
+    names(xtext.position) <- paste("box",1:NS,sep="")
+    names(ytext.position) <- paste("box",1:NS,sep="") 
+    thecall$xtext.position=round(xtext.position,4)
+    thecall$ytext.position=round(ytext.position,4)
+    
+    if (verbose){
+        cat("\n\nBoxlabel data:\n\n")
+        print(data.frame(stateLabs,
+                         boxCol,
+                         boxRow,
+                         x.pos=round(xbox.position,2),
+                         y.pos=round(ybox.position,2),
+                         width=round(box.width,2),
+                         label.width=round(state.width,2),
+                         label.height=round(state.height,2),
+                         boxLabelCex))
+    }
+    boxDefaults <- cbind(boxDefaults,xleft=xbox.position,ybottom=ybox.position,xright=xbox.position+box.width,ytop=ybox.position+box.height)
+    boxLabelDefaults <- cbind(boxLabelDefaults,
+                              x=xtext.position,
+                              y=ytext.position,
+                              cex=boxLabelCex)
 
   # }}}
     # {{{ compute arrow positions
@@ -580,27 +612,37 @@ plot.Hist <- function(x,
   # }}}
     # {{{ Smart argument control
 
-  boxDefaultList <- lapply(1:NS,function(x)boxDefaults[x,-1,drop=FALSE])
-  names(boxDefaultList) <- boxDefaults$name
-  boxLabelDefaultList <- lapply(1:NS,function(x)boxLabelDefaults[x,-1,drop=FALSE])
-  names(boxLabelDefaultList) <- boxLabelDefaults$name
-  arrowDefaultList <- lapply(1:N,function(x)arrowDefaults[x,-1,drop=FALSE])
-  names(arrowDefaultList) <- as.character(arrowDefaults$name)
-  arrowlabelDefaultList <- lapply(1:N,function(x)arrowlabelDefaults[x,-1,drop=FALSE])
-  names(arrowlabelDefaultList) <- as.character(arrowlabelDefaults$name)
-  boxTagsDefaultList <- list(labels=numstateLabels,cex=1.28,adj=c(-.5,1.43))
-  smartArgs <- SmartControl(list(...),
-                            keys=c(boxDefaults$name,
-                                boxLabelDefaults$name,
-                                as.character(arrowDefaults$name),
-                                as.character(arrowlabelDefaults$name),
-                                "boxtags"),
-                            defaults=c(boxLabelDefaultList,arrowDefaultList,arrowlabelDefaultList,boxDefaultList,list("boxtags"=boxTagsDefaultList)),
-                            ignore.case=TRUE,
-                            replaceDefaults=FALSE,
-                            verbose=verbose)
+    boxDefaultList <- lapply(1:NS,function(x)boxDefaults[x,-1,drop=FALSE])
+    names(boxDefaultList) <- boxDefaults$name
+    boxLabelDefaultList <- lapply(1:NS,function(x)boxLabelDefaults[x,-1,drop=FALSE])
+    names(boxLabelDefaultList) <- boxLabelDefaults$name
+    arrowDefaultList <- lapply(1:N,function(x)arrowDefaults[x,-1,drop=FALSE])
+    names(arrowDefaultList) <- as.character(arrowDefaults$name)
+    arrowlabelDefaultList <- lapply(1:N,function(x)arrowlabelDefaults[x,-1,drop=FALSE])
+    names(arrowlabelDefaultList) <- as.character(arrowlabelDefaults$name)
+    boxTagsDefaultList <- list(labels=numstateLabels,cex=1.28,adj=c(-.5,1.43))
+    smartArgs <- SmartControl(list(...),
+                              keys=c(boxDefaults$name,
+                                     boxLabelDefaults$name,
+                                     as.character(arrowDefaults$name),
+                                     as.character(arrowlabelDefaults$name),
+                                     "boxtags"),
+                              defaults=c(boxLabelDefaultList,arrowDefaultList,arrowlabelDefaultList,boxDefaultList,list("boxtags"=boxTagsDefaultList)),
+                              ignore.case=TRUE,
+                              replaceDefaults=FALSE,
+                              verbose=verbose)
     
-  # }}}
+    # }}}
+    # {{{
+    if (rasta[[1]]){
+        abline(v=seq(0,100,5),col="gray55")
+        abline(h=seq(0,100,5),col="gray55")
+        text(seq(0,100,5),x=seq(0,100,5),y=100)
+        text(seq(0,100,5),x=seq(0,100,5),y=0)
+        text(seq(0,100,5),y=seq(0,100,5),x=100)
+        text(seq(0,100,5),y=seq(0,100,5),x=0)
+    }
+    # }}}
     # {{{  draw the boxes
   
   for (i in 1:NS) {
@@ -614,24 +656,29 @@ plot.Hist <- function(x,
     suppressWarnings(do.call("text",c(list(adj=c(0,0)),smartArgs[[paste("label",i,sep="")]])))
   }
 
-  # }}}
+    # }}}
     # {{{  draw the arrows
-
-  for (i in 1:N){
-    suppressWarnings(do.call("arrows",c(smartArgs[[paste("arrow",i,sep="")]])))
-  }
-
-  # }}}
-    # {{{ label the arrows
+    for (i in 1:N){
+        alist <- c(smartArgs[[paste("arrow",i,sep="")]])
+        if (!missing(curved) && requireNamespace("diagram",quietly=TRUE)){
+            dd <- strwidth("ab",cex=max(boxLabelCex))
+            alist <- c(with(alist,list(from=c(x0,y0),
+                                       to=c(x1,y1),curve=curved,segment=c(dd,100-dd)/100)))
+            carrow <- diagram::curvedarrow
+            suppressWarnings(do.call("carrow",alist))
+        }else{
+            suppressWarnings(do.call("arrows",alist))
+        }
+    }
+    # }}}
+    # {{{  label the arrows
     if (verbose) arrowLabel.data <- NULL
     if (arrowLabels.p==TRUE){
         for (i in 1:N){
             labelList <- smartArgs[[paste("arrowlabel",i,sep="")]]
             if (verbose) arrowLabel.data <- rbind(arrowLabel.data,cbind("arrowLabel"=i,data.frame(labelList)))
             switch(labelList$label,"symbolic"={
-                ## lab <- (arrowLabels[[i]])
                 try1 <- try(mode((arrowLabels[[i]])[2])[[1]]=="call",silent=TRUE)
-                ## try2 <- try(as.character(arrowLabels[[i]])[[1]]=="paste",silent=TRUE)
                 labIsCall <- (class(try1)!="try-error" && try1)
                 suppressWarnings(do.call("text",c(list(labels=bquote(arrowLabels[[i]])),labelList)))        
             }, "count"={
@@ -639,7 +686,6 @@ plot.Hist <- function(x,
                 lab <- paste("n=",tabTrans[as.character(labelList$from),as.character(labelList$to)])
                 suppressWarnings(do.call("text",c(list(labels=quote(lab)),labelList)))
             })
-            ## suppressWarnings(do.call("text",c(list(adj=c(labelWidth/2,labelHeight/2),labels="label"),smartArgs[[paste("arrowlabel",i,sep="")]])))
         }
     }
     if (verbose) {
@@ -659,15 +705,14 @@ plot.Hist <- function(x,
            cex=tagList$cex,
            adj=tagList$adj)})
   }
-
-  # }}}
+    # }}}
     # {{{ reset margin
-  par(mar=oldmar,xpd=oldxpd,oma=oldoma)
-  # }}}
+    par(mar=oldmar,xpd=oldxpd,oma=oldoma)
+    # }}}
     if (verbose){
-        cat("\nRelevel the factor 'event' in the dataset which defines the Hist object,\nto change the order of the boxes.\n")
+        cat("To change the order of the boxes,\nrelevel the factor 'event' in the dataset which defines the Hist object.\n")
     }
-    invisible(smartArgs)
+    invisible(list(call=thecall,parameters=smartArgs))
 }
 
 
@@ -701,22 +746,6 @@ centerBoxes <- function(border,len,ncell,pos){
             bp <- max(border-len[b],box.pos[b])
         bp
     })
-    ## }else{
-    ## ## case: at least one box exceeds the cellwidth
-    ## between <- luft/(nboxes-1)
-    ## boxPos <- c(0,len[-nboxes]+between)
-    ## }
     boxPos
 }
 
-
-## positionFinder <- function(border,len,n){
-## distribute the whitespace between the boxes
-## instead of the boxes
-## wspace <- border-sum(len)
-## if (n==1)
-## (border - len)/2
-## else{
-## seq(0,border-.5*len,len + (border-(n * len))/(n-1))
-## }  
-## }
