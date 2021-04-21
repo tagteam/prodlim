@@ -93,11 +93,10 @@
                               bytime=FALSE,
                               cause,
                               ...){
-    if (missing(cause)) cause <- attr(object$model.response,"states")
-    else {
-        iscause <- try(cause <- checkCauses(cause,object),silent=TRUE)
-        if (class(iscause)[1]=="try-error") {
-        }
+    if (missing(cause)){
+        cause <- attr(object$model.response,"states")
+    } else {
+        cause <- checkCauses(cause,object)
     }
     if (length(times)==0) stop("Argument 'times' has length 0")
     if (missing(type))
@@ -184,8 +183,7 @@
           requested.strata <- rep(1,NR)
           fit.strata <- rep(1,NX)
           freq.strata <- NX
-      }
-      else{
+      } else{
           # strata
           # --------------------------------------------------------------------
           ## changed 09 Dec 2014 (16:44) -->
@@ -266,8 +264,6 @@
           else 
               paste(n,requested.X[,n],sep="=")})),1,paste,collapse=", ")
       if (level.chaos==0) {names.strata <- names.strata[new.order]}
-      ##     print(names.strata)
-      predictors <- predictors
   }
   if (level.chaos==2) times <- unsorted.times
   else times <- times

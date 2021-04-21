@@ -28,14 +28,10 @@
 #' intervals between the values of \code{times}.
 #' @param percent Logical. If TRUE all estimated values are multiplied
 #' by 100 and thus interpretable on a percent scale.
-#' @param showTime If \code{TRUE} evaluation times are put into a
-#' column of the output table, otherwise evaluation times are shown as
-#' rownames.
-#' @param asMatrix Control the output format when there are multiple
-#' life tables, either because of covariate strata or competing causes
-#' or both.  If not missing and not FALSE, reduce multiple life tables
-#' into a matrix with new columns \code{X} for covariate strata and
-#' \code{Event} for competing risks.
+#' @param format Control format of output. Since May 2021,
+#' the result is a data.frame with attributes. When there are multiple
+#' covariate strata or competing risks, these are indicated by columns.
+#' Set format to \code{"list"} to get the old behaviour.
 #' @param ... Further arguments that are passed to the print
 #' function.
 #' @return A data.frame with the relevant information.
@@ -80,8 +76,10 @@
 ##' 
 ##' fit1 <- prodlim(Hist(time,event)~sex,data=d)
 ##' print(summary(fit1,times=c(1,5,10),intervals=TRUE,percent=TRUE),digits=3)
+##' # old behaviour
+##' print(summary(fit1,times=c(1,5,10),intervals=TRUE,percent=TRUE,format="list"),digits=3)
 ##' 
-##' summary(fit1,times=c(1,5,10),asMatrix=TRUE,intervals=TRUE,percent=TRUE)
+##' summary(fit1,times=c(1,5,10),intervals=TRUE,percent=TRUE)
 ##' 
 ##' fit2 <- prodlim(Hist(time,event)~Z,data=d)
 ##' print(summary(fit2,times=c(1,5,10),intervals=TRUE,percent=TRUE),digits=3)
@@ -122,8 +120,8 @@
 ##' crfit <- prodlim(Hist(time,event)~X1,data=d)
 ##' summary(crfit,times=c(1,2,5))
 ##' summary(crfit,times=c(1,2,5),cause=1,intervals=TRUE)
-##' summary(crfit,times=c(1,2,5),cause=1,asMatrix=TRUE)
-##' summary(crfit,times=c(1,2,5),cause=1:2,asMatrix=TRUE)
+##' summary(crfit,times=c(1,2,5),cause=1)
+##' summary(crfit,times=c(1,2,5),cause=1:2)
 ##' 
 ##' 
 ##' # extract the actual tables from the summary 
@@ -133,7 +131,8 @@
 ##' 
 ##' 
 ##' # '
-#' @export 
+#' @export summary.prodlim
+#' @export
 summary.prodlim <- function(object,
                             times,
                             newdata,
@@ -142,9 +141,10 @@ summary.prodlim <- function(object,
                             cause,
                             intervals=FALSE,
                             percent=FALSE,
-                            showTime=TRUE,
-                            asMatrix=FALSE,
+                            format="df",
                             ...) {
+    if ("showTime" %in% names(match.call())) stop("Argument showTime is not supported anymore: you should remove argument showTime from the call.")
+    if ("asMatrix" %in% names(match.call())) stop("Argument asMatrix is not supported anymore: you should remove argument asMatrix from the call.")
     # }}}
     # {{{  classify the situation
     cens.type <- object$cens.type         # uncensored, right or interval censored
@@ -198,6 +198,11 @@ summary.prodlim <- function(object,
         } else {
             X <- NULL
         }
+        if (!missing(cause)){
+            cause <- checkCauses(cause=cause,object=object)
+        } else{ ## show all causes
+            cause <- attr(object$model.response,"states")
+        }
         if (model=="survival") {
             stats <- list(c("surv",1),c("se.surv",0))
             if (!is.null(object$conf.int))
@@ -218,54 +223,35 @@ summary.prodlim <- function(object,
             stats <- list(c("cuminc",0),c("se.cuminc",0))
             if (!is.null(object$conf.int))
                 stats <- c(stats,list(c("lower",0),c("upper",0)))
-            if (!missing(cause)){
-                cause <- checkCauses(cause=cause,object=object)
-            } else{ ## show all causes
-                cause <- attr(object$model.response,"states")
-            }
-            ltab <- lifeTab(object=object,
-                            times=times,
-                            cause=cause,
-                            newdata=X,
-                            stats=stats,
-                            intervals=intervals,
-                            percent=percent,
-                            showTime=showTime)
-            Found <- match(cause,names(ltab),nomatch=0)
-            if (all(Found)>0) {
-                ltab <- ltab[Found]
-            }
-            else stop(paste("\nCannot find cause: ",cause,".\nFitted were causes: ",paste(names(ltab),collapse=", "),sep=""))
+            out <- lifeTab(object=object,
+                           times=times,
+                           cause=cause,
+                           newdata=X,
+                           stats=stats,
+                           intervals=intervals,
+                           percent=percent,format=format)
         }else{ ## survival model
-            ltab <- lifeTab(object=object,
-                            times=times,
-                            newdata=X,
-                            stats=stats,
-                            intervals=intervals,
-                            percent=percent,
-                            showTime=showTime)
+            out <- lifeTab(object=object,
+                           times=times,
+                           newdata=X,
+                           stats=stats,
+                           intervals=intervals,
+                           percent=percent,format=format)
         }
     }
     # }}}
-    # {{{ output
-    if (asMatrix!=FALSE) asMatrix <- TRUE
-    if (model=="competing.risks"){
-        ## out <- list(table=ltab,cause=cause)
-        if (asMatrix)
-            if (cotype>1)
-                ltab <- List2Matrix(ltab,depth=2,names=c("Event","X"))
-            else
-                ltab <- List2Matrix(ltab,depth=1,names=c("Event"))
-        
+    # {{{ preparation of output
+    if (format=="list"){
+        out <- list(table=out,model=model,cotype=cotype,percent=percent)
+        if (model=="competing.risks"){
+            out <- c(out,list(cause=cause))
+        }
     }else{
-         if(cotype>1 && asMatrix)
-             ltab <- List2Matrix(ltab,depth=1,names="X")
-     }
-    out <- list(table=ltab,model=model,cotype=cotype,asMatrix=asMatrix,percent=percent)
-    if (model=="competing.risks"){
-        out <- c(out,list(cause=cause))
+        # reduce list of competing risks 
+        if (class(out)[[1]]=="list") out <- do.call("rbind",out)
+        attributes(out) <- c(attributes(out),list(model=model,cotype=cotype,percent=percent))
     }
-    class(out) <- "summary.prodlim"
-    out
     # }}}
+    class(out) <- c("summary.prodlim",class(out))
+    out
 }

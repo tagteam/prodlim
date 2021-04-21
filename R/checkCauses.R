@@ -11,10 +11,10 @@ checkCauses <- function(cause,object){
         fitted.causes <- prodlim::getStates(object)
         if (!is.null(fitted.causes)){
             if (!(all(cause %in% fitted.causes))){
-                stop(paste0("Cannot find requested cause(s) in object.\n\n",
-                            "Requested cause(s): ",
+                stop(paste0("Cannot predict the requested cause of the event:\n",
+                            "Requested: ",
                             paste0(cause,collapse=", "),
-                            "\n Available causes: ",
+                            "\nFitted: ",
                             paste(fitted.causes,collapse=", "),"\n"))
             }
         }

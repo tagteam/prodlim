@@ -13,8 +13,7 @@
   cause,
   intervals = FALSE,
   percent = FALSE,
-  showTime = TRUE,
-  asMatrix = FALSE,
+  format = "df",
   ...
 )
 }
@@ -46,15 +45,10 @@ intervals between the values of \code{times}.}
 \item{percent}{Logical. If TRUE all estimated values are multiplied
 by 100 and thus interpretable on a percent scale.}
 
-\item{showTime}{If \code{TRUE} evaluation times are put into a
-column of the output table, otherwise evaluation times are shown as
-rownames.}
-
-\item{asMatrix}{Control the output format when there are multiple
-life tables, either because of covariate strata or competing causes
-or both.  If not missing and not FALSE, reduce multiple life tables
-into a matrix with new columns \code{X} for covariate strata and
-\code{Event} for competing risks.}
+\item{format}{Control format of output. Since May 2021,
+the result is a data.frame with attributes. When there are multiple
+covariate strata or competing risks, these are indicated by columns.
+Set format to \code{"list"} to get the old behaviour.}
 
 \item{...}{Further arguments that are passed to the print
 function.}
@@ -109,8 +103,10 @@ summary(fit0,times=c(1,5,10,12),surv=FALSE,percent=TRUE,intervals=TRUE)
 
 fit1 <- prodlim(Hist(time,event)~sex,data=d)
 print(summary(fit1,times=c(1,5,10),intervals=TRUE,percent=TRUE),digits=3)
+# old behaviour
+print(summary(fit1,times=c(1,5,10),intervals=TRUE,percent=TRUE,format="list"),digits=3)
 
-summary(fit1,times=c(1,5,10),asMatrix=TRUE,intervals=TRUE,percent=TRUE)
+summary(fit1,times=c(1,5,10),intervals=TRUE,percent=TRUE)
 
 fit2 <- prodlim(Hist(time,event)~Z,data=d)
 print(summary(fit2,times=c(1,5,10),intervals=TRUE,percent=TRUE),digits=3)
@@ -151,8 +147,8 @@ d <- SimCompRisk(30)
 crfit <- prodlim(Hist(time,event)~X1,data=d)
 summary(crfit,times=c(1,2,5))
 summary(crfit,times=c(1,2,5),cause=1,intervals=TRUE)
-summary(crfit,times=c(1,2,5),cause=1,asMatrix=TRUE)
-summary(crfit,times=c(1,2,5),cause=1:2,asMatrix=TRUE)
+summary(crfit,times=c(1,2,5),cause=1)
+summary(crfit,times=c(1,2,5),cause=1:2)
 
 
 # extract the actual tables from the summary 
