@@ -5,7 +5,7 @@ lifeTab.competing.risks <- function(object,
                                     stats,
                                     intervals=FALSE,
                                     percent=TRUE,
-                                    format="list"){
+                                    format){
     # {{{---------get the indices--------------------------
     IndeX <- predict(object,newdata=newdata,level.chaos=0,times=times,type="list")
     # }}}
@@ -133,6 +133,7 @@ lifeTab.competing.risks <- function(object,
             }else{
                 X <- IndeX$predictors[rep(1:Nstrata,rep(Ntimes,Nstrata)),,drop=FALSE]
                 out <- cbind(X,tt,out)
+                data.table::setDT(out)
                 data.table::setkeyv(out,colnames(X))
                 rownames(out) <- 1:NROW(out)
                 out
@@ -142,8 +143,14 @@ lifeTab.competing.risks <- function(object,
             rownames(out) <- 1:NROW(out)
             out
         }
-    })
+    }) 
     # }}}
-    names(outList) <- causes
+    if (format[[1]]!="list") {
+        key <- c("cause",data.table::key(outList[[1]]))
+        outList <- data.table::rbindlist(outList)
+        data.table::setkeyv(outList,key)
+    } else{
+        names(outList) <- causes
+    }
     outList
 }

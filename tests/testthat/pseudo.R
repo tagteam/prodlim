@@ -6,13 +6,13 @@ test_that("pseudo",{
     # make sure we get the same
     # results with both packages
     set.seed(17)
-    N <- 200
-    ddd <- SimCompRisk(200)
+    N <- 80
+    ddd <- SimCompRisk(80)
     ttt <- c(3,5,10)
     # ttt <- ddd$time
     fff <- prodlim(Hist(time,event)~1,data=ddd)
     system.time(jack <- with(ddd,pseudoci(time,event,ttt)))
-    system.time({jack2 <- jackknife.competing.risks(fff,times=ttt)})
+    system.time({jack2 <- jackknife.competing.risks(fff,times=ttt,cause=1)})
     ## check individual 2
     expect_true(all(round(jack2[,2],9)==round(jack[[3]]$cause1[,2],9)))
     ## check all individuals
@@ -26,21 +26,20 @@ test_that("pseudo",{
     ## for small sample sizes (up to ca. 200) but
     ## much slower for large sample sizes:
     set.seed(17)
-    N <- 200
-    ddd <- SimCompRisk(200)
+    N <- 80
+    ddd <- SimCompRisk(80)
     ttt <- c(3,5,10)
     # ttt <- ddd$time
     fff <- prodlim(Hist(time,event)~1,data=ddd)
     system.time(jack <- with(ddd,pseudoci(time,event,ttt)))
-    system.time({jack2 <- jackknife.competing.risks(fff,times=ttt)})
+    system.time({jack2 <- jackknife.competing.risks(fff,times=ttt,cause=1)})
     expect_true(all(round(jack2[,1],9)==round(jack$pseudo$cause1[,1],9)))
-    set.seed(17)
-    N <- 2000
-    ddd <- SimCompRisk(2000)
-    ttt <- c(3,5,10)
-    fff <- prodlim(Hist(time,event)~1,data=ddd)
-    a <- system.time(jack <- with(ddd,pseudoci(time,event,ttt)))
-    b <- system.time({jack2 <- jackknife.competing.risks(fff,times=ttt)})
-    expect_less_than(a,b)
+    ## set.seed(17)
+    ## N <- 2000
+    ## ddd <- SimCompRisk(2000)
+    ## ttt <- c(3,5,10)
+    ## fff <- prodlim(Hist(time,event)~1,data=ddd)
+    ## a <- system.time(jack <- with(ddd,pseudoci(time,event,ttt)))
+    ## b <- system.time({jack2 <- jackknife.competing.risks(fff,times=ttt,cause=1)})
 })
 

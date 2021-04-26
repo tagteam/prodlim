@@ -42,6 +42,7 @@ atRisk <- function(x,
                    col,
                    labelcol=NULL,
                    interspace,
+                   xinterspace,
                    cex,
                    labels,
                    title="",
@@ -49,49 +50,60 @@ atRisk <- function(x,
                    pos,
                    adj,
                    dist,
+                   xdist,
                    adjust.labels=TRUE,
                    show.censored=FALSE,
                    ...){
     if (missing(times)) times <- seq(0,x$maxtime,x$maxtime/10) else times <- sort(unique(times))
+    if (missing(cex)) cex <- 1
+    if (missing(xdist)) xdist=strwidth("MM",cex=cex)
+    if (missing(pos)) pos <- NULL
+    if (missing(adj)) adj <- 0
+    # {{{ find numbers at risk at given times
     if (x$model=="competing.risks"){
-        px <- lifeTab(object=x,times=times,cause=getStates(x)[1],newdata=newdata,stats=NULL,intervals=FALSE)[[1]]
+        px <- lifeTab(object=x,times=times,cause=getStates(x)[1],newdata=newdata,stats=NULL,intervals=FALSE,format="dt")
     }
     else if (x$model=="survival"){
-        px <- lifeTab(object=x,times=times,newdata=newdata,stats=NULL,intervals=FALSE)
+        px <- lifeTab(object=x,times=times,newdata=newdata,stats=NULL,intervals=FALSE,format="dt")
     }
-    if (is.matrix(px) || is.data.frame(px)){
-        sumx <- lapply(data.frame(px)[,grep("n.risk",colnames(px)),drop=FALSE],function(x)x)
-    } else{
-        sumx <- lapply(px,function(v){
-            u <- v[,grep("n.risk",colnames(v)),drop=FALSE]
-            if (NCOL(u)>1){
-                ulist <- lapply(1:NCOL(u),function(i)u[,i])
-                names(ulist) <- colnames(u)
-                ulist
-            }
-            else{
-                u
-            }
-        })
+    ## if (length(x$clustervar))
+    nrisk.vars <- grep("n.risk",colnames(px))
+    xvars  <- data.table::key(px)
+    xvars <- xvars[xvars!="cause"]
+    if (length(xvars)>0){
+        xdata <- px[,xvars,with=FALSE]
+        xdegen <- sapply(xdata,function(x)length(unique(x))==1)
+        xvars <- xvars[!xdegen]
     }
-    if (is.list(sumx[[1]]))
-        sumx <- unlist(sumx,recursive=FALSE)
-    if (all(sapply(sumx,NCOL))==1)
-        nlines <- length(sumx)
+    if (length(xvars)>0){
+        xdata <- xdata[,xvars,with=FALSE]
+        xstrata <- apply(do.call("cbind",lapply(xvars,function(n){xdata[[n]]})),1,paste,collapse=", ")
+        number.atrisk <- split(px[[nrisk.vars]],xstrata)
+    }else{
+        xdata <- data.table("Subjects: "="")
+        number.atrisk <- list(px[[nrisk.vars]])
+    }
+    nlines <- length(number.atrisk)*NCOL(number.atrisk[1])
+    # }}}
+    # {{{ atrisk title and labels
+    n.columns <- NCOL(xdata)
+    if (!missing(labels) && labels[[1]]!="fixme"){
+        xdata <- labels
+    }else{
+        xdata <- unique(xdata)
+        isnum <- sapply(xdata,is.numeric)
+        if (any(isnum)){
+            for (j in (1:NCOL(xdata))[isnum]){
+                set(xdata,j=j,value=format(xdata[[j]],digits=2))
+            }
+        }
+    }
+    column.widths <- cumsum(c(0,xdist+rev(sapply(1:n.columns,function(j){
+        max(strwidth(c(names(xdata)[[j]],xdata[[j]])))}))))
+    # }}}
     if (missing(line)){
-        line <- par()$mgp[2] + dist +
-                    (0:(2*nlines-1)) *interspace -(nlines-1)
+        line <- par()$mgp[1]+dist+(1:nlines)*c(1,rep(interspace,nlines-1))
     }
-    if (missing(cex)) cex <- 1
-    ## if (missing(pos)) pos <- min(times)
-    if (missing(pos)) pos <- par()$usr[1]
-    if (missing(adj)) adj <- 1
-    if (missing(labels))
-        if (length(names(sumx)==nlines))
-            labels <- paste("",names(sumx),"",sep="")
-        else
-            labels <- rep("",nlines)
-    ## c("No.   \nsubjects",rep("",nlines-1))
     # title for no. at-risk below plot
     # --------------------------------------------------------------------
     if (is.null(titlecol)){
@@ -102,65 +114,43 @@ atRisk <- function(x,
         else
             tcol <- titlecol[1]
     }
-    ##
-    if (!is.null(title))
-        mtext(title,
-              side=1,
-              at=pos,
-              col=tcol,
-              line=line[1]-1,
-              adj=adj,
-              cex=cex,
-              outer=FALSE,
-              xpd=NA,
-              ...)
-    # labeling the no. at-risk below plot
+    #
+    # {{{ labeling the no. at-risk below plot
     # --------------------------------------------------------------------
-    ## if (is.null(adjust.labels) || adjust.labels==TRUE){
-    ## labels <- format(labels,justify="left")}
     if (length(col)==nlines/2) ## 1 cluster level
         col <- rep(col,rep(2,length(col)))
-    lapply(1:nlines,function(y){
+    atrisk.figures.lines <- lapply(1:nlines,function(y){
         if (show.censored==FALSE){
-            atrisk.text <- as.character(sumx[[y]])
+            atrisk.figures <- as.character(number.atrisk[[y]])
         }else{
             if (x$model=="competing.risks"){
-                qx <- lifeTab(object=x,times=times,cause=getStates(x)[1],newdata=newdata,stats=NULL,intervals=TRUE)[[1]]
+                qx <- lifeTab(object=x,times=times,cause=getStates(x)[1],newdata=newdata,stats=NULL,intervals=TRUE,format="dt")
             }
             else if (x$model=="survival"){
-                qx <- lifeTab(object=x,times=times,newdata=newdata,stats=NULL,intervals=TRUE)
+                qx <- lifeTab(object=x,times=times,newdata=newdata,stats=NULL,intervals=TRUE,format="dt")
             }
-            ## print(qx)
-            if (is.matrix(qx) || is.data.frame(qx)){
-                ncens <- lapply(data.frame(qx)[,grep("n.lost",colnames(qx)),drop=FALSE],function(x)x)
+            if (length(xvars)>0){
+                ncens <- split(qx[["n.lost"]],xstrata)
             }else{
-                ncens <- lapply(qx,function(v){
-                    u <- v[,grep("n.lost",colnames(v)),drop=FALSE]
-                    if (NCOL(u)>1){
-                        ulist <- lapply(1:NCOL(u),function(i)u[,i])
-                        names(ulist) <- colnames(u)
-                        ulist
-                    }
-                    else
-                        u
-                })
+                ncens <- list(qx[["n.lost"]])
             }
-            if (is.list(ncens[[1]]))
-                ncens <- unlist(ncens,recursive=FALSE)
-            atrisk.text <- paste0(as.character(sumx[[y]]),
-                                  " (",
-                                  cumsum(ncens[[y]]),
-                                  ")")
+            if (show.censored=="cumulative"){
+                atrisk.figures <- paste0(as.character(number.atrisk[[y]])," (",cumsum(ncens[[y]]),")")
+            }else{# in interval
+                atrisk.figures <- paste0(as.character(number.atrisk[[y]])," (",ncens[[y]],")")
+            }
         }
-        mtext(text=atrisk.text,
-              side=1,
-              at=times,
-              line=rep(line[y],length(times)),
-              col=rep(col[y],length(times)),
-              cex=cex,
-              outer=FALSE,
-              xpd=NA,
-              ...)
+    })
+    lapply(1:nlines,function(y){
+        atrisk.figures <- atrisk.figures.lines[[y]]
+        text(labels=atrisk.figures,
+             adj=c(0.5,0),
+             x=times,
+             y=rep(line2user(line[y],side=1),length(times)),
+             col=rep(col[y],length(times)),
+             cex=cex,
+             xpd=NA,
+             ...)
         if (is.null(labelcol)){
             lcol <- col[y]
         } else {
@@ -169,17 +159,20 @@ atRisk <- function(x,
             else
                 lcol <- labelcol[y]
         }
-        ## print(labels[y])
-        mtext(text=labels[y],
-              side=1,
-              at=pos,
-              col=labelcol[y],
-              ## col=1,
-              line=line[y],
-              adj=adj,
-              cex=cex,
-              outer=FALSE,
-              xpd=NA,
-              ...)
+        if (length(pos)==0) pos <- min(times)-xdist
+        for (j in 1:NCOL(xdata)){
+            text(labels=xdata[y,j,with=FALSE][[1]],
+                 x=pos-column.widths[[j]],
+                 col=lcol,
+                 y=line2user(line[y],side=1),
+                 adj=c(1,0),
+                 cex=cex,
+                 xpd=NA,
+                 ...)
+            if (y==1 && !is.null(title)){
+                text(labels=names(xdata)[[j]],x=pos-column.widths[[j]],col=tcol,y=line2user(line[1]-1,side=1),adj=c(1,0),cex=cex,xpd=NA,...)
+            }
+        }
     })
+    # }}}
 }

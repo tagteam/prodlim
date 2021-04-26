@@ -4,7 +4,7 @@ lifeTab.survival <- function(object,
                              stats,
                              intervals=FALSE,
                              percent=TRUE,
-                             format="list"){
+                             format){
     # {{{ get the indices
     IndeX <- predict(object,
                      newdata=newdata,
@@ -112,6 +112,7 @@ lifeTab.survival <- function(object,
         }else{
             X <- IndeX$predictors[rep(1:Nstrata,rep(Ntimes,Nstrata)),,drop=FALSE]
             out <- cbind(X,tt,out)
+            data.table::setDT(out)
             data.table::setkeyv(out,colnames(X))
             rownames(out) <- 1:NROW(out)
         }

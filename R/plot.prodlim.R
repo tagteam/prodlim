@@ -44,6 +44,7 @@
 #' @param xlim limits of the x-axis
 #' @param ylab label for the y-axis
 #' @param xlab label for the x-axis
+#' @param num.digits Number of digits when rounding off numerical values for legend and at-risk tables.
 #' @param timeconverter The following options are supported:
 #'  "days2years" (conversion factor: 1/365.25)
 #'  "months2years" (conversion factor: 1/12)
@@ -55,6 +56,7 @@
 #'     legend.  Optional arguments of the function \code{legend} can
 #'     be given in the form \code{legend.x=val} where x is the name of
 #'     the argument and val the desired value. See also Details.
+#' @param short.labels Logical. When \code{FALSE} construct labels as cause=1, var1=v1, var2=v2 else as 1, v1, v2.
 #' @param logrank If TRUE, the logrank p-value will be extracted from
 #'     a call to \code{survdiff} and added to the legend. This works
 #'     only for survival models, i.e. Kaplan-Meier with discrete
@@ -286,6 +288,7 @@
 ##'      legend.legend=paste("cause:",getStates(ajfitX$model.response)),
 ##'      plot.main="Subject specific stacked plot")
 ##'  
+#' @export plot.prodlim
 #' @export 
 plot.prodlim <- function(x,
                          type,
@@ -300,8 +303,10 @@ plot.prodlim <- function(x,
                          xlim,
                          ylab,
                          xlab="Time",
+                         num.digits=2,
                          timeconverter,
                          legend=TRUE,
+                         short.labels=TRUE,
                          logrank=FALSE,
                          marktime=FALSE,
                          confint=TRUE,
@@ -338,8 +343,6 @@ plot.prodlim <- function(x,
     }
     if (missing(type)||is.null(type)){
         type <- x$type
-        ## type <- switch(model,"survival"="surv","competing.risks"="cuminc","multi.states"="hazard")
-        ## if (!is.null(x$reverse) && x$reverse==TRUE && model=="survival") type <- "cuminc"
     }
     else
         type <- match.arg(type,c("surv","risk","cuminc","hazard"))
@@ -391,17 +394,16 @@ plot.prodlim <- function(x,
     if (stacked){
         confint <- FALSE
         if (model!="competing.risks") stop("Stacked plot works only for competing risks models.")
-        if (NROW(newdata)>1) stop("Stacked plot works only for one covariate stratum.")
+        ## if (NROW(newdata)>1) stop("Stacked plot works only for one covariate stratum.")
     }else{
         if (length(cause)==0){
             cause <- attributes(x$model.response)$states[[1]]
         }
-        if (length(cause)>1){
-            warning("Currently only the cumulative incidence of a single cause can be plotted in one go. Use argument add=TRUE to add the lines of the other causes. For now I use the first cause")
-            cause <- cause[1]
-        }
+        ## if (length(cause)>1){
+        ## warning("Currently only the cumulative incidence of a single cause can be plotted in one go. Use argument add=TRUE to add the lines of the other causes. For now I use the first cause")
+        ## cause <- cause[1]
+        ## }
     }
-    ## Y <- predict(x,times=plot.times,newdata=newdata,level.chaos=1,type=type,cause=cause,mode="list")
     startValue=ifelse(type=="surv",1,0)
     if (type=="hazard" && model!="survival")
         stats=list(c("cause.hazard",0))
@@ -422,44 +424,78 @@ plot.prodlim <- function(x,
                         cause=cause,
                         newdata=newdata,
                         stats=stats,
-                        percent=FALSE)
-    }
-    else{
+                        percent=FALSE,format="dt")
+    } else{
         sumX <- lifeTab(x,
                         times=plot.times,
                         newdata=newdata,
                         stats=stats,
-                        percent=FALSE)
+                        percent=FALSE,format="dt")
     }
-    if (model=="competing.risks"){
-        if (stacked == FALSE){
-            sumX <- sumX[[cause]]
-        } else {
-            ## there is at most one stratum for each cause
-            if (!is.null(newdata))
-                sumX <- lapply(sumX,function(cc)cc[[1]])
-        }
-    }
-    ## cover both no covariate and single newdata:
-    if (!is.null(dim(sumX))) sumX <- list(sumX)
     if (model=="survival" && type=="risk"){
-        Y <- lapply(sumX,function(x)1-x[,"surv"])
-        names(Y) <- names(sumX)
-        nlines <- length(Y)
-    } else{
-        Y <- lapply(sumX,function(x)x[,type])
-        names(Y) <- names(sumX)
-        if (!missing(select)){
-            if (length(select)==1)
-                Y <- Y[select]
-            else
-                Y <- Y[select]
-        }
-        nlines <- length(Y)
+        sumX[,risk:=1-surv]
+        sumX[,lower.risk:=1-upper]
+        sumX[,upper:=1-lower]
+        sumX[,lower:=NULL]
+        setnames(sumX,"lower.risk","lower")
+        estimate <- "risk"
+    }else{
+        if (model=="survival")
+            estimate <- "surv"
+        else
+            estimate <- "risk"
     }
-  
-                                        # }}}
-                                        # {{{  getting default arguments for plot, atrisk, axes, legend, confint, marktime
+    xvars  <- data.table::key(sumX)
+    if (length(xvars)>0){
+        xdata <- sumX[,xvars,with=FALSE]
+        xdegen <- sapply(xdata,function(x)length(unique(x))==1)
+        xvars <- xvars[!xdegen]
+    }
+    if (length(xvars)>0){
+        xdata <- xdata[,xvars,with=FALSE]
+        if (short.labels[[1]]==TRUE){
+            xstrata <- apply(do.call("cbind",lapply(xvars,function(n){
+                if(is.numeric(xdata[[n]]))
+                    x <- format(xdata[[n]],digits=num.digits)
+                else 
+                    x <- as.character(xdata[[n]])
+                # justify to column width
+                format(c(n,x),justify="right")
+            })),1,paste,collapse=", ")
+            xtitle <- xstrata[[1]]
+            xstrata <- xstrata[-1]
+        }else{
+            xstrata <- apply(do.call("cbind",lapply(xvars,function(n){
+                if(is.numeric(xdata[[n]]))
+                    x <- paste(n,format(xdata[[n]],digits=2),sep="=")
+                else 
+                    x <- paste(n,xdata[[n]],sep="=")
+                # justify to column width
+                format(x,justify="right")
+            })),1,paste,collapse=", ")
+            xtitle <- ""
+        }
+        Y <- split(sumX[[estimate]],xstrata)
+        nlost <- split(sumX[["n.lost"]],xstrata)
+        if (confint[[1]]==TRUE)
+            ci <- split(sumX[,data.table::data.table(time,lower,upper)],xstrata)
+        else
+            ci <- NULL
+        names(Y) <- unique(xstrata)
+    }else{
+        xtitle <- ""
+        Y <- list(sumX[[estimate]])
+        nlost <- list(sumX[["n.lost"]])
+        if (confint[[1]]==TRUE)
+            ci <- list(sumX[,data.table::data.table(time,lower,upper)])
+        else
+            ci <- NULL
+    }
+    # argument select could be removed:
+    if (!missing(select)){Y <- Y[select]}
+    nlines <- length(Y)
+    # }}}
+    # {{{  getting default arguments for plot, atrisk, axes, legend, confint, marktime
     if (missing(xlim)) xlim <- c(min(plot.times), max(plot.times))
     if (!missing(timeconverter)){
         units <- strsplit(tolower(as.character(substitute(timeconverter))),"[ \t]?(2|to)[ \t]?")[[1]]
@@ -472,12 +508,15 @@ plot.prodlim <- function(x,
                              "months-days"=30.4368499)
         one <- switch(units[[1]],"years"=1,"months"=12,"days"=365.25)
         xlab <- paste0("Time (", units[[2]],")")
-        axis1.DefaultArgs <- list(at=seq(xlim[1],xlim[2],one),labels=seq(xlim[1],xlim[2],one)*conversion)
+        axis1.DefaultArgs <- list(at=seq(xlim[1],xlim[2],one),
+                                  labels=seq(xlim[1],xlim[2],one)*conversion)
         atriskDefaultPosition <- seq(xlim[1],xlim[2],one)
     } else {
         if (missing(xlab)) xlab <- "Time"
         axis1.DefaultArgs <- list()
-        atriskDefaultPosition <- seq(min(plot.times),max(plot.times),(max(plot.times)-min(plot.times))/10)
+        atriskDefaultPosition <- seq(min(plot.times),
+                                     max(plot.times),
+                                     (max(plot.times)-min(plot.times))/10)
     }
     if (missing(ylab)) ylab <- switch(type,
                                       "surv"=ifelse(x$reverse==TRUE,"Censoring probability","Survival probability"),
@@ -506,95 +545,44 @@ plot.prodlim <- function(x,
     axis2.DefaultArgs <- list(at=seq(ylim[1],ylim[2],ylim[2]/4),side=2)
     lines.DefaultArgs <- list(type="s")
     plot.DefaultArgs <- list(x=0,y=0,type = "n",ylim = ylim,xlim = xlim,xlab = xlab,ylab = ylab)
-    marktime.DefaultArgs <- list(x=Y,nlost=lapply(sumX,function(x)x[,"n.lost"]),times=plot.times,pch="I",col=col)
-    if (length(Y)==1 && length(x$clustervar)==0){
-        atriskDefaultLabels <- "Subjects: "
-        atriskDefaultTitle <- ""
-    }
-    else{
-        if (length(x$clustervar)>0){
-            atriskDefaultTitle <- ""
-            atriskDefaultLabels <- rep(paste(c("Subjects","Clusters"),": ",sep=""),
-                                       nlines)
-        }
-        else{
-            ## print(names(Y))
-            if (model=="competing.risks" && stacked==TRUE){
-                atriskDefaultTitle <- ""
-                atriskDefaultLabels <- "Subjects: "
-            }
-            else{
-
-                if ((length(grep("=",names(Y)))==length(names(Y)))){
-                    atriskDefaultLabels <- paste(gsub("[ \t]*$","",sapply(strsplit(names(Y),"="),function(x)x[[2]])),
-                                                 ": ", sep="")
-                    atriskDefaultTitle <- unique(sapply(strsplit(names(Y),"="),function(x)x[[1]]))
-                }else{
-                     atriskDefaultTitle <- ""
-                     atriskDefaultLabels <- paste(gsub("[ \t]*$","",names(Y)),": ",sep="")
-                 }
-            }
-        }
-        ## atriskDefaultLabels <- format(atriskDefaultLabels,justify="left")
-        ## atriskDefaultTitle <- ""
-    }
+    marktime.DefaultArgs <- list(x=Y,nlost=nlost,times=plot.times,pch="I",col=col)
     atrisk.DefaultArgs <- list(x=x,
                                newdata=newdata,
                                interspace=1,
-                               dist=.3,
+                               dist=1.5,
                                col=col,
                                labelcol=1,
                                titlecol=1,
-                               title=atriskDefaultTitle,
-                               labels=atriskDefaultLabels,
+                               title="fixme",
+                               labels="fixme",
                                times=atriskDefaultPosition,show.censored=FALSE)
     if (!missing(select) && (!(model=="competing.risks" && stacked))){
         atrisk.DefaultArgs$newdata <- atrisk.DefaultArgs$newdata[select,,drop=FALSE]
     }
+    adapted.legend.cex <- as.numeric(as.character(cut(nlines,breaks=c(-Inf,2:17,Inf),labels=seq(1.5,by=-0.05,length.out=17))))
     legend.DefaultArgs <- list(legend=names(Y),
+                               title=xtitle,
                                lwd=lwd,
                                col=col,
                                lty=lty,
-                               cex=1.5,
+                               cex=adapted.legend.cex,
                                bty="n",
                                y.intersp=1.3,
-                               trimnames=!match("legend.legend",names(allArgs),nomatch=0),
-                               x="topright")
+                               x=ifelse(type=="surv","topright","topleft"))
     if (stacked) {
         legend.DefaultArgs$title <- "Competing risks"
         legend.DefaultArgs$x <- "topleft"
     }
 
-  if (NCOL(newdata)>1) legend.DefaultArgs$trimnames <- FALSE
-  confint.DefaultArgs <- list(x=x,
-                              newdata=newdata,
-                              type=type,
-                              citype="shadow",
-                              times=plot.times,
-                              cause=cause,
-                              density=55,
-                              col=col[1:nlines],
-                              lwd=rep(2,nlines),
-                              lty=rep(3,nlines))
+    confint.DefaultArgs <- list(ci=ci,
+                                citype="shadow",
+                                density=55,
+                                col=col[1:nlines],
+                                lwd=rep(2,nlines),
+                                lty=rep(3,nlines))
 
-  # }}}
-# {{{  backward compatibility
-
-    if (match("legend.args",names(allArgs),nomatch=FALSE)){
-        legend.DefaultArgs <- c(args[[match("legend.args",names(allArgs),nomatch=FALSE)]],legend.DefaultArgs)
-        legend.DefaultArgs <- legend.DefaultArgs[!duplicated(names(legend.DefaultArgs))]
-    }
-    if (match("confint.args",names(allArgs),nomatch=FALSE)){
-        confint.DefaultArgs <- c(args[[match("confint.args",names(allArgs),nomatch=FALSE)]],confint.DefaultArgs)
-        confint.DefaultArgs <- confint.DefaultArgs[!duplicated(names(confint.DefaultArgs))]
-    }
-    if (match("atrisk.args",names(allArgs),nomatch=FALSE)){
-        atrisk.DefaultArgs <- c(args[[match("atrisk.args",names(allArgs),nomatch=FALSE)]],atrisk.DefaultArgs)
-        atrisk.DefaultArgs <- atrisk.DefaultArgs[!duplicated(names(atrisk.DefaultArgs))]
-    }
-    ## if (length(list(...)) && match("legend.legend",names(list(...)),nomatch=FALSE) && any(sapply(newdata,is.factor))){
-    ## message("Since version 1.5.1 prodlim obeys the order of factor levels.\nThis may break old code which explicitly defines the legend labels.")
-    ## }
+    # }}}
+    # {{{  smart argument control
     smartA <- SmartControl(call=  list(...),
                            keys=c("plot","lines","atrisk","legend","confint","background","marktime","axis1","axis2"),
                            ignore=c("x","type","cause","newdata","add","col","lty","lwd","ylim","xlim","xlab","ylab","legend","marktime","confint","automar","atrisk","timeOrigin","percent","axes","atrisk.args","confint.args","legend.args"),
@@ -604,117 +592,107 @@ plot.prodlim <- function(x,
                            replaceDefaults=FALSE,
                            verbose=TRUE)
 
-  # }}}
-  # {{{  setting margin parameters
-  if (atrisk==TRUE){
-      oldmar <- par()$mar
-      if (missing(automar) || automar==TRUE){
-          ##        bottomMargin =  margin line (in 'mex' units) for xlab
-          ##                        + distance of xlab from xaxis
-          ##                        + distance of atrisk numbers from xlab
-          ##                        + number of atrisk lines
-          ##                        + one extra line below the bottom number atrisk line
-          ##      leftSideMargin =  margin line + atrisk.lab
-          bottomMargin <- par()$mgp[2] + smartA$atrisk$dist+ ifelse(clusterp,2,1)*nlines + 1
-          ## smartA$atrisk$labels
-          maxlabellen <- max(strwidth(c(smartA$atrisk$labels,smartA$atrisk$title),
-                                      cex=smartA$atrisk$cex,
-                                      units="inches"))
-          maxlabellen <- pmax(maxlabellen * (par("mar")[2] / par("mai")[2]),par("mar")[2])
-          leftMargin <- maxlabellen+2-par("mar")[2]
-          newmar <- par()$mar + c(bottomMargin,leftMargin,0,0)
-          par(mar=newmar)
-      }
-  }
-
-  # }}}
-# {{{  plot and backGround
-  if (!add) {
-    do.call("plot",smartA$plot)
-    ##     if (background==TRUE && match("bg",names(smartA$background),nomatch=FALSE)){
-    ## par(bg=smartA$background$bg)
-    ##     }
-    if (background==TRUE){
-      do.call("backGround",smartA$background)
+    # }}}
+    # {{{  setting margin parameters
+    if (atrisk==TRUE){
+        oldmar <- par()$mar
+        if (missing(automar) || automar==TRUE){
+            ##        bottomMargin =  margin line (in 'mex' units) for xlab
+            ##                        + distance of xlab from xaxis
+            ##                        + distance of atrisk numbers from xlab
+            ##                        + number of atrisk lines
+            ##                        + one extra line below the bottom number atrisk line
+            ##      leftSideMargin =  margin line + atrisk.lab
+            bottommargin.height <- smartA$atrisk$dist+ifelse(clusterp,2,1)*nlines* smartA$atrisk$interspace/length(cause)
+            bottomMargin.start <- par()$mgp[1]
+            maxlabellen <- max(strwidth(c(smartA$atrisk$labels,smartA$atrisk$title),
+                                        cex=smartA$atrisk$cex,
+                                        units="inches"))
+            maxlabellen <- pmax(maxlabellen * (par("mar")[2] / par("mai")[2]),par("mar")[2])
+            leftMargin <- maxlabellen+2-par("mar")[2]
+            newmar <- par()$mar + c(bottomMargin.start+bottommargin.height,leftMargin,0,0)
+            par(mar=newmar)
+        }
     }
-  }
-  # }}}
-# {{{  axes
-
-  if (!add) {
-    if (axes){
-      do.call("axis",smartA$axis1)
-      if (percent & is.null(smartA$axis2$labels))
-        smartA$axis2$labels <- paste(100*smartA$axis2$at,"%")
-      do.call("axis",smartA$axis2)
+    # }}}
+    # {{{  plot and backGround
+    if (!add) {
+        do.call("plot",smartA$plot)
+        if (background==TRUE){
+            do.call("backGround",smartA$background)
+        }
     }
-  }
-  if (atrisk==TRUE) par(mar=oldmar) ## reset
-
-  # }}}
-  # {{{  pointwise confidence intervals
-  if (confint==TRUE) {
-      ## if (verbose==TRUE){print(smartA$confint)}
-      do.call("confInt",smartA$confint)
-  }
-  # }}}
-  # {{{  adding the lines 
-  lines.type <- smartA$lines$type
-  if (stacked==TRUE){
-      if (length(Y)>1){
-          nY <- names(Y)
-          Y <- apply(do.call("rbind",Y),2,cumsum)
-          Y <- lapply(1:nlines,function(i)Y[i,])
-          names(Y) <- nY
-      }
-      ## names(Y) <- attr(x$model.response,"states")
-      nix <- lapply(1:nlines, function(s) {
-                        yyy <- Y[[s]]
-                        ppp <- plot.times
-                        pos.na <- is.na(yyy)
-                        ppp <- ppp[!pos.na]
-                        yyy <- yyy[!pos.na]
-                        lines(x = ppp,y = yyy,type = lines.type,col = col[s],lty = lty[s],lwd = lwd[s])
-                        cc <- dimColor(col[s],density=55)
-                        ttt <- ppp
-                        nt <- length(ttt)
-                        ttt <- c(ttt,ttt)
-                        uuu <- c(0,yyy[-nt],yyy)
-                        if (s==1)
-                            lll <- rep(0,nt*2)
-                        else
-                            lll <- c(0,Y[[s-1]][!pos.na][-nt],Y[[s-1]][!pos.na])
-                        neworder <- order(ttt)
-                        uuu <- uuu[neworder]
-                        lll <- lll[neworder]
-                        ttt <- sort(ttt)
-                        polygon(x=c(ttt,rev(ttt)),y=c(lll,rev(uuu)),col=cc,border=NA)
-                    })
-  }else{
-       nix <- lapply(1:nlines, function(s) {
-                         lines(x = plot.times,
-                               y = Y[[s]],
-                               type = lines.type,
-                               col = col[s],
-                               lty = lty[s],
-                               lwd = lwd[s])
-                     })
-   }
-  # }}}
-  # {{{  marks at the censored times
-
-  if (marktime==TRUE){
-    if (model %in% c("survival","competing.risks")){
-      do.call("markTime",smartA$marktime)
+    # }}}
+    # {{{  axes
+    if (!add) {
+        if (axes){
+            do.call("axis",smartA$axis1)
+            if (percent & is.null(smartA$axis2$labels))
+                smartA$axis2$labels <- paste(100*smartA$axis2$at,"%")
+            do.call("axis",smartA$axis2)
+        }
     }
-    else{
-      message("Marking the curves at censored times is not yet available for multi-state models.")
+    # }}}
+    # {{{  pointwise confidence intervals
+    if (confint==TRUE) {
+        ## if (verbose==TRUE){print(smartA$confint)}
+        do.call("confInt",smartA$confint)
     }
-  }
-
-# }}}
-# {{{  adding the no. of individuals at risk
-
+    # }}}
+    # {{{  adding the lines 
+    lines.type <- smartA$lines$type
+    if (stacked==TRUE){
+        if (length(Y)>1){
+            nY <- names(Y)
+            Y <- apply(do.call("rbind",Y),2,cumsum)
+            Y <- lapply(1:nlines,function(i)Y[i,])
+            names(Y) <- nY
+        }
+        ## names(Y) <- attr(x$model.response,"states")
+        nix <- lapply(1:nlines, function(s) {
+            yyy <- Y[[s]]
+            ppp <- plot.times
+            pos.na <- is.na(yyy)
+            ppp <- ppp[!pos.na]
+            yyy <- yyy[!pos.na]
+            lines(x = ppp,y = yyy,type = lines.type,col = col[s],lty = lty[s],lwd = lwd[s])
+            cc <- dimColor(col[s],density=55)
+            ttt <- ppp
+            nt <- length(ttt)
+            ttt <- c(ttt,ttt)
+            uuu <- c(0,yyy[-nt],yyy)
+            if (s==1)
+                lll <- rep(0,nt*2)
+            else
+                lll <- c(0,Y[[s-1]][!pos.na][-nt],Y[[s-1]][!pos.na])
+            neworder <- order(ttt)
+            uuu <- uuu[neworder]
+            lll <- lll[neworder]
+            ttt <- sort(ttt)
+            polygon(x=c(ttt,rev(ttt)),y=c(lll,rev(uuu)),col=cc,border=NA)
+        })
+    }else{
+        nix <- lapply(1:nlines, function(s) {
+            lines(x = plot.times,
+                  y = Y[[s]],
+                  type = lines.type,
+                  col = col[s],
+                  lty = lty[s],
+                  lwd = lwd[s])
+        })
+    }
+    # }}}
+    # {{{  marks at the censored times
+    if (marktime==TRUE){
+        if (model %in% c("survival","competing.risks")){
+            do.call("markTime",smartA$marktime)
+        }
+        else{
+            message("Marking the curves at censored times is not yet available for multi-state models.")
+        }
+    }
+    # }}}
+    # {{{  adding the number of subjects at risk and uncensored
     if (atrisk==TRUE && !add){
         if (hit <- match("at",names(smartA$atrisk),nomatch=FALSE)){
             if (match("atrisk.times",names(list(...)),nomatch=FALSE)){
@@ -730,12 +708,6 @@ plot.prodlim <- function(x,
     # }}}
     # {{{  legend
     if(legend==TRUE && !add && !is.null(names(Y))){
-        if (smartA$legend$trimnames==TRUE && (length(grep("=",smartA$legend$legend))==length(smartA$legend$legend))){
-            smartA$legend$legend <- sapply(strsplit(smartA$legend$legend,"="),function(x)x[[2]])
-            if (is.null(smartA$legend$title))
-                smartA$legend$title <- unique(sapply(strsplit(names(Y),"="),function(x)x[[1]]))
-        }
-        smartA$legend <- smartA$legend[-match("trimnames",names(smartA$legend))]
         save.xpd <- par()$xpd
         if (logrank && model=="survival" && length(smartA$legend$legend)>1){
             ## formula.names <- try(all.names(formula),silent=TRUE)
@@ -769,7 +741,7 @@ plot.prodlim <- function(x,
         do.call("legend",smartA$legend)
         par(xpd=save.xpd)
     }
-
-# }}}
-invisible(x)
+    if (atrisk==TRUE) par(mar=oldmar) ## reset
+    # }}}
+    invisible(x)
 }
