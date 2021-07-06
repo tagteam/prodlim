@@ -13,6 +13,7 @@ atRisk(
   col,
   labelcol = NULL,
   interspace,
+  xinterspace,
   cex,
   labels,
   title = "",
@@ -20,6 +21,7 @@ atRisk(
   pos,
   adj,
   dist,
+  xdist,
   adjust.labels = TRUE,
   show.censored = FALSE,
   ...

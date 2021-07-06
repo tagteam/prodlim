@@ -35,6 +35,7 @@
 #' \code{\link{markTime}}
 #' @keywords survival
 #' @export
+# {{{ header 
 atRisk <- function(x,
                    newdata,
                    times,
@@ -54,11 +55,15 @@ atRisk <- function(x,
                    adjust.labels=TRUE,
                    show.censored=FALSE,
                    ...){
+    # }}} 
+    # {{{ start values
     if (missing(times)) times <- seq(0,x$maxtime,x$maxtime/10) else times <- sort(unique(times))
     if (missing(cex)) cex <- 1
     if (missing(xdist)) xdist=strwidth("MM",cex=cex)
     if (missing(pos)) pos <- NULL
     if (missing(adj)) adj <- 0
+    clusterp <- length(x$clustervar[[1]])>0
+    # }}}
     # {{{ find numbers at risk at given times
     if (x$model=="competing.risks"){
         px <- lifeTab(object=x,times=times,cause=getStates(x)[1],newdata=newdata,stats=NULL,intervals=FALSE,format="dt")
@@ -66,8 +71,10 @@ atRisk <- function(x,
     else if (x$model=="survival"){
         px <- lifeTab(object=x,times=times,newdata=newdata,stats=NULL,intervals=FALSE,format="dt")
     }
-    ## if (length(x$clustervar))
-    nrisk.vars <- grep("n.risk",colnames(px))
+    if (clusterp)
+        nrisk.vars <- grep("n.risk",colnames(px))
+    else
+        nrisk.vars <- "n.risk"
     xvars  <- data.table::key(px)
     xvars <- xvars[xvars!="cause"]
     if (length(xvars)>0){
@@ -78,46 +85,51 @@ atRisk <- function(x,
     if (length(xvars)>0){
         xdata <- xdata[,xvars,with=FALSE]
         xstrata <- apply(do.call("cbind",lapply(xvars,function(n){xdata[[n]]})),1,paste,collapse=", ")
-        number.atrisk <- split(px[[nrisk.vars]],xstrata)
-    }else{
-        xdata <- data.table("Subjects: "="")
-        number.atrisk <- list(px[[nrisk.vars]])
+        if (clusterp){
+            number.atrisk <- c(split(px[[nrisk.vars[[1]]]],xstrata),
+                               split(px[[nrisk.vars[[2]]]],xstrata))
+        } else{
+            number.atrisk <- split(px[[nrisk.vars[[1]]]],xstrata)
+        }
+    } else{
+        if (clusterp){
+            xdata <- data.table::data.table(c("Subjects: ","Clusters: "))
+            colnames(xdata) <- ""
+            number.atrisk <- c(list(px[[nrisk.vars[[1]]]]),list(px[[nrisk.vars[[2]]]]))
+        }else{
+            xdata <- data.table::data.table("Subjects: ")
+            colnames(xdata) <- ""
+            number.atrisk <- list(px[[nrisk.vars[[1]]]])
+        }
     }
     nlines <- length(number.atrisk)*NCOL(number.atrisk[1])
     # }}}
-    # {{{ atrisk title and labels
-    n.columns <- NCOL(xdata)
+    # {{{ labels 
     if (!missing(labels) && labels[[1]]!="fixme"){
         xdata <- labels
+        n.columns <- NCOL(xdata)
     }else{
         xdata <- unique(xdata)
+        if (clusterp) {
+            xdata <- cbind("V1"=rep(c("Subjects: ","Clusters: "),rep(NROW(xdata),2)),data.table::rbindlist(list(xdata,xdata)))
+            data.table::setnames(xdata,"V1","")
+        }
+        n.columns <- NCOL(xdata)
         isnum <- sapply(xdata,is.numeric)
         if (any(isnum)){
-            for (j in (1:NCOL(xdata))[isnum]){
-                set(xdata,j=j,value=format(xdata[[j]],digits=2))
+            for (j in (1:n.columns)[isnum]){
+                data.table::set(xdata,j=j,value=format(xdata[[j]],digits=2))
             }
         }
     }
-    column.widths <- cumsum(c(0,xdist+rev(sapply(1:n.columns,function(j){
-        max(strwidth(c(names(xdata)[[j]],xdata[[j]])))}))))
-    # }}}
+    # distance from plot 
     if (missing(line)){
         line <- par()$mgp[1]+dist+(1:nlines)*c(1,rep(interspace,nlines-1))
     }
-    # title for no. at-risk below plot
-    # --------------------------------------------------------------------
-    if (is.null(titlecol)){
-        tcol <- 1
-    } else {
-        if (is.na(titlecol[1]))
-            tcol <- 1
-        else
-            tcol <- titlecol[1]
-    }
-    #
-    # {{{ labeling the no. at-risk below plot
-    # --------------------------------------------------------------------
-    if (length(col)==nlines/2) ## 1 cluster level
+    # }}}
+    # {{{ the actual numbers below the plot
+    ## color of labels for clustered data
+    if (clusterp && (length(col)==nlines/2))
         col <- rep(col,rep(2,length(col)))
     atrisk.figures.lines <- lapply(1:nlines,function(y){
         if (show.censored==FALSE){
@@ -160,7 +172,11 @@ atRisk <- function(x,
                 lcol <- labelcol[y]
         }
         if (length(pos)==0) pos <- min(times)-xdist
-        for (j in 1:NCOL(xdata)){
+        column.widths <- cumsum(c(0,xdist+rev(sapply(1:n.columns,function(j){
+            max(strwidth(c(names(xdata)[[j]],xdata[[j]])))}))))
+        # reverse column order
+        xdata <- xdata[,n.columns:1,with=FALSE]
+        for (j in 1:n.columns){
             text(labels=xdata[y,j,with=FALSE][[1]],
                  x=pos-column.widths[[j]],
                  col=lcol,
@@ -170,7 +186,14 @@ atRisk <- function(x,
                  xpd=NA,
                  ...)
             if (y==1 && !is.null(title)){
-                text(labels=names(xdata)[[j]],x=pos-column.widths[[j]],col=tcol,y=line2user(line[1]-1,side=1),adj=c(1,0),cex=cex,xpd=NA,...)
+                text(labels=names(xdata)[[j]],
+                     x=pos-column.widths[[j]],
+                     col=ifelse(length(titlecol)==0 || is.na(titlecol[1]),1,titlecol[1]),
+                     y=line2user(line[1]-1,side=1),
+                     adj=c(1,0),
+                     cex=cex,
+                     xpd=NA,
+                     ...)
             }
         }
     })

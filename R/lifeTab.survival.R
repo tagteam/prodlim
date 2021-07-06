@@ -41,7 +41,7 @@ lifeTab.survival <- function(object,
             for (cv in 1:length(object$clustervar)){
                 yyy <- .C("summary_prodlim",pred.nrisk=integer(Ntimes*Nstrata),pred.nevent=integer(Ntimes*Nstrata),pred.nlost=integer(Ntimes*Nstrata),nrisk=as.integer(object$n.risk[,1+cv]),nevent=as.integer(object$n.event[,1+cv]),nlost=as.integer(object$n.lost[,1+cv]),as.double(times),as.double(object$time),as.integer(object$first.strata[findex]),as.integer(object$size.strata[findex]),as.integer(Nstrata),as.integer(Ntimes),NAOK=FALSE,PACKAGE="prodlim")
                 outCV <- data.frame(n.risk=yyy$pred.nrisk,n.event=yyy$pred.nevent,n.lost=yyy$pred.nlost)
-                names(outCV) <- paste(object$clustervar,names(outCV))
+                names(outCV) <- paste(object$clustervar,names(outCV),sep=".")
                 out <- cbind(out,outCV)
             }
         }
@@ -69,7 +69,7 @@ lifeTab.survival <- function(object,
             for (cv in 1:length(object$clustervar)){
                 yyy <- .C("life_table",pred.nrisk=integer(Ntimes*Nstrata),pred.nevent=integer(Ntimes*Nstrata),pred.nlost=integer(Ntimes*Nstrata),nrisk=as.integer(object$n.risk[,1+cv]),nevent=as.integer(object$n.event[,1+cv]),nlost=as.integer(object$n.lost[,1+cv]),lower=as.double(lower),upper=as.double(upper),as.double(object$time),as.integer(object$first.strata[findex]),as.integer(object$size.strata[findex]),as.integer(Nstrata),as.integer(Ntimes),NAOK=FALSE,PACKAGE="prodlim")
                 outCV <- data.frame(n.risk=yyy$pred.nrisk,n.event=yyy$pred.nevent,n.lost=yyy$pred.nlost)
-                names(outCV) <- paste(object$clustervar,names(outCV))
+                names(outCV) <- paste(object$clustervar,names(outCV),sep=".")
                 out <- cbind(out,outCV)
             }
         }

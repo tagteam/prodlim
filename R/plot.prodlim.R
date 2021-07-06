@@ -434,10 +434,12 @@ plot.prodlim <- function(x,
     }
     if (model=="survival" && type=="risk"){
         sumX[,risk:=1-surv]
-        sumX[,lower.risk:=1-upper]
-        sumX[,upper:=1-lower]
-        sumX[,lower:=NULL]
-        setnames(sumX,"lower.risk","lower")
+        if (confint[[1]]==TRUE){
+            sumX[,lower.risk:=1-upper]
+            sumX[,upper:=1-lower]
+            sumX[,lower:=NULL]
+            setnames(sumX,"lower.risk","lower")
+        }
         estimate <- "risk"
     }else{
         if (model=="survival")
@@ -477,19 +479,22 @@ plot.prodlim <- function(x,
         }
         Y <- split(sumX[[estimate]],xstrata)
         nlost <- split(sumX[["n.lost"]],xstrata)
-        if (confint[[1]]==TRUE)
+        if (confint[[1]]==TRUE){
             ci <- split(sumX[,data.table::data.table(time,lower,upper)],xstrata)
-        else
+        } else{
             ci <- NULL
+        }
         names(Y) <- unique(xstrata)
     }else{
         xtitle <- ""
         Y <- list(sumX[[estimate]])
         nlost <- list(sumX[["n.lost"]])
-        if (confint[[1]]==TRUE)
-            ci <- list(sumX[,data.table::data.table(time,lower,upper)])
-        else
+        if (confint[[1]]==TRUE){
+            ci <- list(data.table::data.table(time=sumX$time,lower=sumX$lower,upper=sumX$upper))
+        }
+        else{
             ci <- NULL
+        }
     }
     # argument select could be removed:
     if (!missing(select)){Y <- Y[select]}
@@ -573,7 +578,7 @@ plot.prodlim <- function(x,
         legend.DefaultArgs$title <- "Competing risks"
         legend.DefaultArgs$x <- "topleft"
     }
-
+    
     confint.DefaultArgs <- list(ci=ci,
                                 citype="shadow",
                                 density=55,
