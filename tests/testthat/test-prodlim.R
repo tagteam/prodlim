@@ -296,7 +296,7 @@ test_that("left truncation: survival",{
     summary.survfit.delayed <- summary(survfit.delayed,times=c(0,10,56,267,277,1000,2000))
     summary.prodlim.delayed <- summary(prodlim.delayed,times=c(0,10,56,267,277,1000,2000),intervals=1)
     expect_equal(as.numeric(summary.survfit.delayed$surv),
-                 as.numeric(unlist(summary.prodlim.delayed[,"surv"])))
+                 as.numeric(unlist(summary.prodlim.delayed$table[,"surv"])))
     ## FIXME: lifetab does not handle delayed entry
     ##        and shows wrong numbers at risk before the
     ##        first event time

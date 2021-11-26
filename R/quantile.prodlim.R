@@ -76,16 +76,17 @@
         if (attr(sumx,"cotype")==1) {
             out <- list("quantiles.survival"=sumx[,get.quantiles(time=time,x=surv,lower=lower,upper=upper)])
         } else{
-            out <- sumx[,get.quantiles(time=time,surv,lower,upper,model="survival"),by=key(sumx)]
+            out <- sumx[,get.quantiles(time=time,x=surv,lower=lower,upper=upper,model="survival"),by=key(sumx)]
         }
     } else{
         ## absolute risks, cumulative incidence, competing risks
         if (missing(q)) q <- c(0,0.25,0.5,0.75,1)
         sumx <- summary(x,newdata=x$X,times=x$time,verbose=FALSE,cause=cause)
+        setDT(sumx)
         if (attr(sumx,"cotype")==1)
-            out <- list("quantiles.risk"=sumx[,get.quantiles(time=time,x=risk,lower=lower,upper=upper)])
+            out <- list("quantiles.risk"=sumx[,get.quantiles(time=time,x=cuminc,lower=lower,upper=upper)])
         else {
-            out <- sumx[,get.quantiles(risk,lower,upper,model="survival"),by=key(sumx)]
+            out <- sumx[,get.quantiles(time=time,x=cuminc,lower=lower,upper=upper,model="survival"),by=key(sumx)]
         }
         out
     }

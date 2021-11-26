@@ -26,7 +26,10 @@
 #' @param dist If \code{line} is missing, the distance of the upper
 #' most atrisk row from the inner plotting region: par()$mgp[2].
 #' @param adjust.labels If \code{TRUE} the labels are left adjusted.
-#' @param show.censored If \code{TRUE} the cumulative number of subjects lost to follow up is shown in parentheses.
+#' @param show.censored If \code{TRUE} the cumulative number of subjects
+#'                      lost to follow up is shown in parentheses.
+#' @param unit The graphical coordinate systems unit to convert from when line2user is calling \code{grconvertX} and \code{grconvertY}.
+#'             Default is \code{'npc'}
 #' @param ... Further arguments that are passed to the function
 #' \code{mtext}.
 #' @return Nil
@@ -36,6 +39,7 @@
 #' @keywords survival
 #' @export
 # {{{ header 
+
 atRisk <- function(x,
                    newdata,
                    times,
@@ -54,7 +58,9 @@ atRisk <- function(x,
                    xdist,
                    adjust.labels=TRUE,
                    show.censored=FALSE,
+                   unit='npc',
                    ...){
+
     # }}} 
     # {{{ start values
     if (missing(times)) times <- seq(0,x$maxtime,x$maxtime/10) else times <- sort(unique(times))
@@ -106,7 +112,12 @@ atRisk <- function(x,
     # }}}
     # {{{ labels 
     if (!missing(labels) && labels[[1]]!="fixme"){
-        xdata <- labels
+        if (is.numeric(labels) || is.character(labels) || !(data.table::is.data.table(labels)))
+            labels <- data.table::data.table(labels)
+        if (!is.data.table(labels))
+            xdata <- data.table(labels)
+        else
+            xdata <- labels
         n.columns <- NCOL(xdata)
     }else{
         xdata <- unique(xdata)
@@ -122,12 +133,21 @@ atRisk <- function(x,
             }
         }
     }
+    # title of labels column(s)
+    if (title[[1]]!=FALSE && title[[1]] !="" && length(title)>0) {
+        if (length(title)==length(names(xdata)))
+            names(xdata) <- title
+        else{
+            warning(paste0("Argument 'atRisk.title' has the wrong length.\nIt should have length ",length(names(xdata)),", i.e., one label for each column of the 'atrisk.labels'."))
+        }
+    }
     # distance from plot 
     if (missing(line)){
         line <- par()$mgp[1]+dist+(1:nlines)*c(1,rep(interspace,nlines-1))
     }
     # }}}
     # {{{ the actual numbers below the plot
+
     ## color of labels for clustered data
     if (clusterp && (length(col)==nlines/2))
         col <- rep(col,rep(2,length(col)))
@@ -158,7 +178,7 @@ atRisk <- function(x,
         text(labels=atrisk.figures,
              adj=c(0.5,0),
              x=times,
-             y=rep(line2user(line[y],side=1),length(times)),
+             y=rep(line2user(line[y],side=1,unit=unit),length(times)),
              col=rep(col[y],length(times)),
              cex=cex,
              xpd=NA,
@@ -172,24 +192,30 @@ atRisk <- function(x,
                 lcol <- labelcol[y]
         }
         if (length(pos)==0) pos <- min(times)-xdist
-        column.widths <- cumsum(c(0,xdist+rev(sapply(1:n.columns,function(j){
-            max(strwidth(c(names(xdata)[[j]],xdata[[j]])))}))))
+        if(title!=FALSE && title !="" && length(title)>0){
+            column.widths <- cumsum(c(0,xdist+rev(sapply(1:n.columns,function(j){
+                max(strwidth(c(names(xdata)[[j]],xdata[[j]])))}))))
+        } else{
+            column.widths <- cumsum(c(0,xdist+rev(sapply(1:n.columns,function(j){
+                max(strwidth(xdata[[j]]))}))))
+        }
         # reverse column order
         xdata <- xdata[,n.columns:1,with=FALSE]
         for (j in 1:n.columns){
-            text(labels=xdata[y,j,with=FALSE][[1]],
-                 x=pos-column.widths[[j]],
-                 col=lcol,
-                 y=line2user(line[y],side=1),
-                 adj=c(1,0),
-                 cex=cex,
-                 xpd=NA,
-                 ...)
-            if (y==1 && !is.null(title)){
-                text(labels=names(xdata)[[j]],
+            if (y==1 && title!=FALSE && title !="" && length(title)>0){
+                text(labels=c(names(xdata)[[j]],as.character(xdata[y,j,with=FALSE][[1]])),
+                     x=rep(pos-column.widths[[j]],2),
+                     col=c(ifelse(length(titlecol)==0 || is.na(titlecol[1]),1,titlecol[1]),lcol),
+                     y=c(line2user(line[1]-1,side=1,unit=unit),line2user(line[1],side=1,unit=unit)),
+                     adj=c(1,0),
+                     cex=cex,
+                     xpd=NA,
+                     ...)
+            }else{
+                text(labels=as.character(xdata[y,j,with=FALSE][[1]]),
                      x=pos-column.widths[[j]],
-                     col=ifelse(length(titlecol)==0 || is.na(titlecol[1]),1,titlecol[1]),
-                     y=line2user(line[1]-1,side=1),
+                     col=lcol,
+                     y=line2user(line[y],side=1,unit=unit),
                      adj=c(1,0),
                      cex=cex,
                      xpd=NA,
@@ -197,5 +223,6 @@ atRisk <- function(x,
             }
         }
     })
+
     # }}}
 }

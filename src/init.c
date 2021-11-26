@@ -11,7 +11,7 @@ extern void GMLE(void *, void *, void *, void *, void *, void *, void *, void *,
 extern void icens_prodlim(void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *);
 extern void iindexSRC(void *, void *, void *, void *, void *, void *, void *);
 extern void IntIndexSRC(void *, void *, void *, void *, void *, void *, void *, void *, void *, void *);
-extern void life_table(void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *);
+extern void life_table(void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *);
 extern void loo_comprisk(void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *);
 extern void loo_surv(void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *);
 extern void neighborhoodSRC(void *, void *, void *, void *, void *, void *, void *, void *);
@@ -29,7 +29,7 @@ static const R_CMethodDef CEntries[] = {
     {"icens_prodlim",               (DL_FUNC) &icens_prodlim,               20},
     {"iindexSRC",                   (DL_FUNC) &iindexSRC,                    7},
     {"IntIndexSRC",                 (DL_FUNC) &IntIndexSRC,                 10},
-    {"life_table",                  (DL_FUNC) &life_table,                  13},
+    {"life_table",                  (DL_FUNC) &life_table,                  14},
     {"loo_comprisk",                (DL_FUNC) &loo_comprisk,                14},
     {"loo_surv",                    (DL_FUNC) &loo_surv,                    12},
     {"neighborhoodSRC",             (DL_FUNC) &neighborhoodSRC,              8},

@@ -1,6 +1,6 @@
 Package: prodlim
 Title: Product-Limit Estimation for Censored Event History Analysis
-Version: 2021.06.30
+Version: 2021.11.26
 Author: Thomas A. Gerds
 Description: Fast and user friendly implementation of nonparametric estimators
     for censored event history (survival) analysis. Kaplan-Meier and
@@ -21,4 +21,4 @@ LinkingTo: Rcpp
 Maintainer: Thomas A. Gerds <tag@biostat.ku.dk>
 License: GPL (>= 2)
 Packaged: Wed Oct 3 20:15:28 2007; tag
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2

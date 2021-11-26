@@ -24,6 +24,7 @@ atRisk(
   xdist,
   adjust.labels = TRUE,
   show.censored = FALSE,
+  unit = "npc",
   ...
 )
 }
@@ -63,7 +64,11 @@ most atrisk row from the inner plotting region: par()$mgp[2].}
 
 \item{adjust.labels}{If \code{TRUE} the labels are left adjusted.}
 
-\item{show.censored}{If \code{TRUE} the cumulative number of subjects lost to follow up is shown in parentheses.}
+\item{show.censored}{If \code{TRUE} the cumulative number of subjects
+lost to follow up is shown in parentheses.}
+
+\item{unit}{The graphical coordinate systems unit to convert from when line2user is calling \code{grconvertX} and \code{grconvertY}.
+Default is \code{'npc'}}
 
 \item{...}{Further arguments that are passed to the function
 \code{mtext}.}

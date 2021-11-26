@@ -558,9 +558,9 @@ plot.prodlim <- function(x,
                                col=col,
                                labelcol=1,
                                titlecol=1,
-                               title="fixme",
-                               labels="fixme",
-                               times=atriskDefaultPosition,show.censored=FALSE)
+                               title="",
+                               labels="",
+                               times=atriskDefaultPosition,show.censored=FALSE,unit='npc')
     if (!missing(select) && (!(model=="competing.risks" && stacked))){
         atrisk.DefaultArgs$newdata <- atrisk.DefaultArgs$newdata[select,,drop=FALSE]
     }
@@ -601,6 +601,7 @@ plot.prodlim <- function(x,
     # {{{  setting margin parameters
     if (atrisk==TRUE){
         oldmar <- par()$mar
+        on.exit(par(mar=oldmar)) ## reset
         if (missing(automar) || automar==TRUE){
             ##        bottomMargin =  margin line (in 'mex' units) for xlab
             ##                        + distance of xlab from xaxis
@@ -746,7 +747,6 @@ plot.prodlim <- function(x,
         do.call("legend",smartA$legend)
         par(xpd=save.xpd)
     }
-    if (atrisk==TRUE) par(mar=oldmar) ## reset
     # }}}
     invisible(x)
 }
