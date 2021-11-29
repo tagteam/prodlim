@@ -320,6 +320,9 @@ plot.prodlim <- function(x,
                          limit=10,
                          ...){
     # }}}
+    # {{{ data.table NULL's
+    risk <- surv <- lower.risk <- lower <- upper <- cuminc <- surv <- time <- NULL
+    # }}}
     # {{{  backward compatibility
     ##   args=match.call(expand=TRUE)
     ##   args[[1]]=list
@@ -609,7 +612,7 @@ plot.prodlim <- function(x,
             ##                        + number of atrisk lines
             ##                        + one extra line below the bottom number atrisk line
             ##      leftSideMargin =  margin line + atrisk.lab
-            bottommargin.height <- smartA$atrisk$dist+ifelse(clusterp,2,1)*nlines* smartA$atrisk$interspace/length(cause)
+            bottommargin.height <- smartA$atrisk$dist+ifelse(clusterp,2,1)*nlines* smartA$atrisk$interspace/max(1,length(cause))
             bottomMargin.start <- par()$mgp[1]
             maxlabellen <- max(strwidth(c(smartA$atrisk$labels,smartA$atrisk$title),
                                         cex=smartA$atrisk$cex,

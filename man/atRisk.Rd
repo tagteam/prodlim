@@ -13,7 +13,6 @@ atRisk(
   col,
   labelcol = NULL,
   interspace,
-  xinterspace,
   cex,
   labels,
   title = "",
@@ -54,13 +53,16 @@ labels.}
 \item{titlecol}{The color for the title. Defaults to 1 (black).}
 
 \item{pos}{The value is passed on to the \code{mtext} argument
-\code{at} for the labels (not the atriks numbers).}
+\code{at} for the labels (not the atrisk numbers).}
 
 \item{adj}{Passed on to \code{mtext} for the labels (not the atriks
 numbers).}
 
 \item{dist}{If \code{line} is missing, the distance of the upper
 most atrisk row from the inner plotting region: par()$mgp[2].}
+
+\item{xdist}{Distance in x-axis direction to define the distance between the labels
+and the numbers at-risk. Deftaults to \code{strwidth("MM",cex=cex)}.}
 
 \item{adjust.labels}{If \code{TRUE} the labels are left adjusted.}
 

@@ -402,18 +402,23 @@
         if (weighted==TRUE) caseweights <- caseweights[neighbors]
     }
   
-  # }}}
-  # {{{ delay (left truncation)
-  delayed <- attr(event.history,"entry.type")=="leftTruncated"
-  ## && !(attr(event.history,"entry.type")=="")
-  if (!delayed) { ## either NULL or ""
-      entrytime <- NULL
-  }  else {
-      entrytime <- response[,"entry"]
-      if(!(all(entrytime>=0)))
-          stop(paste("Not all entry times in dataset are greater or equal to zero."))
-  }
-  # }}}
+    # }}}
+    # {{{ delay (left truncation)
+    delayed <- attr(event.history,"entry.type")=="leftTruncated"
+    if (!delayed) { ## either NULL or ""
+        entrytime <- NULL
+    }  else {
+        entrytime <- response[,"entry"]
+        if(!(all(entrytime>=0)))
+            stop(paste("Not all entry times in dataset are greater or equal to zero."))
+        if (any(entrytime==response[,"time"]))
+            warning("For some subjects the entry time is equal to the event time.
+  The product-limit estimates use the convention that
+  in case of ties events come before censored and before entry.
+  Still, the summary tables include the subjects that enter
+  at time t in the number at risk at time t.")
+    }
+    # }}}
 
     # {{{  bound on the number of unique time points over all strata  
     switch(cotype,

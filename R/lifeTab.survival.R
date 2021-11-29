@@ -78,7 +78,6 @@ lifeTab.survival <- function(object,
                       as.integer(delayed),
                       NAOK=FALSE,
                       PACKAGE="prodlim")
-            browser()
             out <- data.frame(n.risk=xxx$pred.nrisk,
                               n.event=xxx$pred.nevent,
                               n.lost=xxx$pred.nlost)

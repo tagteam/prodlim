@@ -301,5 +301,8 @@ test_that("left truncation: survival",{
     ##        and shows wrong numbers at risk before the
     ##        first event time
     ## expect_equal(as.numeric(summary.survfit.delayed$n.risk),
-                 ## as.numeric(summary.prodlim.delayed$table[,"n.risk"]))
+    ## as.numeric(summary.prodlim.delayed$table[,"n.risk"]))
+    
 })
+
+

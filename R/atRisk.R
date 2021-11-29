@@ -20,11 +20,13 @@
 #' @param title Title for the at-risk labels
 #' @param titlecol The color for the title. Defaults to 1 (black).
 #' @param pos The value is passed on to the \code{mtext} argument
-#' \code{at} for the labels (not the atriks numbers).
+#' \code{at} for the labels (not the atrisk numbers).
 #' @param adj Passed on to \code{mtext} for the labels (not the atriks
 #' numbers).
 #' @param dist If \code{line} is missing, the distance of the upper
 #' most atrisk row from the inner plotting region: par()$mgp[2].
+#' @param xdist Distance in x-axis direction to define the distance between the labels
+#' and the numbers at-risk. Deftaults to \code{strwidth("MM",cex=cex)}.
 #' @param adjust.labels If \code{TRUE} the labels are left adjusted.
 #' @param show.censored If \code{TRUE} the cumulative number of subjects
 #'                      lost to follow up is shown in parentheses.
@@ -47,7 +49,6 @@ atRisk <- function(x,
                    col,
                    labelcol=NULL,
                    interspace,
-                   xinterspace,
                    cex,
                    labels,
                    title="",

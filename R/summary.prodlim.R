@@ -1,4 +1,5 @@
 # {{{ header
+
 #' Summary method for prodlim objects.
 #' 
 #' Summarizing the result of the product limit method in life-table format.
@@ -145,14 +146,16 @@ summary.prodlim <- function(object,
                             ...) {
     if ("showTime" %in% names(match.call())) stop("Argument showTime is not supported anymore: you should remove argument showTime from the call.")
     if ("asMatrix" %in% names(match.call())) stop("Argument asMatrix is not supported anymore: you should remove argument asMatrix from the call.")
+
     # }}}
-    # {{{  classify the situation
+    # {{{ classify the situation
     cens.type <- object$cens.type         # uncensored, right or interval censored
     model <- object$model                 # survival, competing risks or multi-state
     ## cluster <- object$clustervar          # clustered data?
     cotype <- object$covariate.type       # no, discrete, continuous or both
     # }}}
-    # {{{  times
+    # {{{ times
+
     jump.times <- object$time
     if (missing(times) && (length(times <- jump.times) > 50)) 
         times <- quantile(sort(unique(jump.times)))
@@ -163,6 +166,7 @@ summary.prodlim <- function(object,
                 paste("\n","Time(s) ",paste(times[times>max(jump.times)],collapse=", "),
                       " are beyond the maximal follow-up time ",max(jump.times),"\n"))
     ntimes <- length(times)
+
     # }}}
     # {{{ interval-censored
     if (cens.type=="intervalCensored"){
@@ -176,7 +180,7 @@ summary.prodlim <- function(object,
     }
     else{
         # }}}
-        # {{{ with covariates
+    # {{{ with covariates
         if (cotype>1){
             if (missing(newdata) || length(newdata)==0){
                 X <- object$X

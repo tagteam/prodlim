@@ -46,6 +46,7 @@
                                q,
                                cause=1,
                                ...){
+    time <- surv <- lower <- upper <- cuminc <- NULL
     get.quantiles <- function(time,x,lower,upper,model="survival"){
         out <- do.call("cbind",lapply(list(x,lower,upper),function(sumw){
             notna= is.na(sumw) | sumw==0 | sumw ==1

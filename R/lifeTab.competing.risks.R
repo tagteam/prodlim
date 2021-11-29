@@ -69,11 +69,43 @@ lifeTab.competing.risks <- function(object,
             lagTimes <- c(min(min(object$time),0)-.1 , times[-length(times)])
             if (is.null(object$clustervar)){
                 ## only one column in n.event and n.risk 
-                xxx <- .C("life_table",pred.nrisk=integer(Ntimes*Nstrata),pred.nevent=integer(Ntimes*Nstrata),pred.nlost=integer(Ntimes*Nstrata),nrisk=as.integer(object$n.risk),nevent=as.integer(object$n.event[[cc]]),nlost=as.integer(object$n.lost),as.double(lower),as.double(upper),as.double(object$time),as.integer(object$first.strata[findex]),as.integer(object$size.strata[findex]),as.integer(Nstrata),as.integer(Ntimes),as.integer(delayed),NAOK=FALSE,PACKAGE="prodlim")
+                xxx <- .C("life_table",
+                          pred.nrisk=integer(Ntimes*Nstrata),
+                          pred.nevent=integer(Ntimes*Nstrata),
+                          pred.nlost=integer(Ntimes*Nstrata),
+                          nrisk=as.integer(object$n.risk),
+                          nevent=as.integer(object$n.event[[cc]]),
+                          nlost=as.integer(object$n.lost),
+                          as.double(lower),
+                          as.double(upper),
+                          as.double(object$time),
+                          as.integer(object$first.strata[findex]),
+                          as.integer(object$size.strata[findex]),
+                          as.integer(Nstrata),
+                          as.integer(Ntimes),
+                          as.integer(delayed),
+                          NAOK=FALSE,
+                          PACKAGE="prodlim")
                 out <- data.frame(cause=cc,n.risk=xxx$pred.nrisk,n.event=xxx$pred.nevent,n.lost=xxx$pred.nlost)
             }
             else{
-                xxx <- .C("life_table",pred.nrisk=integer(Ntimes*Nstrata),pred.nevent=integer(Ntimes*Nstrata),pred.nlost=integer(Ntimes*Nstrata),nrisk=as.integer(object$n.risk[,1]),nevent=as.integer(object$n.event[[cc]][,1]),nlost=as.integer(object$n.lost[,1]),as.double(lower),as.double(upper),as.double(object$time),as.integer(object$first.strata[findex]),as.integer(object$size.strata[findex]),as.integer(Nstrata),as.integer(Ntimes), as.integer(delayed),,NAOK=FALSE,PACKAGE="prodlim")
+                xxx <- .C("life_table",
+                          pred.nrisk=integer(Ntimes*Nstrata),
+                          pred.nevent=integer(Ntimes*Nstrata),
+                          pred.nlost=integer(Ntimes*Nstrata),
+                          nrisk=as.integer(object$n.risk[,1]),
+                          nevent=as.integer(object$n.event[[cc]][,1]),
+                          nlost=as.integer(object$n.lost[,1]),
+                          as.double(lower),
+                          as.double(upper),
+                          as.double(object$time),
+                          as.integer(object$first.strata[findex]),
+                          as.integer(object$size.strata[findex]),
+                          as.integer(Nstrata),
+                          as.integer(Ntimes),
+                          as.integer(delayed),
+                          NAOK=FALSE,
+                          PACKAGE="prodlim")
                 out <- data.frame(cause=cc,n.risk=xxx$pred.nrisk,n.event=xxx$pred.nevent,n.lost=xxx$pred.nlost)
                 lagxxx <- .C("life_table",
                              pred.nrisk=integer(Ntimes*Nstrata),
