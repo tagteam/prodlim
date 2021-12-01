@@ -53,7 +53,7 @@ void life_table(int *pred_nrisk,
     There are three cases:
     
     (1) the interval lays before the first event time
-    (2) the interval includes one event time
+    (2) the interval lays includes one event time
     (3) the interval lays behind the last event time
     
   */
@@ -77,7 +77,7 @@ void life_table(int *pred_nrisk,
 	if (*delayed)
 	  pred_nrisk[t + i *(*NT)] = 0;
 	else
-	pred_nrisk[t + i *(*NT)] = nrisk[First];
+	  pred_nrisk[t + i *(*NT)] = nrisk[First];
 	pred_nevent[t + i *(*NT)] = 0;
 	pred_nlost[t + i *(*NT)] = 0;
       }
@@ -105,7 +105,7 @@ void life_table(int *pred_nrisk,
 	  /*
 	    first find number at risk just before lower[t] ...
 	  */
-	  /* Rprintf("s=%d\tt=%d\teventTime[First + s]=%1.2f\tlower[t]=%1.2f\t\n",s,t,eventTime[First + s],lower[t]); */
+	  /* Rprintf("s=%d\tt=%d\ti=%d\tupper[t]=%1.2f\tlower[t]=%1.2f\teventTime[i]=%1.2f\t\n",s,t,i,upper[t],lower[t],eventTime[i]); */
 	  if (s==0){
 	    if (*delayed)
 	      	    pred_nrisk[t + i *(*NT)] = 0;

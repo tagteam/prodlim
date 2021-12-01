@@ -117,8 +117,7 @@ void prodlimSurvPlus(double *y,
 	event[s] += status[i];
 	loss[s]  += (1-status[i]);
       }
-    }
-    else {
+    } else {
       if (*delayed==1){
 	/* delayed entry: find number of subjects that
 	   entered at time[s] */
@@ -127,16 +126,18 @@ void prodlimSurvPlus(double *y,
 	while((e<stop) && (entrytime[e] < y[i-1])){
 	  entered++;
 	  /* unless there is a tie between the current
-	     and the next entry-time, add time to list of times, increase s
-	     and move the values of event, loss etc. to the next event time 
+	     and the next entry-time, add the entry-time to list of times,
+	     increase s, and carry the current values of event,
+	     loss etc., forward to the next event time.
 	  */
 	  /* FIXED: 17 Nov 2019 (12:50) */
 	  if ((e+1>=stop) || entrytime[e] < entrytime[e+1]){ /* it has to be the last tie of the current entry time */
 	  /* WRONG: 17 Nov 2019 (12:50) if (e==start || entrytime[e]>entrytime[e-1]){ */
 	    if (s==0 || entrytime[e]!=time[s-1]){ /* only if entry time is not a tie with the current event/censored time*/
 	      nrisk[s]=atrisk+entered;
-	      /* if entrytime[e]==time[s-1] then only increase
-		 the number at risk (done two lines above)
+	      /* if entrytime[e]==time[s-1], i.e., there is a tie
+		 between the entry time and the event time/censored time,
+		 then only increase the number at risk (done three lines above)
 		 but dont change the time counter or the values
 		 of event, etc.
 	      */
@@ -165,7 +166,9 @@ void prodlimSurvPlus(double *y,
       hazard[s]=hazard_temp;
       varhazard[s] = varhazard_temp;
       if (i<stop){
+	/* Rprintf("tatrisk=%1.2f\t\n",atrisk); */
 	atrisk-=(event[s]+loss[s]);
+	/* Rprintf("batrisk=%1.2f\t\n",atrisk); */
 	s++;
 	if (*weighted==1){
 	  event[s] = caseweights[i] * status[i];
