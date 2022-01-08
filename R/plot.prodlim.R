@@ -612,7 +612,7 @@ plot.prodlim <- function(x,
             ##                        + number of atrisk lines
             ##                        + one extra line below the bottom number atrisk line
             ##      leftSideMargin =  margin line + atrisk.lab
-            bottommargin.height <- smartA$atrisk$dist+ifelse(clusterp,2,1)*nlines* smartA$atrisk$interspace/max(1,length(cause))
+            bottommargin.height <- smartA$atrisk$dist+ifelse(clusterp,2,1)*nlines * smartA$atrisk$interspace/max(1,length(cause))
             bottomMargin.start <- par()$mgp[1]
             maxlabellen <- max(strwidth(c(smartA$atrisk$labels,smartA$atrisk$title),
                                         cex=smartA$atrisk$cex,

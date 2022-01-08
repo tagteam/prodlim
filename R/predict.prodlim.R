@@ -174,7 +174,10 @@
       }
       if (!all(match(all.vars(X.formula),names(newdata),nomatch=FALSE)))
           stop("Arg newdata does not contain all the covariates used for fitting. \n\nfitted variables: ", paste(all.vars(X.formula),collapse=", "),"\nnewdata contains:",ifelse(length(names(newdata))==0," nothing",names(newdata)))
-      requested.X <- newdata[,all.vars(X.formula),drop=FALSE]
+      if (is.data.table(newdata))
+          requested.X <- newdata[,all.vars(X.formula),with=FALSE]
+      else
+          requested.X <- newdata[,all.vars(X.formula),drop=FALSE]
       NR <- NROW(requested.X)
       requested.names <- extract.name.from.special(names(requested.X))
       names(requested.X) <- requested.names
@@ -213,7 +216,8 @@
       {requested.NN <- NULL
           fit.NN <- NULL
           new.order <- order(requested.strata)},
-      {requested.NN <- requested.X[,NN.vars,drop=TRUE]
+      {
+          requested.NN <- requested.X[,NN.vars,drop=TRUE]
           fit.NN <- fit.X[,NN.vars,drop=TRUE]
           new.order <- order(requested.strata,requested.NN)
       },
