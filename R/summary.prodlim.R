@@ -145,7 +145,7 @@ summary.prodlim <- function(object,
                             format="df",
                             ...) {
     if ("showTime" %in% names(match.call())) stop("Argument showTime is not supported anymore: you should remove argument showTime from the call.")
-    if ("asMatrix" %in% names(match.call())) stop("Argument asMatrix is not supported anymore: you should remove argument asMatrix from the call.")
+    if ("asMatrix" %in% names(match.call())) stop("Argument asMatrix is not supported anymore: you should remove argument asMatrix from the call. Use new argument 'format' instead.")
 
     # }}}
     # {{{ classify the situation

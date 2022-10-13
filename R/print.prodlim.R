@@ -49,18 +49,18 @@
               collapse=", ",sep="")
     }
     message(#"Predictor space:\n\n",
-            switch(x$covariate.type,
-                   "No covariates",{
-                       if (length(discrete.predictors)==1){
-                           c("Discrete predictor variable: ", format.disc(discrete.predictors))
-                       }else{
-                           c("Discrete predictor variables:\n", sapply(discrete.predictors,function(x)paste("\n - ",format.disc(x))))
-                       }},
-                   c("Continuous predictors: ",continuous.predictors),
-                   c("  Discrete predictor variables: ",
-                     paste(discrete.predictors,collapse=", "),
-                     "\nContinuous predictor variables: ",
-                     continuous.predictors)))
+        switch(x$covariate.type,
+               "No covariates",{
+                   if (length(discrete.predictors)==1){
+                       c("Discrete predictor variable: ", format.disc(discrete.predictors))
+                   }else{
+                       c("Discrete predictor variables:\n", sapply(discrete.predictors,function(x)paste("\n - ",format.disc(x))))
+                   }},
+               c("Continuous predictors: ",continuous.predictors),
+               c("  Discrete predictor variables: ",
+                 paste(discrete.predictors,collapse=", "),
+                 "\nContinuous predictor variables: ",
+                 continuous.predictors)))
     summary(x$model.response,verbose=TRUE)
     if (!is.null(x$na.action)){
         cat("\n",
@@ -69,4 +69,9 @@
                    " observation",
                    " observations")," deleted due to missing values.\n",sep="")
     }
+    if (attr(x$model.response,"entry.type")=="leftTruncated")
+        message("\nThe data are left truncated (delayed entry). The product-limit estimate uses the convention that
+in case of ties, on the same 'day', outcome events occur before censored and censored occur before entry.
+Note however that the summary tables include the subjects that enter
+at time t in the number at risk at time t.")
 }

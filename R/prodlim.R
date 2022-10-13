@@ -413,10 +413,7 @@
             stop(paste("Not all entry times in dataset are greater or equal to zero."))
         if (any(entrytime==response[,"time"]))
             warning("For some subjects the entry time is equal to the event time.
-  The product-limit estimates use the convention that
-  in case of ties events come before censored and before entry.
-  Still, the summary tables include the subjects that enter
-  at time t in the number at risk at time t.")
+  This could be a mistake in the data.")
     }
     # }}}
 

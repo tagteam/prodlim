@@ -138,7 +138,7 @@ SmartControl <- function(call,
         ## if the expression is communicated
         ## more than one level higher
         maybeFail <- try(e <- eval(x),silent=TRUE)
-        if (class(maybeFail)[[1]]=="try-error")
+        if (inherits(maybeFail,"try-error"))
           x
         else
           eval(x)

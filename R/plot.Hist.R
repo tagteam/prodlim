@@ -177,6 +177,7 @@
 ##' arrowlabel4.x=68)
 ##' 
 ##' ##'
+#' @export plot.Hist
 #' @export 
 plot.Hist <- function(x,
                       nrow,
@@ -205,6 +206,10 @@ plot.Hist <- function(x,
     oldoma <- par()$oma
     par(oma=c(0,0,0,0))
     oldxpd <- par()$xpd
+    # {{{ reset margin
+    on.exit(par(mar=oldmar,xpd=oldxpd,oma=oldoma))
+    # }}}
+
     if (!missing(margin)){
         par(mar=rep(margin,length.out=4),xpd=TRUE)
     }
@@ -249,11 +254,20 @@ plot.Hist <- function(x,
             stateLabs[i] <- eval(thecall[[labelhits[i]]])[1]
     }
     numstates <- as.numeric(as.character(factor(states,levels=states,labels=1:NS)))
-    startCountZero <- TRUE 
-    if (startCountZero)
-        numstateLabels <- numstates-1
-    else
-        numstateLabels <- numstates
+    startCountZero <- TRUE
+    if (length(tagBoxes)==1){
+        if (startCountZero)
+            numstateLabels <- numstates-1
+        else
+            numstateLabels <- numstates
+    }else{
+        if (length(tagBoxes)==NS){
+            numstateLabels <- tagBoxes
+            tagBoxes <- TRUE
+        }else{
+            stop(paste0("The length of argument 'tagBoxes' is ",length(tagBoxes)," does not match number of states which is ",NS,"."))
+        }
+    }
     # {{{  find transitions between the states
 
   ## first remove the censored lines from the transition matrix
@@ -541,73 +555,73 @@ plot.Hist <- function(x,
   # }}}
     # {{{ compute arrow positions
 
-  doubleArrow <- match(paste(arrowDefaults[,"to"],arrowDefaults[,"from"]),paste(arrowDefaults[,"from"],arrowDefaults[,"to"]),nomatch=0)
-  arrowDefaults <- cbind(arrowDefaults,doubleArrow)
-  arrowList <- for (trans in 1:N){
-    from.state <- factor(ordered.transitions[trans,1],levels=states,labels=numstates)
-    to.state <- factor(ordered.transitions[trans,2],levels=states,labels=numstates)
-    ArrowPositions <- findArrow(Box1=c(round(xbox.position[from.state],4),round(ybox.position[from.state],4)),
-                                Box2=c(round(xbox.position[to.state],4),round(ybox.position[to.state],4)),
-                                Box1Dim=c(box.width[from.state],box.height[from.state]),
-                                Box2Dim=c(box.width[to.state],box.height[to.state]),
-                                verbose=FALSE)
-    Len <- function(x){sqrt(sum(x^2))}
-    from <- ArrowPositions$from
-    to <- ArrowPositions$to
-    ArrowDirection <- to-from
-    ArrowDirection <- ArrowDirection/Len(ArrowDirection)
-    ## perpendicular direction
-    PerDir <- rev(ArrowDirection)*c(1,-1)/Len(ArrowDirection)
-    ## shift double arrows
-    dd <- arrowDefaults[trans,"doubleArrow"]
-    if (dd!=0){
-      dist <- strwidth(".",cex=arrowLabel.cex)
-      arrowDefaults[trans,"headoffset"]+dist
-      if (dd>trans){
-        from <- from + sign(PerDir) * c(dist,dist)
-        to <- to + sign(PerDir) * c(dist,dist)
-      }
-      else{
-        from <- from + sign(PerDir) * c(dist,dist)
-        to <- to + sign(PerDir) * c(dist,dist)
-      }
-    }
-    # shift the start and end points of arrows by ArrowHeadOffset
-    ArrowHeadOffset <- arrowDefaults[trans,"headoffset"]
-    from <- from+sign(ArrowDirection)*c(ArrowHeadOffset,ArrowHeadOffset)*abs(ArrowDirection)
-    to <- to-sign(ArrowDirection)*c(ArrowHeadOffset,ArrowHeadOffset)*abs(ArrowDirection)
-    arrowDefaults[trans,"x0"] <- from[1]
-    arrowDefaults[trans,"x1"] <- to[1]
-    arrowDefaults[trans,"y0"] <- from[2]
-    arrowDefaults[trans,"y1"] <- to[2]
-    ## shift arrow label perpendicular (left) to arrow direction
-    offset <- strwidth(".",cex=arrowLabel.cex)
-    ArrowMid <- (to+from)/2
-    ## points(x=ArrowMid[1],y=ArrowMid[2],col=3,pch=16)
-    if (changeArrowLabelSide[trans]==TRUE)
-    ArrowLabelPos <- ArrowMid - sign(PerDir) * c(offset,offset)
-    else
-    ArrowLabelPos <- ArrowMid + sign(PerDir) * c(offset,offset)
-    try1 <- try(mode((arrowLabels[[trans]])[2])[[1]]=="call",silent=TRUE)
-    ## try2 <- try(as.character(arrowLabels[[trans]])[[1]]=="paste",silent=TRUE)
-    labIsCall <- (class(try1)!="try-error" && try1)
-    ## labUsePaste <- (class(try2)!="try-error" && try2)
-    if (labIsCall){ # symbolic label
-      arrowLabels[[trans]] <- ((arrowLabels[[trans]])[2])[[1]][[2]]
-    }
-    ## relative label height
-    lab <- arrowLabels[[trans]]
-    labelHeight <- strheight(lab,cex=arrowlabelDefaults[trans,"cex"])
-    ## relative label width 
-    labelWidth <-  strwidth(lab,cex=arrowlabelDefaults[trans,"cex"])
-    ## shift further according to label height and width in perpendicular direction
-    if (changeArrowLabelSide[trans]==TRUE)
-      ArrowLabelPos <- ArrowLabelPos-sign(PerDir)*c(labelWidth/2,labelHeight/2)
-    else
-    ArrowLabelPos <- ArrowLabelPos+sign(PerDir)*c(labelWidth/2,labelHeight/2)
-    arrowlabelDefaults[trans,"x"] <- ArrowLabelPos[1] 
-    arrowlabelDefaults[trans,"y"] <- ArrowLabelPos[2]
-  }
+    doubleArrow <- match(paste(arrowDefaults[,"to"],arrowDefaults[,"from"]),paste(arrowDefaults[,"from"],arrowDefaults[,"to"]),nomatch=0)
+    arrowDefaults <- cbind(arrowDefaults,doubleArrow)
+    arrowList <- for (trans in 1:N){
+                     from.state <- factor(ordered.transitions[trans,1],levels=states,labels=numstates)
+                     to.state <- factor(ordered.transitions[trans,2],levels=states,labels=numstates)
+                     ArrowPositions <- findArrow(Box1=c(round(xbox.position[from.state],4),round(ybox.position[from.state],4)),
+                                                 Box2=c(round(xbox.position[to.state],4),round(ybox.position[to.state],4)),
+                                                 Box1Dim=c(box.width[from.state],box.height[from.state]),
+                                                 Box2Dim=c(box.width[to.state],box.height[to.state]),
+                                                 verbose=FALSE)
+                     Len <- function(x){sqrt(sum(x^2))}
+                     from <- ArrowPositions$from
+                     to <- ArrowPositions$to
+                     ArrowDirection <- to-from
+                     ArrowDirection <- ArrowDirection/Len(ArrowDirection)
+                     ## perpendicular direction
+                     PerDir <- rev(ArrowDirection)*c(1,-1)/Len(ArrowDirection)
+                     ## shift double arrows
+                     dd <- arrowDefaults[trans,"doubleArrow"]
+                     if (dd!=0){
+                         dist <- strwidth(".",cex=arrowLabel.cex)
+                         arrowDefaults[trans,"headoffset"]+dist
+                         if (dd>trans){
+                             from <- from + sign(PerDir) * c(dist,dist)
+                             to <- to + sign(PerDir) * c(dist,dist)
+                         }
+                         else{
+                             from <- from + sign(PerDir) * c(dist,dist)
+                             to <- to + sign(PerDir) * c(dist,dist)
+                         }
+                     }
+                     # shift the start and end points of arrows by ArrowHeadOffset
+                     ArrowHeadOffset <- arrowDefaults[trans,"headoffset"]
+                     from <- from+sign(ArrowDirection)*c(ArrowHeadOffset,ArrowHeadOffset)*abs(ArrowDirection)
+                     to <- to-sign(ArrowDirection)*c(ArrowHeadOffset,ArrowHeadOffset)*abs(ArrowDirection)
+                     arrowDefaults[trans,"x0"] <- from[1]
+                     arrowDefaults[trans,"x1"] <- to[1]
+                     arrowDefaults[trans,"y0"] <- from[2]
+                     arrowDefaults[trans,"y1"] <- to[2]
+                     ## shift arrow label perpendicular (left) to arrow direction
+                     offset <- strwidth(".",cex=arrowLabel.cex)
+                     ArrowMid <- (to+from)/2
+                     ## points(x=ArrowMid[1],y=ArrowMid[2],col=3,pch=16)
+                     if (changeArrowLabelSide[trans]==TRUE)
+                         ArrowLabelPos <- ArrowMid - sign(PerDir) * c(offset,offset)
+                     else
+                         ArrowLabelPos <- ArrowMid + sign(PerDir) * c(offset,offset)
+                     try1 <- try(mode((arrowLabels[[trans]])[2])[[1]]=="call",silent=TRUE)
+                     ## try2 <- try(as.character(arrowLabels[[trans]])[[1]]=="paste",silent=TRUE)
+                     labIsCall <- (class(try1)!="try-error" && try1)
+                     ## labUsePaste <- (class(try2)!="try-error" && try2)
+                     if (labIsCall){ # symbolic label
+                         arrowLabels[[trans]] <- ((arrowLabels[[trans]])[2])[[1]][[2]]
+                     }
+                     ## relative label height
+                     lab <- arrowLabels[[trans]]
+                     labelHeight <- strheight(lab,cex=arrowlabelDefaults[trans,"cex"])
+                     ## relative label width 
+                     labelWidth <-  strwidth(lab,cex=arrowlabelDefaults[trans,"cex"])
+                     ## shift further according to label height and width in perpendicular direction
+                     if (changeArrowLabelSide[trans]==TRUE)
+                         ArrowLabelPos <- ArrowLabelPos-sign(PerDir)*c(labelWidth/2,labelHeight/2)
+                     else
+                         ArrowLabelPos <- ArrowLabelPos+sign(PerDir)*c(labelWidth/2,labelHeight/2)
+                     arrowlabelDefaults[trans,"x"] <- ArrowLabelPos[1] 
+                     arrowlabelDefaults[trans,"y"] <- ArrowLabelPos[2]
+                 }
 
   # }}}
     # {{{ Smart argument control
@@ -695,7 +709,7 @@ plot.Hist <- function(x,
     # }}}
     # {{{  put numbers in the upper left corner of the boxes (if wanted)
 
-  if (tagBoxes==TRUE){
+  if (tagBoxes[[1]]==TRUE){
     tagList <- smartArgs$boxtags
     nix <- lapply(1:NS,function(b) {
       lab <- tagList[b]
@@ -705,9 +719,6 @@ plot.Hist <- function(x,
            cex=tagList$cex,
            adj=tagList$adj)})
   }
-    # }}}
-    # {{{ reset margin
-    par(mar=oldmar,xpd=oldxpd,oma=oldoma)
     # }}}
     if (verbose){
         cat("To change the order of the boxes,\nrelevel the factor 'event' in the dataset which defines the Hist object.\n")

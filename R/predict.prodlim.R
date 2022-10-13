@@ -93,6 +93,8 @@
                               bytime=FALSE,
                               cause,
                               ...){
+    if (!is.null(newdata))
+        data.table::setDF(newdata)
     if (missing(cause)){
         cause <- attr(object$model.response,"states")
     } else {
@@ -174,10 +176,7 @@
       }
       if (!all(match(all.vars(X.formula),names(newdata),nomatch=FALSE)))
           stop("Arg newdata does not contain all the covariates used for fitting. \n\nfitted variables: ", paste(all.vars(X.formula),collapse=", "),"\nnewdata contains:",ifelse(length(names(newdata))==0," nothing",names(newdata)))
-      if (is.data.table(newdata))
-          requested.X <- newdata[,all.vars(X.formula),with=FALSE]
-      else
-          requested.X <- newdata[,all.vars(X.formula),drop=FALSE]
+      requested.X <- newdata[,all.vars(X.formula),drop=FALSE]
       NR <- NROW(requested.X)
       requested.names <- extract.name.from.special(names(requested.X))
       names(requested.X) <- requested.names
