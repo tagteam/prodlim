@@ -1,5 +1,4 @@
 plotIntervals <- function(object,rightCensored=FALSE,xlim,ylim,ylab,xlab,...){
-  ## stopifnot(match("Hist",class(object)) && attr(object,"cens.type")=="intervalCensored")
   x <- object[order(object[,"L"]),]
   L <- x[,"L"]
   R <- x[,"R"]
