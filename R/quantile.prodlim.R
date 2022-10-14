@@ -75,7 +75,7 @@
         q <- 1-q ## since this is a survival function
         sumx <- summary(x,newdata=x$X,times=x$time,verbose=FALSE)
         if (attr(sumx,"cotype")==1) {
-            out <- list("quantiles.survival"=sumx[,get.quantiles(time=time,x=surv,lower=lower,upper=upper)])
+            out <- sumx[,get.quantiles(time=time,x=surv,lower=lower,upper=upper)]
         } else{
             out <- sumx[,get.quantiles(time=time,x=surv,lower=lower,upper=upper,model="survival"),by=key(sumx)]
         }
@@ -83,15 +83,11 @@
         ## absolute risks, cumulative incidence, competing risks
         if (missing(q)) q <- c(0,0.25,0.5,0.75,1)
         sumx <- summary(x,newdata=x$X,times=x$time,verbose=FALSE,cause=cause)
-        setDT(sumx)
-        if (attr(sumx,"cotype")==1)
-            out <- list("quantiles.risk"=sumx[,get.quantiles(time=time,x=cuminc,lower=lower,upper=upper)])
-        else {
-            out <- sumx[,get.quantiles(time=time,x=cuminc,lower=lower,upper=upper,model="survival"),by=key(sumx)]
-        }
+        out <- sumx[,get.quantiles(time=time,x=cuminc,lower=lower,upper=upper),by = key(sumx)]
         out
     }
     attr(out,"model") <- x$model
+    attr(out,"covariates") <- key(sumx)
     attr(out,"reverse") <- x$reverse
     attr(out,"cotype") <- attr(sumx,"cotype")
     class(out) <- "quantile.prodlim"

@@ -93,7 +93,7 @@
                               bytime=FALSE,
                               cause,
                               ...){
-    if (!is.null(newdata))
+    if (!missing(newdata)&&!is.null(newdata)&&inherits(newdata,"data.table"))
         data.table::setDF(newdata)
     if (missing(cause)){
         cause <- attr(object$model.response,"states")
