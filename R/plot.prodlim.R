@@ -453,6 +453,7 @@ plot.prodlim <- function(x,
     xvars  <- data.table::key(sumX)
     if (length(xvars)>0){
         xdata <- sumX[,xvars,with=FALSE]
+        # degenerated variables are ignored
         xdegen <- sapply(xdata,function(x)length(unique(x))==1)
         xvars <- xvars[!xdegen]
     }
@@ -480,10 +481,16 @@ plot.prodlim <- function(x,
             })),1,paste,collapse=", ")
             xtitle <- ""
         }
-        Y <- split(sumX[[estimate]],xstrata)
-        nlost <- split(sumX[["n.lost"]],xstrata)
+        Y <- lapply(unique(xstrata),function(u){sumX[[estimate]][xstrata == u]})
+        names(Y) <- unique(xstrata)
+        ## Y <- split(sumX[[estimate]],xstrata)
+        nlost <- lapply(unique(xstrata),function(u){sumX[["n.lost"]][xstrata == u]})
+        names(nlost) <- unique(xstrata)
+        ## nlost <- split(sumX[["n.lost"]],xstrata)
         if (confint[[1]]==TRUE){
-            ci <- split(sumX[,data.table::data.table(time,lower,upper)],xstrata)
+            ci <- lapply(unique(xstrata),function(u){sumX[,data.table::data.table(time,lower,upper)][xstrata == u]})
+            names(ci) <- unique(xstrata)
+            ## ci <- split(sumX[,data.table::data.table(time,lower,upper)],xstrata)
         } else{
             ci <- NULL
         }
