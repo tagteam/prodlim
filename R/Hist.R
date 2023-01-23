@@ -151,7 +151,7 @@
     
                                         # {{{ resolving the `time' argument
     if (is.matrix(time)) time <- data.frame(time)
-    if (class(time)=="list"){
+    if (inherits(time,"list")){
         if (length(time) !=2 || length(time[[1]])!=length(time[[2]]))
             stop("Argument time has a wrong format")
         time <- data.frame(time)
@@ -188,7 +188,7 @@
       entry.type <- ""
   else{
       if (is.matrix(entry)) entry <- data.frame(entry)
-      if (class(entry)=="list"){
+      if (inherits(entry,"list")){
           if (length(entry) !=2 || length(entry[[1]])!=length(entry[[2]]))
               stop("Argument entry has a wrong format")
           entry <- data.frame(entry)
@@ -236,9 +236,9 @@
       ## event can be an ordered factor
       ## in which case class has two elements
       ## to avoid warnings we need [[1]]
-      if ((is.vector(event) & class(event)[[1]]!="list")|| is.factor(event))
+      if ((is.vector(event) & !(inherits(event,"list"))|| is.factor(event))
           stopifnot(length(event)==N)
-      if (class(event)[[1]]=="list"){
+      if (inherits(event,"list")){
           if (length(event) !=2 || length(event[[1]])!=length(event[[2]]))
               stop("Argument event has a wrong format")
           event <- data.frame(event)

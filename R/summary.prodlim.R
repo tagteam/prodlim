@@ -30,7 +30,7 @@
 #' @param percent Logical. If TRUE all estimated values are multiplied
 #' by 100 and thus interpretable on a percent scale.
 #' @param format Control format of output. Since May 2021,
-#' the result is a data.frame with attributes. When there are multiple
+#' the result is a data.table and data.frame with attributes. When there are multiple
 #' covariate strata or competing risks, these are indicated by columns.
 #' Set format to \code{"list"} to get the old behaviour.
 #' @param ... Further arguments that are passed to the print
@@ -252,7 +252,7 @@ summary.prodlim <- function(object,
         }
     }else{
         # reduce list of competing risks 
-        if (class(out)[[1]]=="list") out <- do.call("rbind",out)
+        if (inherits(out,"list")) out <- do.call("rbind",out)
         attributes(out) <- c(attributes(out),list(model=model,cotype=cotype,percent=percent))
     }
     # }}}

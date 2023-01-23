@@ -146,7 +146,6 @@ model.design <- function(terms,
             ## print(design)
             ## print(NCOL(design))
             if (NCOL(design)>0 && NROW(design)>0){
-                ## class(design)=="matrix")
                 ff <- apply(design[pos,,drop=FALSE],2,sum)
             }
             else{

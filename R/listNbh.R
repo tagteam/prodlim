@@ -1,5 +1,5 @@
 listNbh <- function(object,y,val){
-  stopifnot(class(object)=="neighborhood")
+  stopifnot(inherits(object,"neighborhood"))
   if (missing(y)) y=object$neighbors
   else{
     stopifnot(length(y)==object$n)

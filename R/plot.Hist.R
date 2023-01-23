@@ -604,8 +604,7 @@ plot.Hist <- function(x,
                          ArrowLabelPos <- ArrowMid + sign(PerDir) * c(offset,offset)
                      try1 <- try(mode((arrowLabels[[trans]])[2])[[1]]=="call",silent=TRUE)
                      ## try2 <- try(as.character(arrowLabels[[trans]])[[1]]=="paste",silent=TRUE)
-                     labIsCall <- (class(try1)!="try-error" && try1)
-                     ## labUsePaste <- (class(try2)!="try-error" && try2)
+                     labIsCall <- (!inherits(try1,"try-error") && try1)
                      if (labIsCall){ # symbolic label
                          arrowLabels[[trans]] <- ((arrowLabels[[trans]])[2])[[1]][[2]]
                      }
@@ -693,7 +692,7 @@ plot.Hist <- function(x,
             if (verbose) arrowLabel.data <- rbind(arrowLabel.data,cbind("arrowLabel"=i,data.frame(labelList)))
             switch(labelList$label,"symbolic"={
                 try1 <- try(mode((arrowLabels[[i]])[2])[[1]]=="call",silent=TRUE)
-                labIsCall <- (class(try1)!="try-error" && try1)
+                labIsCall <- (!inherits(try1,"try-error") && try1)
                 suppressWarnings(do.call("text",c(list(labels=bquote(arrowLabels[[i]])),labelList)))        
             }, "count"={
                 tabTrans <- as.matrix(table(transitions))
