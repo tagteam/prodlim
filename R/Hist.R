@@ -236,7 +236,7 @@
       ## event can be an ordered factor
       ## in which case class has two elements
       ## to avoid warnings we need [[1]]
-      if ((is.vector(event) & !(inherits(event,"list"))|| is.factor(event))
+      if ((is.vector(event) & !(inherits(event,"list")))|| is.factor(event))
           stopifnot(length(event)==N)
       if (inherits(event,"list")){
           if (length(event) !=2 || length(event[[1]])!=length(event[[2]]))

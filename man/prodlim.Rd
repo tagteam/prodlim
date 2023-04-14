@@ -128,7 +128,7 @@ Stute 1984, Akritas 1994).
 
 (2) For cluster-correlated data the right hand side of \code{formula} may
 identify a \code{\link{cluster}} variable. In that case Greenwood's variance
-formula is replaced by the formula of Ying \& Wei (1994).
+formula is replaced by the formula of Ying and Wei (1994).
 
 (3) Competing risk models can be specified via \code{\link{Hist}} response
 objects in \code{formula}.
