@@ -165,14 +165,12 @@ lifeTab.survival <- function(object,
             out <- cbind(X,tt,out)
             data.table::setDT(out)
             data.table::setkeyv(out,colnames(X))
-            rownames(out) <- 1:NROW(out)
         }
     }
     # }}}
     # {{{ univariate case
     else{
         out <- cbind(tt,out)
-        rownames(out) <- 1:NROW(out)
     }
     # }}}
     out

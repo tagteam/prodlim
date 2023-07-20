@@ -200,7 +200,6 @@ lifeTab.competing.risks <- function(object,
                 out <- cbind(X,tt,out)
                 data.table::setDT(out)
                 data.table::setkeyv(out,colnames(X))
-                rownames(out) <- 1:NROW(out)
                 out
             }
         } else{
