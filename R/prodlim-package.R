@@ -3,9 +3,9 @@
 ## author: Thomas Alexander Gerds
 ## created: Apr 24 2015 (09:08) 
 ## Version: 
-## last-updated: Nov 28 2021 (12:14) 
+## last-updated: Aug 28 2023 (09:18) 
 ##           By: Thomas Alexander Gerds
-##     Update #: 11
+##     Update #: 26
 #----------------------------------------------------------------------
 ## 
 ### Commentary: 
@@ -14,10 +14,16 @@
 #----------------------------------------------------------------------
 ## 
 ### Code:
-#' Functions for estimating probabilities from right censored data
+#' Fast and user friendly implementation
+#' of nonparametric estimators for censored
+#' event history (survival) analysis.
+#' Kaplan-Meier and Aalen-Johansen method.
 #'
+#' @keywords internal
+# "_PACKAGE"
 #' @docType package
-#' @name prodlim
+#' @name prodlim-package
+#' @aliases prodlim-package
 #' @useDynLib prodlim, .registration=TRUE
 #' @importFrom survival survdiff Surv cluster
 #' @import data.table

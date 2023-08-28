@@ -5,7 +5,7 @@ lifeTab.competing.risks <- function(object,
                                     stats,
                                     intervals=FALSE,
                                     percent=TRUE,
-                                    format){
+                                    format,...){
     # {{{---------get the indices--------------------------
     IndeX <- predict(object,newdata=newdata,level.chaos=0,times=times,type="list")
     # }}}

@@ -3,7 +3,7 @@ events <- function(object,...){
 }
 
 
-events.prodlim <- function(object){
+events.prodlim <- function(object,...){
   events.Hist(object$model.response)
 }
 

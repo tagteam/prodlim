@@ -454,7 +454,7 @@
   # }}}
 }
 
-subset.Hist <- function(x,subset,select,drop){
+subset.Hist <- function(x,subset,select,drop,...){
   if (missing(select)){
     xx <- x
     class(xx) <- "matrix"
