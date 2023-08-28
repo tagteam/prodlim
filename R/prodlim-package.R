@@ -3,9 +3,9 @@
 ## author: Thomas Alexander Gerds
 ## created: Apr 24 2015 (09:08) 
 ## Version: 
-## last-updated: Aug 28 2023 (09:18) 
+## last-updated: Aug 28 2023 (09:21) 
 ##           By: Thomas Alexander Gerds
-##     Update #: 26
+##     Update #: 27
 #----------------------------------------------------------------------
 ## 
 ### Commentary: 
@@ -14,11 +14,11 @@
 #----------------------------------------------------------------------
 ## 
 ### Code:
+#' Kaplan-Meier and Aalen-Johansen method.
+#'
 #' Fast and user friendly implementation
 #' of nonparametric estimators for censored
 #' event history (survival) analysis.
-#' Kaplan-Meier and Aalen-Johansen method.
-#'
 #' @keywords internal
 # "_PACKAGE"
 #' @docType package
