@@ -3,9 +3,9 @@
 ## author: Thomas Alexander Gerds
 ## created: Apr 24 2015 (09:08) 
 ## Version: 
-## last-updated: Aug 28 2023 (09:21) 
+## last-updated: Aug 28 2023 (11:26) 
 ##           By: Thomas Alexander Gerds
-##     Update #: 27
+##     Update #: 29
 #----------------------------------------------------------------------
 ## 
 ### Commentary: 
@@ -14,7 +14,7 @@
 #----------------------------------------------------------------------
 ## 
 ### Code:
-#' Kaplan-Meier and Aalen-Johansen method.
+#' Kaplan-Meier and Aalen-Johansen method
 #'
 #' Fast and user friendly implementation
 #' of nonparametric estimators for censored

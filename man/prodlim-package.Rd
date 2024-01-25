@@ -3,7 +3,7 @@
 \docType{package}
 \name{prodlim-package}
 \alias{prodlim-package}
-\title{Kaplan-Meier and Aalen-Johansen method.}
+\title{Kaplan-Meier and Aalen-Johansen method}
 \description{
 Fast and user friendly implementation
 of nonparametric estimators for censored
