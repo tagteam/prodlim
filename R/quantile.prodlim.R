@@ -83,7 +83,7 @@
         ## absolute risks, cumulative incidence, competing risks
         if (missing(q)) q <- c(0,0.25,0.5,0.75,1)
         sumx <- summary(x,newdata=x$X,times=x$time,verbose=FALSE,cause=cause)
-        out <- sumx[,get.quantiles(time=time,x=cuminc,lower=lower,upper=upper),by = key(sumx)]
+        out <- sumx[,get.quantiles(time=time,x=cuminc,lower=lower,upper=upper,model = "cuminc"),by = key(sumx)]
         out
     }
     attr(out,"model") <- x$model
