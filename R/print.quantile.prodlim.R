@@ -12,21 +12,23 @@ print.quantile.prodlim <- function(x,byvars,digits=2,na.val="--",...){
     tab <- data.table::data.table(do.call("data.frame",x))
     print(tab,digits=digits)
     if(all(c(0.25,0.5,0.75) %in% tab$q)){
-        set(tab,j = "quantile",value = sprintf("%1.2f",tab[["quantile"]]))
+        set(tab,j = "quantile",value = sprintf(paste0("%1.",digits,"f"),tab[["quantile"]]))
         byvars = attr(x,"covariates")
         cat("\n")
+        cat("\nMedian with interquartile range (IQR):\n")
         if (attr(x,"model")=="survival"){
-            tab[,{
-                if (length(byvars)>0) cat(paste(byvars,"=",.SD[1,byvars,with = FALSE],collapse = ", "),":")
-                cat("Median time (IQR):",quantile[q==0.5]," (",quantile[q==0.75],";",quantile[q==0.25],")","\n",sep="")},by = byvars,.SDcols = c(byvars,"q","quantile")
-                ]
+            stab <- tab[,{
+                sprintf(fmt = "%s (%s;%s)",quantile[q==0.5],
+                        quantile[q==0.75],
+                        quantile[q==0.25])},by = byvars]
         }
         else{
-            tab[,{
-                if (length(byvars)>0) cat(paste(byvars,"=",.SD[1,byvars,with = FALSE],collapse = ", "),":")
-                cat("Median time (IQR):",quantile[q==0.5]," (",quantile[q==0.25],";",quantile[q==0.75],")","\n",sep="")},by = byvars,.SDcols = c(byvars,"q","quantile")
-                ]
+            stab <- tab[,{
+                sprintf(fmt = "%s (%s;%s)",quantile[q==0.5],
+                        quantile[q==0.25],
+                        quantile[q==0.75])},by = byvars]
         }
+        print(stab)
     }
-    invisible(x)
+    invisible(tab)
 }
