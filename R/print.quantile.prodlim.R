@@ -18,17 +18,19 @@ print.quantile.prodlim <- function(x,byvars,digits=2,na.val="--",...){
         cat("\nMedian with interquartile range (IQR):\n")
         if (attr(x,"model")=="survival"){
             stab <- tab[,{
-                sprintf(fmt = "%s (%s;%s)",quantile[q==0.5],
-                        quantile[q==0.75],
-                        quantile[q==0.25])},by = byvars]
+                data.table::data.table("Median (IQR)" = sprintf(fmt = "%s (%s;%s)",quantile[q==0.5],
+                                                                quantile[q==0.75],
+                                                                quantile[q==0.25]))
+            },by = byvars]
         }
         else{
             stab <- tab[,{
-                sprintf(fmt = "%s (%s;%s)",quantile[q==0.5],
-                        quantile[q==0.25],
-                        quantile[q==0.75])},by = byvars]
+                data.table::data.table("Median (IQR)" = sprintf(fmt = "%s (%s;%s)",quantile[q==0.5],
+                                                                quantile[q==0.25],
+                                                                quantile[q==0.75]))
+            },by = byvars]
         }
         print(stab)
-    }
-    invisible(tab)
+    }else stab <- NULL
+    invisible(list(tab,stab))
 }
