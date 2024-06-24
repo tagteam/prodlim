@@ -9,4 +9,11 @@ Fast and user friendly implementation
 of nonparametric estimators for censored
 event history (survival) analysis.
 }
+\seealso{
+Useful links:
+\itemize{
+  \item Report bugs at \url{https://github.com/tagteam/prodlim/issues}
+}
+
+}
 \keyword{internal}

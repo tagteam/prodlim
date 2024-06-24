@@ -306,3 +306,60 @@ test_that("left truncation: survival",{
 })
 
 
+context("Clustered survival data")
+test_that("clustersurv",{
+    library(prodlim)
+    ## if (!is.function("cluster")) cluster <- function(x)x
+    clusterTestData <- data.frame(midtimeX=1:8,eventX=c(0,"pn","pn",0,0,0,0,0),patientid=c(1,1,2,2,3,3,4,4),AnyCrownFracture=c(1,1,1,1,2,2,2,2))
+    a <- prodlim(Hist(midtimeX,eventX=="pn")~cluster(patientid)+AnyCrownFracture,data=clusterTestData)
+    b <- prodlim(Hist(midtimeX,eventX=="pn")~cluster(patientid),data=clusterTestData[clusterTestData$AnyCrownFracture==1,])
+    c <- prodlim(Hist(midtimeX,eventX=="pn")~cluster(patientid),data=clusterTestData,subset=clusterTestData$AnyCrownFracture==1)
+    d <- prodlim(Hist(midtimeX,eventX=="pn")~1,data=clusterTestData[clusterTestData$AnyCrownFracture==2,])
+    expect_equal(round(as.numeric(summary(a)[AnyCrownFracture==1][["se.surv"]]),5),c(0,0.20951,0.10476,0.10476,NA,NA,NA,NA))
+    expect_equal(summary(b), summary(c))
+})
+
+context("Construction of pseudovalues")
+test_that("pseudo",{
+    library(prodlim)
+    library(pseudo)
+    # comparison to pseudoci
+    # make sure we get the same
+    # results with both packages
+    set.seed(17)
+    N <- 80
+    ddd <- SimCompRisk(80)
+    ttt <- c(3,5,10)
+    # ttt <- ddd$time
+    fff <- prodlim(Hist(time,event)~1,data=ddd)
+    system.time(jack <- with(ddd,pseudoci(time,event,ttt)))
+    system.time({jack2 <- jackknife.competing.risks(fff,times=ttt,cause=1)})
+    ## check individual 2
+    expect_true(all(round(jack2[,2],9)==round(jack[[3]]$cause1[,2],9)))
+    ## check all individuals
+    expect_true(all(sapply(1:N,function(x){
+        a <- round(jack[[3]]$cause1[x,],8)
+        b <- round(jack2[x,],8)
+        # all(a[!is.na(a)]==b[!is.na(b)])
+        all(a[!is.na(a)]==b[!is.na(a)])
+    })))
+    ## the pseudoci function seems only slightly slower
+    ## for small sample sizes (up to ca. 200) but
+    ## much slower for large sample sizes:
+    set.seed(17)
+    N <- 80
+    ddd <- SimCompRisk(80)
+    ttt <- c(3,5,10)
+    # ttt <- ddd$time
+    fff <- prodlim(Hist(time,event)~1,data=ddd)
+    system.time(jack <- with(ddd,pseudoci(time,event,ttt)))
+    system.time({jack2 <- jackknife.competing.risks(fff,times=ttt,cause=1)})
+    expect_true(all(round(jack2[,1],9)==round(jack$pseudo$cause1[,1],9)))
+    ## set.seed(17)
+    ## N <- 2000
+    ## ddd <- SimCompRisk(2000)
+    ## ttt <- c(3,5,10)
+    ## fff <- prodlim(Hist(time,event)~1,data=ddd)
+    ## a <- system.time(jack <- with(ddd,pseudoci(time,event,ttt)))
+    ## b <- system.time({jack2 <- jackknife.competing.risks(fff,times=ttt,cause=1)})
+})

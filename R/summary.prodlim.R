@@ -233,7 +233,8 @@ summary.prodlim <- function(object,
                            newdata=X,
                            stats=stats,
                            intervals=intervals,
-                           percent=percent,format=format)
+                           percent=percent,
+                           format=format)
         }else{ ## survival model
             out <- lifeTab(object=object,
                            times=times,
