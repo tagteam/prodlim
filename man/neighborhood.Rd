@@ -13,7 +13,7 @@ variate.}
 \item{bandwidth}{Controls the distance between neighbors in a neighborhood.
 It can be a decimal, i.e.\ the bandwidth, or the string `"smooth"', in which
 case \code{N^{-1/4}} is used, \code{N} being the sample size, or \code{NULL}
-in which case the \code{\link{dpik}} function of the package KernSmooth is
+in which case the \code{\link[KernSmooth]{dpik}} function of the package KernSmooth is
 used to find the optimal bandwidth.}
 
 \item{kernel}{Only the rectangular kernel ("box") is implemented.}
@@ -43,7 +43,7 @@ Stute, W. "Asymptotic Normality of Nearest Neighbor Regression
 Function Estimates", \emph{The Annals of Statistics}, 1984,12,917--926.
 }
 \seealso{
-\code{\link{dpik}}, \code{\link{prodlim}}
+\code{\link[KernSmooth]{dpik}}, \code{\link{prodlim}}
 }
 \author{
 Thomas Gerds

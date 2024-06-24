@@ -100,8 +100,6 @@
 #'     \code{\link{atRisk}}, \code{\link{confInt}},
 #'     \code{\link{markTime}}, \code{\link{backGround}}
 #' @return The (invisible) object.
-#' @note Similar functionality is provided by the function
-#'     \code{\link{plot.survfit}} of the survival library
 #' @author Thomas Alexander Gerds <tag@@biostat.ku.dk>
 #' @seealso \code{\link{plot}}, \code{\link{legend}},
 #'     \code{\link{axis}},

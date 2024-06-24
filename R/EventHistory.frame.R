@@ -11,7 +11,7 @@
 ##' \code{\link{model.design}}.
 ##' @param specials Character vector of special function names.
 ##' Usually the body of the special functions is function(x)x but
-##' e.g., \code{\link{strata}} from the survival package does treat
+##' e.g., \code{\link[survival]{strata}} from the survival package does treat
 ##' the values
 ##' @param specialsFactor Passed as is to \code{\link{model.design}}.
 ##' @param specialsDesign Passed as is to \code{\link{model.design}}

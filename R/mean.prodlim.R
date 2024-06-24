@@ -1,3 +1,4 @@
+#' @export mean.prodlim
 "mean.prodlim" <- function(x,
                            times,
                            newdata,

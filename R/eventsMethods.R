@@ -2,12 +2,12 @@ events <- function(object,...){
   UseMethod("events",object)
 }
 
-
+#' @export events.prodlim
 events.prodlim <- function(object,...){
   events.Hist(object$model.response)
 }
 
-
+#' @export events.Hist
 events.Hist <- function(object,...){
   model <- attr(object,"model")
   cens.code <- attr(object,"cens.code")

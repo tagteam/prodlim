@@ -1,9 +1,9 @@
-#' Create an event history response variable
+#' Create an event history object
 #' 
 #' Functionality for managing censored event history response data. The
 #' function can be used as the left hand side of a formula: \code{Hist} serves
-#' \code{\link{prodlim}} in a similar way as \code{\link{Surv}} from the
-#' survival package serves `survfit'.  \code{Hist} provides the suitable
+#' \code{\link{prodlim}} in a similar way as \code{\link[survival]{Surv}} from the
+#' survival package serves `survfit'. \code{Hist} provides the suitable
 #' extensions for dealing with right censored and interval censored data from
 #' competing risks and other multi state models. Objects generated with
 #' \code{Hist} have a print and a plot method.
@@ -454,6 +454,17 @@
   # }}}
 }
 
+
+#' Subset an event history object
+#'
+#' This method makes sure that the attributes are
+#' preserved
+#' @export subset.Hist
+#' @param x object obtained with \code{\link{Hist}}
+#' @param subset passed on to next method
+#' @param select passed on to next method
+#' @param drop passed on to next method
+#' @param ... passed on to the next method
 subset.Hist <- function(x,subset,select,drop,...){
   if (missing(select)){
     xx <- x
@@ -473,6 +484,15 @@ subset.Hist <- function(x,subset,select,drop,...){
   }
 }
 
+#' Subset an event history object
+#'
+#' This method makes sure that the attributes are
+#' preserved
+#' @param x object obtained with \code{\link{Hist}}
+#' @param i passed on to next method
+#' @param j passed on to next method
+#' @param drop passed on to next method
+#' @export '[.Hist'
 "[.Hist" <- function(x,i,j,drop=FALSE){
   if (missing(j)){
     xx <- x
@@ -494,24 +514,43 @@ subset.Hist <- function(x,subset,select,drop,...){
   }
 }
 
-# does not work
-# as.data.frame.Hist <- function(x,...){
-#  class(x) <- "matrix"
-#  as.data.frame(x)
-# }
-  
-
+#' Check for missing values in event history object
+#'
+#' The object has usually two or three columns and
+#' this function checks each column separately
+#' @export is.na.Hist
+#' @param x object obtained with \code{\link{Hist}} 
 is.na.Hist <- function(x) {
   as.vector( (1* is.na(unclass(x)))%*% rep(1, ncol(x)) >0)
 }
 
+#' Check the structure of an event history object
+#'
+#' The object is evaluated as a matrix
+#' @export str.Hist
+#' @param x object obtained with \code{\link{Hist}} 
 str.Hist <- function(x){
   class(x) <- "matrix"
   utils::str(x)
 }
 
+#' Check the head of an event history object
+#'
+#' The object is evaluated as a matrix
+#' @export head.Hist
+#' @param x object obtained with \code{\link{Hist}} 
 head.Hist <- function(x){
   class(x) <- "matrix"
   utils::head(x)
+}
+
+#' Check the tail of an event history object
+#'
+#' The object is evaluated as a matrix
+#' @export tail.Hist
+#' @param x object obtained with \code{\link{Hist}} 
+tail.Hist <- function(x){
+  class(x) <- "matrix"
+  utils::tail(x)
 }
 

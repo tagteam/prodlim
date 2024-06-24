@@ -2,7 +2,7 @@
 % Please edit documentation in R/Hist.R
 \name{Hist}
 \alias{Hist}
-\title{Create an event history response variable}
+\title{Create an event history object}
 \usage{
 Hist(
   time,
@@ -57,8 +57,8 @@ an attribute "states".
 \description{
 Functionality for managing censored event history response data. The
 function can be used as the left hand side of a formula: \code{Hist} serves
-\code{\link{prodlim}} in a similar way as \code{\link{Surv}} from the
-survival package serves `survfit'.  \code{Hist} provides the suitable
+\code{\link{prodlim}} in a similar way as \code{\link[survival]{Surv}} from the
+survival package serves `survfit'. \code{Hist} provides the suitable
 extensions for dealing with right censored and interval censored data from
 competing risks and other multi state models. Objects generated with
 \code{Hist} have a print and a plot method.

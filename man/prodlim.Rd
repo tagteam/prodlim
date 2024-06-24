@@ -25,7 +25,7 @@ prodlim(
 }
 \arguments{
 \item{formula}{A formula whose left hand side is a \code{Hist}
-object. In some special cases it can also be a \code{Surv}
+object. In some special cases it can also be a \code{\link[survival]{Surv}}
 response object, see the details section. The right hand side is
 as usual a linear combination of covariates which may contain at
 most one continuous factor. Whether or not a covariate is
@@ -110,7 +110,7 @@ specifies the model.
 
 In two-state models -- the classical survival case -- the standard
 Kaplan-Meier method is applied.  For this the response can be specified as a
-\code{\link{Surv}} or as a \code{\link{Hist}} object. The \code{\link{Hist}}
+\code{\link[survival]{Surv}} or as a \code{\link{Hist}} object. The \code{\link{Hist}}
 function allows you to change the code for censored observations, e.g.
 \code{Hist(time,status,cens.code="4")}.
 
@@ -126,7 +126,7 @@ continuous predictors using nearest neighborhoods (Beran 1981,
 Stute 1984, Akritas 1994).
 
 (2) For cluster-correlated data the right hand side of \code{formula} may
-identify a \code{\link{cluster}} variable. In that case Greenwood's variance
+identify a \code{\link[survival]{cluster}} variable. In that case Greenwood's variance
 formula is replaced by the formula of Ying and Wei (1994).
 
 (3) Competing risk models can be specified via \code{\link{Hist}} response
@@ -265,7 +265,7 @@ estimate for dependent failure time observations
 \seealso{
 \code{\link{predictSurv}}, \code{\link{predictSurvIndividual}},
 \code{\link{predictAbsrisk}}, \code{\link{Hist}}, \code{\link{neighborhood}},
-\code{\link{Surv}}, \code{\link{survfit}}, \code{\link{strata}},
+\code{\link[survival]{Surv}}, \code{\link[survival]{survfit}}, \code{\link[survival]{strata}},
 }
 \author{
 Thomas A. Gerds \email{tag@biostat.ku.dk}

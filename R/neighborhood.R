@@ -10,7 +10,7 @@
 #' @param bandwidth Controls the distance between neighbors in a neighborhood.
 #' It can be a decimal, i.e.\ the bandwidth, or the string `"smooth"', in which
 #' case \code{N^{-1/4}} is used, \code{N} being the sample size, or \code{NULL}
-#' in which case the \code{\link{dpik}} function of the package KernSmooth is
+#' in which case the \code{\link[KernSmooth]{dpik}} function of the package KernSmooth is
 #' used to find the optimal bandwidth.
 #' @param kernel Only the rectangular kernel ("box") is implemented.
 #' @return An object of class 'neighborhood'.  The value is a list that
@@ -22,7 +22,7 @@
 #' Further values are the arguments \code{bandwidth}, \code{kernel}, the total
 #' sample size \code{n} and the number of unique values \code{nu}.
 #' @author Thomas Gerds
-#' @seealso \code{\link{dpik}}, \code{\link{prodlim}}
+#' @seealso \code{\link[KernSmooth]{dpik}}, \code{\link{prodlim}}
 #' @references Stute, W. "Asymptotic Normality of Nearest Neighbor Regression
 #' Function Estimates", \emph{The Annals of Statistics}, 1984,12,917--926.
 #' @keywords smooth

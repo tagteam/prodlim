@@ -169,10 +169,6 @@ These arguments are processed via \code{\dots{}} of \code{plot.prodlim} and
 inside by using the function \code{SmartControl}.  Documentation of these
 arguments can be found in the help pages of the corresponding functions.
 }
-\note{
-Similar functionality is provided by the function
-    \code{\link{plot.survfit}} of the survival library
-}
 \examples{
 ## simulate right censored data from a two state model 
 set.seed(100)

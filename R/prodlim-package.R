@@ -3,9 +3,9 @@
 ## author: Thomas Alexander Gerds
 ## created: Apr 24 2015 (09:08) 
 ## Version: 
-## last-updated: Aug 28 2023 (11:26) 
+## last-updated: Jun 24 2024 (11:58) 
 ##           By: Thomas Alexander Gerds
-##     Update #: 29
+##     Update #: 30
 #----------------------------------------------------------------------
 ## 
 ### Commentary: 
@@ -21,7 +21,6 @@
 #' event history (survival) analysis.
 #' @keywords internal
 # "_PACKAGE"
-#' @docType package
 #' @name prodlim-package
 #' @aliases prodlim-package
 #' @useDynLib prodlim, .registration=TRUE
