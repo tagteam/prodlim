@@ -42,7 +42,7 @@ leaveOneOut.survival <- function(object,times,lag=FALSE,...){
     N <- length(obstimes)
     S <- predict(object,times=time,newdata=mr)
     ## idea: find the at-risk set for pseudo-value k by
-    ##       substracting 1 in the period where subj k is
+    ##       subtracting 1 in the period where subj k is
     ##       at risk. need the position of obstime.k in time ...
     found <- sindex(jump.times=time,eval.times=times)
     loo <- .C("loo_surv",
