@@ -192,17 +192,22 @@ rsfit <- survfit(Surv(time,1-status)~1,data=rdat,conf.type="plain")
 ## is that events come first. This is not obeyed by the above call to survfit,
 ## and hence only prodlim delivers the correct reverse Kaplan-Meier:
 cbind("Wrong:"=rsfit$surv,"Correct:"=rpfit$surv)
+##----------------  quantiles of the potential followup time-----
+
+G=prodlim(Hist(time,status)~X1,data=dat,reverse=TRUE)
+quantile(G)
 
 ##-------------------stratified Kaplan-Meier---------------------
 
-pfit.X2 <- prodlim(Surv(time,status)~X2,data=dat)
-summary(pfit.X2)
-summary(pfit.X2,intervals=TRUE)
-plot(pfit.X2)
+stratfit <- prodlim(Surv(time,status)~X1,data=dat)
+summary(stratfit)
+summary(stratfit,intervals=TRUE)
+plot(stratfit)
 
 ##----------continuous covariate: Stone-Beran estimate------------
 
-prodlim(Surv(time,status)~X1,data=dat)
+SB=prodlim(Surv(time,status)~X2,data=dat)
+summary(SB,newdata=data.frame(X2=c(-0.3,0,.5)))
 
 ##-------------both discrete and continuous covariates------------
 

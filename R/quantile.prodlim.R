@@ -50,7 +50,7 @@
     get.quantiles <- function(time,x,lower,upper,model="survival"){
         out <- do.call("cbind",lapply(list(x,lower,upper),function(sumw){
             notna= is.na(sumw) | sumw==0 | sumw ==1
-            if (all(notna)) return(NA)
+            if (all(notna)) return(as.numeric(NA))
             xxx=as.numeric(sumw[!notna])
             ttt=as.numeric(time[!notna])
             found <- 2+sindex(jump.times=xxx,eval.times=q,comp=ifelse(model=="survival","greater","smaller"),strict=FALSE)
@@ -90,7 +90,7 @@
     attr(out,"covariates") <- key(sumx)
     attr(out,"reverse") <- x$reverse
     attr(out,"cotype") <- attr(sumx,"cotype")
-    class(out) <- "quantile.prodlim"
+    class(out) <- c("quantile.prodlim","data.table")
     out
 }
       
