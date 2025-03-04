@@ -12,11 +12,14 @@ Imports:
     stats,
     data.table,
     grDevices,
+    ggplot2,
+    pammtools,
     graphics,
     diagram,
     survival,
     KernSmooth,
     lava
+Suggests: tibble
 LinkingTo: Rcpp
 Maintainer: Thomas A. Gerds <tag@biostat.ku.dk>
 BugReports: https://github.com/tagteam/prodlim/issues

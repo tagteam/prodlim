@@ -619,7 +619,8 @@
             states <- attr(response,"states")
             E <- response[,"event"]-1 # for the c routine
             D <- response[,"status"]
-            NS <- length(unique(E[D!=0])) # number of different causes
+            ## NS <- length(unique(E[D!=0])) # number of different causes
+            NS <- length(states)
             fit <- .C("prodlimSRC",
                       as.double(response[,"time"]),
                       as.double(D),
@@ -652,19 +653,16 @@
                       weighted=as.integer(weighted),
                       PACKAGE="prodlim")
             NT <- fit$ntimes
-            # changed Tue Sep 30 12:51:58 CEST 2008
-            # its easier to work with a list than with a matrix
-            #      gatherC <- function(x,dimR=fit$ntimes,dimC=NS,names=states){
-            #        matrix(x[1:(dimR*dimC)],ncol=dimC,byrow=TRUE,dimnames=list(rep("",dimR),names))
-            #      }
-            gatherC <- function(x,dimR=fit$ntimes,dimC=NS,names=states){
-                out <- split(x[1:(dimR*dimC)],rep(1:NS,dimR))
+            # changed Tue Sep 30 12:51:58 CEST 2008 from matrix to list
+            # changed Tue 04 Mar 2025 (13:01) to allow events that do not occur in the data
+            gatherC <- function(x,ntimes=fit$ntimes,nstrata=NS,names=states){
+                out <- split(x[1:(ntimes*nstrata)],rep(1:nstrata,ntimes))
                 names(out) <- names
                 out
             }
             Cout <- list("time"=fit$time[1:NT],
                          "n.risk"=fit$nrisk[1:NT],
-                         "n.event"=gatherC(fit$nevent),
+                         "n.event"=gatherC(x = fit$nevent),
                          "n.lost"=fit$ncens[1:NT],
                          "cuminc"=gatherC(fit$risk),
                          "var.cuminc"=gatherC(fit$var.hazard),

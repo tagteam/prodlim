@@ -155,7 +155,6 @@ summary.prodlim <- function(object,
     cotype <- object$covariate.type       # no, discrete, continuous or both
     # }}}
     # {{{ times
-
     jump.times <- object$time
     if (missing(times) && (length(times <- jump.times) > 50)) 
         times <- quantile(sort(unique(jump.times)))
@@ -166,7 +165,6 @@ summary.prodlim <- function(object,
                 paste("\n","Time(s) ",paste(times[times>max(jump.times)],collapse=", "),
                       " are beyond the maximal follow-up time ",max(jump.times),"\n"))
     ntimes <- length(times)
-
     # }}}
     # {{{ interval-censored
     if (cens.type=="intervalCensored"){

@@ -314,73 +314,69 @@
   ## if (all(status==0)) warning("All observations are censored")
   if (all(status==1)) cens.type <- "uncensored"
   
-  if(model=="onejump"){
-
-    # }}}
-  # {{{  2-state and competing.risks models
-    if (is.factor(event)){
-      event <- factor(event) # drop unused levels
-      states <- levels(event)
-      ## states <- states[match(state.order,states)]
-    }
-    else{
-      states <- sort(as.character(unique(event)))
-    }
-    states <- as.character(states[states!=cens.code])
-  
-  if (length(states)>1)
-    model <- "competing.risks"
-  else
-      model <- "survival"
-    
-    if (cens.type=="intervalCensored"){
-        if (model=="survival"){
-            if (entry.type=="intervalCensored")
-                history <- cbind(U=U,V=V,L=L,R=R,status=status)
-            else
-                history <- cbind(entry = entry,L=L,R=R,status=status)
+    if(model=="onejump"){
+        # }}}
+        # {{{  2-state and competing.risks models
+        if (is.factor(event)){
+            # event <- factor(event) # drop unused levels
+            states <- levels(event)
+            ## states <- states[match(state.order,states)]
         }
         else{
-            if (entry.type=="intervalCensored")
-                history <- cbind(U=U,
-                                 V=V,
-                                 L=L,
-                                 R=R,
-                                 status=status,
-                                 event=as.integer(factor(event,levels=c(states,cens.code))))
-            else
-                history <- cbind(entry = entry,
-                                 L=L,
-                                 R=R,
-                                 status=status,
-                                 event=as.integer(factor(event,levels=c(states,cens.code))))
+            states <- sort(as.character(unique(event)))
         }
-    }
-    else{
-        if (model=="survival"){
-            if (entry.type=="intervalCensored")
-                history <- cbind(U=U,V=V,time=time,status=status)
-            else
-                history <- cbind(entry = entry,time=time,status=status)
-        }
-        else{
-            if (entry.type=="intervalCensored")
-                history <- cbind(U=U,
-                                 V=V,
-                                 time=time,
-                                 status=status,
-                                 event=as.integer(factor(event,levels=c(states,cens.code))))
+        states <- as.character(states[states!=cens.code])
+        if (length(states)>1)
+            model <- "competing.risks"
+        else
+            model <- "survival"
+        if (cens.type=="intervalCensored"){
+            if (model=="survival"){
+                if (entry.type=="intervalCensored")
+                    history <- cbind(U=U,V=V,L=L,R=R,status=status)
+                else
+                    history <- cbind(entry = entry,L=L,R=R,status=status)
+            }
             else{
-                history <- cbind(entry = entry,
-                                 time=time,
-                                 status=status,
-                                 event=as.integer(factor(event,levels=c(states,cens.code))))
+                if (entry.type=="intervalCensored")
+                    history <- cbind(U=U,
+                                     V=V,
+                                     L=L,
+                                     R=R,
+                                     status=status,
+                                     event=as.integer(factor(event,levels=c(states,cens.code))))
+                else
+                    history <- cbind(entry = entry,
+                                     L=L,
+                                     R=R,
+                                     status=status,
+                                     event=as.integer(factor(event,levels=c(states,cens.code))))
+            }
+        } else{
+            if (model=="survival"){
+                if (entry.type=="intervalCensored")
+                    history <- cbind(U=U,V=V,time=time,status=status)
+                else
+                    history <- cbind(entry = entry,time=time,status=status)
+            }
+            else{
+                if (entry.type=="intervalCensored")
+                    history <- cbind(U=U,
+                                     V=V,
+                                     time=time,
+                                     status=status,
+                                     event=as.integer(factor(event,levels=c(states,cens.code))))
+                else{
+                    history <- cbind(entry = entry,
+                                     time=time,
+                                     status=status,
+                                     event=as.integer(factor(event,levels=c(states,cens.code))))
+                }
             }
         }
-    }
-} else{
-    # }}}
-    # {{{  multi.state models
+    } else{
+        # }}}
+        # {{{  multi.state models
 
     if (any(as.character(from)==as.character(to))) stop("Data contain transitions from state x to state x")
 

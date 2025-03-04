@@ -32,8 +32,10 @@ This is merely a wrapper for \code{prodlim} with argument reverse.
 set.seed(8)
 d <- SimCompRisk(117)
 
+# overall
 followup(Hist(time,event)~1,data=d)
-# strata 
+
+# in strata defined by variable X1 
 followup(Hist(time,event)~X1,data=d)
 
 }

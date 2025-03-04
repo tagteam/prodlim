@@ -1,3 +1,4 @@
+#' @export
 lifeTab.competing.risks <- function(object,
                                     times,
                                     cause,

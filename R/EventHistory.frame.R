@@ -160,7 +160,7 @@ EventHistory.frame <- function(formula,
         if (!(formula.names[1]=="~")
             ||
             (match("$",formula.names,nomatch=0)+match("[",formula.names,nomatch=0)>0)){
-            stop("Invalid specification of formula. Perhaps forgotten right hand side?\nNote that any subsetting, i.e., data$var or data[,\"var\"], is not supported here.")}
+            stop("Invalid specification of formula. Perhaps forgotten right hand side?\nNote that any subsetting, i.e., data$var or data[,\"var\"], is not supported here.\nSpecify response=FALSE and check.formula=FALSE to avoid this error when using the design functionality without a response.")}
         else{
                 if (!(any(match(c("survival::Surv","Surv","prodlim::Hist","Hist"),
                                 formula.names,nomatch=0)))
@@ -198,32 +198,32 @@ EventHistory.frame <- function(formula,
         # {{{ Fix for those who use `Surv' instead of `Hist' 
         if (inherits(event.history,"Surv")
             || inherits(data[[formula.names[[2]]]],"Surv")){
-                event.history = as.matrix(event.history)
-                class(event.history) = "Hist"
-                attr(event.history,"model") <- "survival"
-                attr(event.history,"cens.code") <- 0
-                attr(event.history,"cens.type") <- "rightCensored"
-                attr(event.history,"entry.type") <- ifelse(ncol(event.history)==2,"","leftTruncated")
-                if (attr(event.history,"entry.type")=="leftTruncated")
-                    colnames(event.history) <- c("entry","time","status")
-            }
+            event.history = as.matrix(event.history)
+            class(event.history) = "Hist"
+            attr(event.history,"model") <- "survival"
+            attr(event.history,"cens.code") <- 0
+            attr(event.history,"cens.type") <- "rightCensored"
+            attr(event.history,"entry.type") <- ifelse(ncol(event.history)==2,"","leftTruncated")
+            if (attr(event.history,"entry.type")=="leftTruncated")
+                colnames(event.history) <- c("entry","time","status")
+        }
+        # }}}
+    }else event.history <- NULL
+    # {{{ design
+    design <- model.design(Terms,
+                           data=mm,
+                           maxOrder=1,
+                           dropIntercept=dropIntercept,
+                           unspecialsDesign=unspecialsDesign,
+                           specialsFactor=specialsFactor,
+                           specialsDesign=specialsDesign)
     # }}}
-}else event.history <- NULL
-# {{{ design
-design <- model.design(Terms,
-                       data=mm,
-                       maxOrder=1,
-                       dropIntercept=dropIntercept,
-                       unspecialsDesign=unspecialsDesign,
-                       specialsFactor=specialsFactor,
-                       specialsDesign=specialsDesign)
-# }}}
-out <- c(list(event.history=event.history),
-         design[sapply(design,length)>0])
-attr(out,"Terms") <- Terms
-attr(out,"na.action") <- attr(mm,"na.action")
-class(out) <- "EventHistory.frame"
-out
+    out <- c(list(event.history=event.history),
+             design[sapply(design,length)>0])
+    attr(out,"Terms") <- Terms
+    attr(out,"na.action") <- attr(mm,"na.action")
+    class(out) <- "EventHistory.frame"
+    out
 }
 ##' @export 
 as.data.frame.EventHistory.frame <- function(x,...){

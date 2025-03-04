@@ -1,3 +1,4 @@
+#' @export
 lifeTab.survival <- function(object,
                              times,
                              newdata,
