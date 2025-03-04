@@ -6,20 +6,19 @@ Description: Fast and user friendly implementation of nonparametric estimators
     for censored event history (survival) analysis. Kaplan-Meier and
     Aalen-Johansen method.
 Depends:
-    R (>= 2.9.0)
+    R (>= 4.1.0)
 Imports:
     Rcpp (>= 0.11.5),
     stats,
     data.table,
     grDevices,
     ggplot2,
-    pammtools,
     graphics,
     diagram,
     survival,
     KernSmooth,
     lava
-Suggests: tibble
+Suggests: tibble, pammtools, ggthemes
 LinkingTo: Rcpp
 Maintainer: Thomas A. Gerds <tag@biostat.ku.dk>
 BugReports: https://github.com/tagteam/prodlim/issues

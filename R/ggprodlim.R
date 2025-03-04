@@ -3,9 +3,9 @@
 ## Author: Thomas Alexander Gerds
 ## Created: Mar  3 2025 (14:32) 
 ## Version: 
-## Last-Updated: Mar  4 2025 (15:45) 
+## Last-Updated: Mar  4 2025 (15:58) 
 ##           By: Thomas Alexander Gerds
-##     Update #: 54
+##     Update #: 58
 #----------------------------------------------------------------------
 ## 
 ### Commentary: 
@@ -39,6 +39,7 @@
 ##' @export 
 ##' @author Thomas A. Gerds <tag@@biostat.ku.dk>
 ggprodlim <- function(x,x_at,pos_atrisk,...){
+    time <- absolute_risk <- cause <- n.risk <- NULL
     ## cbbPalette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#D55E00", "#0072B2", "#CC79A7", "#F0E442")
     if (missing(pos_atrisk)) pos_atrisk <- x_at
     w <- data.table::as.data.table(x = x,...)
@@ -59,9 +60,11 @@ ggprodlim <- function(x,x_at,pos_atrisk,...){
     }
     type <- factor(interaction(length(covariates) > 0,length(unique(w$cause))>1),levels = c("FALSE.FALSE","FALSE.TRUE","TRUE.FALSE","TRUE.TRUE"),
                    labels = c("NoCovaNoCause","NoCovaHasCause","HasCovaNoCause","HasCovaHasCause"))
+    # cannot import pammtools due to a circular imports
+    requireNamespace("pammtools")
     switch(as.character(type),
            "NoCovaNoCause" = {
-               g <- ggplot2::ggplot(data = data.frame(w),ggplot2::aes(x = time,y = absolute_risk))+geom_step()
+               g <- ggplot2::ggplot(data = data.frame(w),ggplot2::aes(x = time,y = absolute_risk))+ggplot2::geom_step()
            },"NoCovaHasCause" = {
                g <- ggplot2::ggplot(data = data.frame(w),ggplot2::aes(x = time,y = absolute_risk,col = cause))
                g <- g+pammtools::geom_stepribbon(ggplot2::aes_string(ymin="lower",ymax="upper",fill = "cause"),linetype = 0,alpha=0.2)
