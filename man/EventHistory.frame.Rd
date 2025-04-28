@@ -55,7 +55,7 @@ the values}
 \item{check.formula}{If TRUE check if formula is a Surv or Hist
 thing.}
 
-\item{response}{If FALSE do not get response data (event.history).}
+\item{response}{If FALSE do not evaluate the left hand side of the formula and to not return the response (event.history).}
 }
 \value{
 A list which contains
