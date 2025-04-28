@@ -4,14 +4,22 @@
 \alias{ggprodlim}
 \title{ggplot2::ggplot support for Kaplan-Meier and Aalen-Johansen estimators}
 \usage{
-ggprodlim(x, x_at, pos_atrisk, ...)
+ggprodlim(x, xlim, ylim, y_breaks, x_breaks, position_atrisk, conf_int, ...)
 }
 \arguments{
 \item{x}{object obtained with \code{\link{prodlim}}.}
 
-\item{x_at}{Vector containg the positions for ticks on the x-axis}
+\item{xlim}{Limits for the x-axis.}
 
-\item{pos_atrisk}{Vector with x positions for numbers at risk}
+\item{ylim}{Limits for the y-axis.}
+
+\item{y_breaks}{Breaks for the y-axis.}
+
+\item{x_breaks}{Breaks for the x-axis.}
+
+\item{position_atrisk}{Vector of values within xlim. Specifies where numbers at risk should be positioned on the x-axis.}
+
+\item{conf_int}{Logical. If \code{TRUE} pointwise confidence intervals as a shadow.}
 
 \item{...}{passed on to \code{\link{as.data.table.prodlim}}. Can be used to specify 'cause', 'newdata', and 'times'.}
 }
@@ -26,16 +34,44 @@ Important functionality like facet_grid is not yet supported
 }
 \examples{
 library(ggplot2)
-d <- SimCompRisk(117)
-fit1 <- prodlim(Hist(time,event)~1,data = d)
-ggprodlim(fit1,x_at = c(0,4,8,12))
-g <- ggprodlim(fit1,x_at = c(0,4,8,12))+ggthemes::theme_solarized()
-g+theme(plot.margin = margin(t = 0,r = 0,b = 4,l = 0,"line"))
-g <- g+ggplot2::scale_fill_manual(values = grDevices::palette.colors(palette = "Okabe-Ito"))
-g <- g+ggplot2::scale_color_manual(values = grDevices::palette.colors(palette = "Okabe-Ito"))
+
+# Kaplan-Meier and stratified Kaplan-Meier
+
+set.seed(9)
+ds <- SimSurv(27)
+
+km <- prodlim(Hist(time,event)~1,data = ds)
+ggprodlim(km)
+g <- ggprodlim(km)
+g <- g+geom_step(linewidth=1.5)
+g + theme(text = element_text(size=20)) + update_geom_defaults("text", list(size=5.5))
+km1 <- prodlim(Hist(time,event)~X1,data = ds)
+ggprodlim(km1)
+
+ds$group <- factor(sample(1:5,replace=TRUE,size=27),labels=letters[1:5])
+km2 <- prodlim(Hist(time,event)~group,data = ds)
+ggprodlim(km2,conf_int=FALSE)
+
+# Aalen-Johansen and stratified Aalen-Johansen
+
+set.seed(8)
+d <- SimCompRisk(27)
+d$X_group <- factor(sample(1:5,replace=TRUE,size=27),labels=letters[1:5])
+aj <- prodlim(Hist(time,event)~1,data = d)
+ggprodlim(aj)
+ggprodlim(aj,cause=1)
+ggprodlim(aj,position_atrisk=c(0,5,10))+scale_x_continuous(breaks=c(0,5,10))
+
+ggprodlim(aj)+theme_minimal()+theme(plot.margin=margin(t=0,r=0,b=8,l=0,"line"))
+
+# changing colors
+g+ggplot2::scale_fill_manual(values = 1:2)+ggplot2::scale_color_manual(values=1:2)
+
+aj <- prodlim(Hist(time,event)~X1,data = d)
+ggprodlim(aj,cause = 1)
 d$X1 <- factor(d$X1,levels=c("1","0"),labels=c("1","0"))
-fit <- prodlim(Hist(time,event)~X1,data = d)
-ggprodlim(fit,cause = 1,x_at = c(0,6,12))
+aj <- prodlim(Hist(time,event)~X1,data = d)
+
 }
 \seealso{
 \code{\link{plot.prodlim}}

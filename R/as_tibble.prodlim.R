@@ -3,9 +3,9 @@
 ## Author: Thomas Alexander Gerds
 ## Created: Mar  3 2025 (12:57) 
 ## Version: 
-## Last-Updated: Mar  3 2025 (14:12) 
+## Last-Updated: Mar  5 2025 (15:42) 
 ##           By: Thomas Alexander Gerds
-##     Update #: 30
+##     Update #: 33
 #----------------------------------------------------------------------
 ## 
 ### Commentary: 
@@ -29,20 +29,14 @@
 ##' set.seed(8)
 ##' d <- SimCompRisk(17)
 ##' fit <- prodlim(Hist(time,event)~X1,data=d)
-##' as_tibble(fit)
+##' tibble::as_tibble(fit)
 ##'
 ##'@export as_tibble.prodlim
 ##'@export 
 ##'@author Thomas A. Gerds <tag@@biostat.ku.dk>
 as_tibble.prodlim <- function(x,...){
     requireNamespace("tibble")
-    all_times = sort(unique(c(0,x$time)))
-    all_X = x$X
-    out = summary(x,times = all_times,newdata = all_X,...,format = "df")
-    class(out) = "data.frame"
-    names(out) = sub("cuminc","absolute_risk",names(out))
-    out = tibble::as_tibble(out)
-    out[]
+    tibble::as_tibble(as.data.frame.prodlim(x,...))
 }
 
 

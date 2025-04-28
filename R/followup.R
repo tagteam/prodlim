@@ -3,9 +3,9 @@
 ## author: Thomas Alexander Gerds
 ## created: Sep 22 2015 (10:29) 
 ## Version: 
-## last-updated: Mar  3 2025 (12:50) 
+## last-updated: Apr 25 2025 (08:17) 
 ##           By: Thomas Alexander Gerds
-##     Update #: 36
+##     Update #: 37
 #----------------------------------------------------------------------
 ## 
 ### Commentary: 
@@ -38,7 +38,7 @@
 ##' 
 ##' # in strata defined by variable X1 
 ##' followup(Hist(time,event)~X1,data=d)
-##' 
+##' @references Michael Schemper and Terry L. Smith. A note on quantifying follow-up in studies of failure time. Controlled Clinical Trials, 17(4):343--346, 1996.
 ##' @export 
 ##' @author Thomas A. Gerds <tag@@biostat.ku.dk>
 followup <- function(formula,cens.code = 0,data,...){

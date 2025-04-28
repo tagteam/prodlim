@@ -105,7 +105,7 @@ censoring times by invoking the function
 \code{markTime} can be given in the form \code{confint.x=val}
 as with legend. See also Details.}
 
-\item{confint}{if TRUE pointwise confidence intervals are plotted
+\item{confint}{Logical. If \code{TRUE} pointwise confidence intervals are plotted
 by invoking the function \code{confInt}. Optional arguments of
 the function \code{confInt} can be given in the form
 \code{confint.x=val} as with legend.  See also Details.}

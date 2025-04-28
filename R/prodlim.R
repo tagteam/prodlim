@@ -690,9 +690,13 @@
                 ## pointwise confidence intervals for survival probability
                 zval <- qnorm(1- (1-conf.int)/2, 0,1)
                 lower <- pmax(Cout$surv - zval * Cout$se.surv,0)
-                lower[Cout$se.surv==0] <- 0
+                # change 05 Mar 2025 (08:45) from [0,1] to [S(t),S(t)] in
+                # in case of no variation
+                no_variation <- Cout$se.surv==0
+                no_variation[is.na(no_variation)] = TRUE
+                lower[no_variation] <- Cout$surv[no_variation]
                 upper <- pmin(Cout$surv + zval * Cout$se.surv,1)
-                upper[Cout$se.surv==0] <- 1
+                upper[no_variation] <- Cout$surv[no_variation]
                 Cout <- c(Cout,list(lower=lower,upper=upper))
             }
         }

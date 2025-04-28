@@ -26,6 +26,7 @@ set.seed(8)
 d <- SimCompRisk(17)
 fit <- prodlim(Hist(time,event)~X1,data=d)
 as.data.frame.prodlim(fit)
+as.data.frame.prodlim(fit)
 
 }
 \seealso{

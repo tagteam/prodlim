@@ -26,7 +26,7 @@ library(tibble)
 set.seed(8)
 d <- SimCompRisk(17)
 fit <- prodlim(Hist(time,event)~X1,data=d)
-as_tibble(fit)
+tibble::as_tibble(fit)
 
 }
 \seealso{

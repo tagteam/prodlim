@@ -3,9 +3,9 @@
 ## Author: Thomas Alexander Gerds
 ## Created: Mar  3 2025 (12:57) 
 ## Version: 
-## Last-Updated: Mar  3 2025 (14:11) 
+## Last-Updated: Mar  5 2025 (11:58) 
 ##           By: Thomas Alexander Gerds
-##     Update #: 21
+##     Update #: 23
 #----------------------------------------------------------------------
 ## 
 ### Commentary: 
@@ -36,12 +36,7 @@
 ##'@export 
 ##'@author Thomas A. Gerds <tag@@biostat.ku.dk>
 as.data.table.prodlim <- function(x,keep.rownames = FALSE,...){
-    requireNamespace("data.table")
-    all_times = sort(unique(c(0,x$time)))
-    all_X = x$X
-    out = data.table::as.data.table(summary(x,times = all_times,newdata = all_X,...,format = "df"))
-    data.table::setnames(out,sub("cuminc","absolute_risk",names(out)))
-    out[]
+    data.table::as.data.table(as.data.frame.prodlim(x,...))
 }
 
 
