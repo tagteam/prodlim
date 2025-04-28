@@ -37,7 +37,9 @@ followup(Hist(time,event)~1,data=d)
 
 # in strata defined by variable X1 
 followup(Hist(time,event)~X1,data=d)
-
+}
+\references{
+Michael Schemper and Terry L. Smith. A note on quantifying follow-up in studies of failure time. Controlled Clinical Trials, 17(4):343--346, 1996.
 }
 \seealso{
 \code{\link{prodlim}}

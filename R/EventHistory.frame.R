@@ -172,7 +172,11 @@ EventHistory.frame <- function(formula,
     # }}}
     # {{{call model.frame
     ## data argument is used to resolve '.' see help(terms.formula)
-    Terms <- terms(x=formula,specials=specials,data=data)
+    if (response == TRUE){
+        Terms <- terms(x=formula,specials=specials,data=data)
+    }else{
+        Terms <- delete.response(terms(x=formula,specials=specials,data=data))
+    }
     if (!is.null(stripSpecials)){
         ## Terms <- terms(x=formula, specials=specials)
         if (length(attr(Terms,"term.labels"))>0)
