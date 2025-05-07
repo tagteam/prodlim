@@ -3,9 +3,9 @@
 ## Author: Thomas Alexander Gerds
 ## Created: Mar  3 2025 (14:32) 
 ## Version: 
-## Last-Updated: Apr 28 2025 (13:35) 
+## Last-Updated: May  7 2025 (12:20) 
 ##           By: Thomas Alexander Gerds
-##     Update #: 110
+##     Update #: 115
 #----------------------------------------------------------------------
 ## 
 ### Commentary: 
@@ -84,7 +84,7 @@ ggprodlim <- function(x,
     if (length(x$clustervar)>0) stop("ggprodlim does not deal with clustered data yet. Use plot.prodlim for now.")
     covariates <- x$discrete.predictors
     # create data table with plot data
-    w <- data.table::as.data.table(x = x,...)
+    w <- data.table::as.data.table(x = x,...,surv = x$type == "surv")
     covariates <- covariates[sapply(covariates,function(c){length(unique(w[[c]]))>1})]
     if (length(covariates) == 0) covariates <- NULL
     if (length(covariates)>0){
