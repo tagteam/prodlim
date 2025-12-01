@@ -3,9 +3,9 @@
 ## Author: Thomas Alexander Gerds
 ## Created: Mar  3 2025 (14:32) 
 ## Version: 
-## Last-Updated: May  7 2025 (12:20) 
+## Last-Updated: nov 29 2025 (09:57) 
 ##           By: Thomas Alexander Gerds
-##     Update #: 115
+##     Update #: 122
 #----------------------------------------------------------------------
 ## 
 ### Commentary: 
@@ -24,7 +24,8 @@
 ##' @param x_breaks Breaks for the x-axis.
 ##' @param y_breaks Breaks for the y-axis.
 ##' @param position_atrisk Vector of values within xlim. Specifies where numbers at risk should be positioned on the x-axis.
-##' @param conf_int Logical. If \code{TRUE} pointwise confidence intervals as a shadow.
+##' @param conf_int Logical. If \code{TRUE} show pointwise confidence intervals as a geom_stepribbon.
+##' @param percent Logical.  If \code{TRUE} show probabilities on a scale from 0 to 100.
 ##' @param ... passed on to \code{\link{as.data.table.prodlim}}. Can be used to specify 'cause', 'newdata', and 'times'.
 ##' @return A ggplot2::ggplot object
 ##' @seealso \code{\link{plot.prodlim}}
@@ -77,6 +78,7 @@ ggprodlim <- function(x,
                       x_breaks,
                       position_atrisk,
                       conf_int,
+                      percent = TRUE,
                       ...){
     time <- absolute_risk <- lower <- upper <- cause <- n.risk <- NULL
     # only discrete covariates (for now)
@@ -84,7 +86,7 @@ ggprodlim <- function(x,
     if (length(x$clustervar)>0) stop("ggprodlim does not deal with clustered data yet. Use plot.prodlim for now.")
     covariates <- x$discrete.predictors
     # create data table with plot data
-    w <- data.table::as.data.table(x = x,...,surv = x$type == "surv")
+    w <- data.table::as.data.table(x = x,...,surv = x$type == "surv",percent = percent)
     covariates <- covariates[sapply(covariates,function(c){length(unique(w[[c]]))>1})]
     if (length(covariates) == 0) covariates <- NULL
     if (length(covariates)>0){
@@ -107,24 +109,29 @@ ggprodlim <- function(x,
                                       y = !! rlang::sym(outcome_type),
                                       fill = !! if (length(color_variable)>0) {rlang::sym(color_variable)}else{NULL},
                                       colour = !! if (length(color_variable)>0) {rlang::sym(color_variable)}else{NULL}))
-    # getting data for numbers at-risk below the graph
-    if (missing(position_atrisk)){
-        jump_times <- sort(unique(w$time))
-        position_atrisk <- seq(min(jump_times),
-                               max(jump_times),
-                               (max(jump_times)-min(jump_times))/10)
-    }
-    atrisk_times <- data.table::data.table(time = position_atrisk)
-    if (length(covariates)>0){
-        atrisk <- unique(w[,c(covariates,"time","n.risk"),with = FALSE])
-        strata <- w[,unique(.SD),.SDcols = covariates]
-        atrisk_data <- lapply(1:NROW(strata),function(s){
-            atrisk_s <- atrisk[strata[s],on = covariates]
-            atrisk_s[atrisk_times,on = "time",roll = TRUE]
-        })
+    if (missing(position_atrisk) ||
+        (length(position_atrisk)>1)){
+        # getting data for numbers at-risk below the graph
+        if (missing(position_atrisk)){
+            jump_times <- sort(unique(w$time))
+            position_atrisk <- seq(min(jump_times),
+                                   max(jump_times),
+                                   (max(jump_times)-min(jump_times))/10)
+        }
+        atrisk_times <- data.table::data.table(time = position_atrisk)
+        if (length(covariates)>0){
+            atrisk <- unique(w[,c(covariates,"time","n.risk"),with = FALSE])
+            strata <- w[,unique(.SD),.SDcols = covariates]
+            atrisk_data <- lapply(1:NROW(strata),function(s){
+                atrisk_s <- atrisk[strata[s],on = covariates]
+                atrisk_s[atrisk_times,on = "time",roll = TRUE]
+            })
+        }else{
+            atrisk <- unique(w[,c("time","n.risk"),with = FALSE])
+            atrisk_data <- list(atrisk[atrisk_times,on = "time",roll = TRUE])
+        }
     }else{
-        atrisk <- unique(w[,c("time","n.risk"),with = FALSE])
-        atrisk_data <- list(atrisk[atrisk_times,on = "time",roll = TRUE])
+        atrisk_data <- NULL
     }
     g <- g+ggplot2::geom_step()
     # cannot import pammtools due to a circular imports
@@ -146,7 +153,11 @@ ggprodlim <- function(x,
     ## g <- g+ggplot2::ylim(0,1)
     if (missing(y_breaks)) y_breaks <- seq(ylim[1],ylim[2],abs(ylim[2]-ylim[1])/4)
     ## throws a warning
-    g <- g+ggplot2::scale_y_continuous(limits = ylim,breaks = y_breaks,labels = paste0(100*y_breaks,"%"))
+    if (percent[[1]] == TRUE){
+        g <- g+ggplot2::scale_y_continuous(limits = ylim,breaks = y_breaks,labels = paste0(y_breaks,"%"))
+    }else{
+        g <- g+ggplot2::scale_y_continuous(limits = ylim,breaks = y_breaks)
+    }
     g <- g+ggplot2::coord_cartesian(ylim = ylim,xlim = xlim,clip = 'off')
     ## g <- g+ggplot2::scale_fill_manual(values = grDevices::palette.colors(palette = "Okabe-Ito"))
     ## g <- g+ggplot2::scale_color_manual(values = grDevices::palette.colors(palette = "Okabe-Ito"))
@@ -154,24 +165,30 @@ ggprodlim <- function(x,
     g <- g+ggplot2::scale_fill_manual(values = cbbPalette)
     g <- g+ggplot2::scale_color_manual(values = cbbPalette)
     ## g <- g+ggplot2::theme_bw()+ ggplot2::theme(axis.title.x = ggplot2::element_text(vjust=0))
-    for (i in 1:length(atrisk_data)){
-        atrisk <- atrisk_data[[i]]
-        vpos <- 3+(i*2)
-        g <- g+ggplot2::geom_text(data = atrisk,
-                                  mapping = ggplot2::aes(x = time,
-                                                         y = I(0),
-                                                         vjust = !!(vpos),
-                                                         label = n.risk,
-                                                         fill = NULL,
-                                                         colour =  !! if (length(covariates)>0){rlang::sym(covariates)}else {NULL}),
-                                  show.legend = FALSE)
+    if (length(atrisk_data)>0){
+        for (i in 1:length(atrisk_data)){
+            atrisk <- atrisk_data[[i]]
+            vpos <- 3+(i*2)
+            g <- g+ggplot2::geom_text(data = atrisk,
+                                      mapping = ggplot2::aes(x = time,
+                                                             y = I(0),
+                                                             vjust = !!(vpos),
+                                                             label = n.risk,
+                                                             fill = NULL,
+                                                             colour =  !! if (length(covariates)>0){rlang::sym(covariates)}else {NULL}),
+                                      show.legend = FALSE)
+        }
+        g <- g+ggplot2::annotate("text",
+                                 x = 0,
+                                 y = I(0),
+                                 vjust = ggplot2::unit(3, "lines"),
+                                 label = "Number at risk")
     }
     # space for atrisk data
     g <- g+ggplot2::theme(plot.margin = ggplot2::unit(c(1,1,length(atrisk_data)+5,1), "lines"))
     g <- g+ggplot2::ylab(ifelse(outcome_type == "absolute_risk","Absolute risk","Survival probability"))+ggplot2::xlab("Time")
     ## g <- g+ggplot2::theme(axis.title.y = ggplot2::element_text(margin = ggplot2::margin(t = 0, r = 20, b = 0, l = 0)))
     ## g <- g+ggplot2::theme(axis.title.x = ggplot2::element_text(margin = ggplot2::margin(t = 0, r = 0, b = 20, l = 0)))
-    g <- g+ggplot2::annotate("text",x = 0, y = I(0), vjust = ggplot2::unit(3, "lines"), label = "Number at risk")
     g
 }
 ######################################################################

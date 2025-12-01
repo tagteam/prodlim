@@ -3,6 +3,7 @@
 S3method(as.data.frame,EventHistory.frame)
 S3method(as.data.frame,prodlim)
 S3method(as.data.table,prodlim)
+S3method(as_tibble,prodlim)
 S3method(getStates,Hist)
 S3method(getStates,prodlim)
 S3method(lifeTab,competing.risks)

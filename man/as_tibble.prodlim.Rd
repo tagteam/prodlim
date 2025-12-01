@@ -4,7 +4,7 @@
 \alias{as_tibble.prodlim}
 \title{Turn prodlim objects into a \code{\link[tibble]{tibble}}}
 \usage{
-as_tibble.prodlim(x, ...)
+\method{as_tibble}{prodlim}(x, ...)
 }
 \arguments{
 \item{x}{object obtained with function \code{\link{prodlim}}}

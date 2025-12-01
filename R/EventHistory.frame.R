@@ -155,8 +155,8 @@ EventHistory.frame <- function(formula,
                                check.formula=TRUE,
                                response=TRUE){
     # {{{  check if formula is a proper formula
+    formula.names <- try(all.names(formula),silent=TRUE)
     if (response && check.formula){
-        formula.names <- try(all.names(formula),silent=TRUE)
         if (!(formula.names[1]=="~")
             ||
             (match("$",formula.names,nomatch=0)+match("[",formula.names,nomatch=0)>0)){

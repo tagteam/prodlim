@@ -4,7 +4,17 @@
 \alias{ggprodlim}
 \title{ggplot2::ggplot support for Kaplan-Meier and Aalen-Johansen estimators}
 \usage{
-ggprodlim(x, xlim, ylim, y_breaks, x_breaks, position_atrisk, conf_int, ...)
+ggprodlim(
+  x,
+  xlim,
+  ylim,
+  y_breaks,
+  x_breaks,
+  position_atrisk,
+  conf_int,
+  percent = TRUE,
+  ...
+)
 }
 \arguments{
 \item{x}{object obtained with \code{\link{prodlim}}.}
@@ -19,7 +29,9 @@ ggprodlim(x, xlim, ylim, y_breaks, x_breaks, position_atrisk, conf_int, ...)
 
 \item{position_atrisk}{Vector of values within xlim. Specifies where numbers at risk should be positioned on the x-axis.}
 
-\item{conf_int}{Logical. If \code{TRUE} pointwise confidence intervals as a shadow.}
+\item{conf_int}{Logical. If \code{TRUE} show pointwise confidence intervals as a geom_stepribbon.}
+
+\item{percent}{Logical.  If \code{TRUE} show probabilities on a scale from 0 to 100.}
 
 \item{...}{passed on to \code{\link{as.data.table.prodlim}}. Can be used to specify 'cause', 'newdata', and 'times'.}
 }

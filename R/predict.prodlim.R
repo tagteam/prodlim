@@ -162,6 +162,7 @@
       # --------------------------------------------------------------------
       if (missing(newdata)) stop("Argument newdata is missing.")
       ## deal with tibbles and data.tables
+      newdata <- data.table::copy(newdata)      
       newdata <- as.data.frame(newdata)
       NX <- NROW(object$X)
       fit.X <- object$X
