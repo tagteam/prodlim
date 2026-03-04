@@ -3,9 +3,9 @@
 ## Author: Thomas Alexander Gerds
 ## Created: Mar  3 2025 (14:32) 
 ## Version: 
-## Last-Updated: nov 29 2025 (09:57) 
+## Last-Updated: mar  4 2026 (15:08) 
 ##           By: Thomas Alexander Gerds
-##     Update #: 122
+##     Update #: 130
 #----------------------------------------------------------------------
 ## 
 ### Commentary: 
@@ -110,7 +110,7 @@ ggprodlim <- function(x,
                                       fill = !! if (length(color_variable)>0) {rlang::sym(color_variable)}else{NULL},
                                       colour = !! if (length(color_variable)>0) {rlang::sym(color_variable)}else{NULL}))
     if (missing(position_atrisk) ||
-        (length(position_atrisk)>1)){
+        (length(position_atrisk) >= 1)){
         # getting data for numbers at-risk below the graph
         if (missing(position_atrisk)){
             jump_times <- sort(unique(w$time))
@@ -148,7 +148,7 @@ ggprodlim <- function(x,
                                           show.legend = FALSE)
     }
     # axes
-    if (missing(ylim)) ylim <- c(0,1)
+    if (missing(ylim)) if (percent[[1]] == TRUE) ylim <- c(0,100) else ylim <- c(0,1)
     if (missing(xlim)) xlim <- c(0,max(w$time))
     ## g <- g+ggplot2::ylim(0,1)
     if (missing(y_breaks)) y_breaks <- seq(ylim[1],ylim[2],abs(ylim[2]-ylim[1])/4)

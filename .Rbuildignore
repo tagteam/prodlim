@@ -2,3 +2,4 @@ examples/
 ^\.travis\.yml$
 vignettes/*
 revdep
+old_tests/

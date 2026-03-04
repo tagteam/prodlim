@@ -27,6 +27,7 @@
 ##' @param check.formula If TRUE check if formula is a Surv or Hist
 ##' thing.
 ##' @param response If FALSE do not evaluate the left hand side of the formula and to not return the response (event.history).
+##' @param na.action Decide what to do with missing values. 
 ##' @return A list which contains
 ##' - the event.history (see \code{\link{Hist}})
 ##' - the design matrix (see \code{\link{model.design}})
@@ -106,6 +107,10 @@
 ##' }
 ##' dsurv$outcome <- c("cause1","0","cause2","cause1","cause2","cause2","0")
 ##' SampleRegression(Hist(time,outcome)~prop(X1)+X2+cluster(X3)+X4,dsurv)
+##' ehf <- EventHistory.frame(formula=Hist(time,outcome)~prop(X1)+X2+cluster(X3)+X4,
+##'                           data=dsurv,
+##'                           stripSpecials=c("prop","cluster","timevar"),
+##'                           specials=c("prop","timevar","cluster"))
 ##' 
 ##' ## let's test if the parsing works
 ##' form1 <- Hist(time,outcome!="0")~prop(X1)+X2+cluster(X3)+X4
@@ -153,20 +158,24 @@ EventHistory.frame <- function(formula,
                                stripUnspecials=NULL,
                                dropIntercept=TRUE,
                                check.formula=TRUE,
-                               response=TRUE){
+                               response=TRUE,
+                               na.action=options()$na.action){
     # {{{  check if formula is a proper formula
     formula.names <- try(all.names(formula),silent=TRUE)
+    if (response[[1]]){
+        is_event_history <- ((any(match(c("survival::Surv","Surv","prodlim::Hist","Hist"),formula.names,nomatch=0)))
+            || inherits(data[[formula.names[[2]]]],"Surv")
+            || inherits(data[[formula.names[[2]]]],"Hist"))
+    }
     if (response && check.formula){
         if (!(formula.names[1]=="~")
             ||
             (match("$",formula.names,nomatch=0)+match("[",formula.names,nomatch=0)>0)){
             stop("Invalid specification of formula. Perhaps forgotten right hand side?\nNote that any subsetting, i.e., data$var or data[,\"var\"], is not supported here.\nSpecify response=FALSE and check.formula=FALSE to avoid this error when using the design functionality without a response.")}
         else{
-                if (!(any(match(c("survival::Surv","Surv","prodlim::Hist","Hist"),
-                                formula.names,nomatch=0)))
-                    && !inherits(data[[formula.names[[2]]]],"Surv")
-                    && !inherits(data[[formula.names[[2]]]],"Hist"))
+                if (!is_event_history) {
                     stop("formula is NOT a proper survival formula,\nwhich must have a `Surv' or `Hist' object as response.")
+                }
             }
     }
     # }}}
@@ -189,30 +198,34 @@ EventHistory.frame <- function(formula,
     # }}}
     # {{{ get all variables and remove missing values
     ## use the stripped formula because, otherwise
-    ## it may be hard to know what variables are, e.g.,
-    ## FGR uses cov2(var,tf=qfun) where qfun is a function
-    mm <- na.omit(get_all_vars(formula(Terms),data=data))
+    ## it may be hard to distinguis the variable names from functions, e.g.,
+    ## riskRegression::FGR may use cov2(var,tf=qfun) where qfun is a function
+    mm <- do.call(na.action,list(object = get_all_vars(formula(Terms),data=data)))
     if (NROW(mm) == 0) stop("No (non-missing) observations")
     # }}}
 
-    # {{{ extract response
     if (response==TRUE && attr(Terms,"response")!=0){
-        event.history <- model.response(model.frame(update(formula,".~1"),data=mm))
-        # }}}
-        # {{{ Fix for those who use `Surv' instead of `Hist' 
-        if (inherits(event.history,"Surv")
-            || inherits(data[[formula.names[[2]]]],"Surv")){
-            event.history = as.matrix(event.history)
-            class(event.history) = "Hist"
-            attr(event.history,"model") <- "survival"
-            attr(event.history,"cens.code") <- 0
-            attr(event.history,"cens.type") <- "rightCensored"
-            attr(event.history,"entry.type") <- ifelse(ncol(event.history)==2,"","leftTruncated")
-            if (attr(event.history,"entry.type")=="leftTruncated")
-                colnames(event.history) <- c("entry","time","status")
+        if (is_event_history){
+            event.history <- model.response(model.frame(update(formula,".~1"),data=mm,na.action=na.action))
+        }else{
+            event.history <- model.frame(update(formula,".~1"), data=mm,na.action=na.action)
         }
-        # }}}
-    }else event.history <- NULL
+        # Fix for those who use `Surv' instead of `Hist' 
+        if (is_event_history){
+            if (inherits(event.history,"Surv") || inherits(data[[formula.names[[2]]]],"Surv")){
+                event.history = as.matrix(event.history)
+                class(event.history) = "Hist"
+                attr(event.history,"model") <- "survival"
+                attr(event.history,"cens.code") <- 0
+                attr(event.history,"cens.type") <- "rightCensored"
+                attr(event.history,"entry.type") <- ifelse(ncol(event.history)==2,"","leftTruncated")
+                if (attr(event.history,"entry.type")=="leftTruncated")
+                    colnames(event.history) <- c("entry","time","status")
+            }
+        }
+    }else {
+        event.history <- NULL
+    }
     # {{{ design
     design <- model.design(Terms,
                            data=mm,
@@ -224,6 +237,9 @@ EventHistory.frame <- function(formula,
     # }}}
     out <- c(list(event.history=event.history),
              design[sapply(design,length)>0])
+    if (!is_event_history){
+        names(out)[1] <- "response"
+    }
     attr(out,"Terms") <- Terms
     attr(out,"na.action") <- attr(mm,"na.action")
     class(out) <- "EventHistory.frame"

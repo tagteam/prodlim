@@ -17,7 +17,8 @@ EventHistory.frame(
   stripUnspecials = NULL,
   dropIntercept = TRUE,
   check.formula = TRUE,
-  response = TRUE
+  response = TRUE,
+  na.action = options()$na.action
 )
 }
 \arguments{
@@ -56,6 +57,8 @@ the values}
 thing.}
 
 \item{response}{If FALSE do not evaluate the left hand side of the formula and to not return the response (event.history).}
+
+\item{na.action}{Decide what to do with missing values.}
 }
 \value{
 A list which contains
@@ -145,6 +148,10 @@ SampleRegression <- function(formula,data=parent.frame()){
 }
 dsurv$outcome <- c("cause1","0","cause2","cause1","cause2","cause2","0")
 SampleRegression(Hist(time,outcome)~prop(X1)+X2+cluster(X3)+X4,dsurv)
+ehf <- EventHistory.frame(formula=Hist(time,outcome)~prop(X1)+X2+cluster(X3)+X4,
+                          data=dsurv,
+                          stripSpecials=c("prop","cluster","timevar"),
+                          specials=c("prop","timevar","cluster"))
 
 ## let's test if the parsing works
 form1 <- Hist(time,outcome!="0")~prop(X1)+X2+cluster(X3)+X4

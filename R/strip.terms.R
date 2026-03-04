@@ -116,8 +116,7 @@ strip.terms <- function(terms,
     newspecials <- unique(c(specials,names(terms.specials)))
     anames <- unlist(alias.names)
     if (length(anames)>0){
-        catch <- match(anames,newspecials,nomatch=0)
-        newspecials <- newspecials[-catch]
+        newspecials <- setdiff(newspecials,anames)
     }
     if (do.unspecials||do.alias){
         aform <- reformulate(termLabels,response,intercept)
