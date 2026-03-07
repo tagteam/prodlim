@@ -2,92 +2,95 @@
 % Please edit documentation in R/ggprodlim.R
 \name{ggprodlim}
 \alias{ggprodlim}
-\title{ggplot2::ggplot support for Kaplan-Meier and Aalen-Johansen estimators}
+\title{ggplot2 support for prodlim objects}
 \usage{
 ggprodlim(
   x,
+  type = x$type,
+  cause,
+  select = NULL,
   xlim,
   ylim,
   y_breaks,
   x_breaks,
   position_atrisk,
-  conf_int,
+  atrisk_title = "Number at risk",
+  atrisk_labels = NULL,
+  atrisk_show_censored = FALSE,
+  atrisk_min = 0L,
+  conf_int = TRUE,
+  conf_int_alpha = 0.2,
   percent = TRUE,
+  timeconverter,
+  facet = c("none", "cause", "strata", "cause_x_strata"),
+  palette = NULL,
+  return_data = FALSE,
   ...
 )
 }
 \arguments{
-\item{x}{object obtained with \code{\link{prodlim}}.}
+\item{x}{An object obtained with \code{\link{prodlim}}.}
 
-\item{xlim}{Limits for the x-axis.}
+\item{type}{Either \code{"surv"} or \code{"risk"}. Defaults to \code{x$type}.
+For competing risks, \code{"risk"} is appropriate.}
 
-\item{ylim}{Limits for the y-axis.}
+\item{cause}{For competing risk models: a cause (passed to
+\code{\link{as.data.table.prodlim}}), \code{"all"} for all causes, or
+\code{"stacked"} for a stacked cumulative incidence plot.}
 
-\item{y_breaks}{Breaks for the y-axis.}
+\item{select}{Optional integer vector selecting which curves to keep, after
+curves are identified by unique strata (and cause, if present).}
 
-\item{x_breaks}{Breaks for the x-axis.}
+\item{xlim, ylim}{Limits for the axes.}
 
-\item{position_atrisk}{Vector of values within xlim. Specifies where numbers at risk should be positioned on the x-axis.}
+\item{x_breaks, y_breaks}{Breaks for axes.}
 
-\item{conf_int}{Logical. If \code{TRUE} show pointwise confidence intervals as a geom_stepribbon.}
+\item{position_atrisk}{Numeric vector specifying x-positions where numbers at
+risk should be printed. If missing, a default grid is chosen.}
 
-\item{percent}{Logical.  If \code{TRUE} show probabilities on a scale from 0 to 100.}
+\item{atrisk_title}{Title shown left of the at-risk table.}
 
-\item{...}{passed on to \code{\link{as.data.table.prodlim}}. Can be used to specify 'cause', 'newdata', and 'times'.}
+\item{atrisk_labels}{Optional replacement labels for strata/cause groups in
+the at-risk table (in plotting order).}
+
+\item{atrisk_show_censored}{Logical. If TRUE and the data provides
+\code{n.cens}, show it in parentheses next to \code{n.risk}.}
+
+\item{atrisk_min}{Integer. If >0, drop curve segments after n.risk < atrisk_min.}
+
+\item{conf_int}{Logical. If TRUE and \code{lower}/\code{upper} are available,
+draw pointwise confidence intervals.}
+
+\item{conf_int_alpha}{Alpha for CI shading.}
+
+\item{percent}{Logical. If TRUE, y axis is shown in percent (0-100).}
+
+\item{timeconverter}{Optional character, see \code{\link{plot.prodlim}} for
+supported values (e.g., "years2months").}
+
+\item{facet}{One of \code{"none"}, \code{"cause"}, \code{"strata"},
+\code{"cause_x_strata"}. When multiple causes and multiple strata exist,
+facetting avoids the "one graph only" limitation of the old implementation.}
+
+\item{palette}{Optional vector of colors. If provided, applied via
+\code{scale_color_manual}/\code{scale_fill_manual}. Default NULL (do not
+impose a palette).}
+
+\item{return_data}{Logical. If TRUE, return a list with plot and data.}
+
+\item{...}{Passed to \code{\link{as.data.table.prodlim}}; commonly \code{newdata},
+\code{times}, and for competing risks \code{cause}.}
 }
 \value{
-A ggplot2::ggplot object
+A ggplot object, or a list if \code{return_data=TRUE}.
 }
 \description{
-ggplot2::ggplot support for Kaplan-Meier and Aalen-Johansen estimators
+ggplot2 support for Kaplan-Meier and Aalen-Johansen estimators
 }
 \details{
-Important functionality like facet_grid is not yet supported
-}
-\examples{
-library(ggplot2)
-
-# Kaplan-Meier and stratified Kaplan-Meier
-
-set.seed(9)
-ds <- SimSurv(27)
-
-km <- prodlim(Hist(time,event)~1,data = ds)
-ggprodlim(km)
-g <- ggprodlim(km)
-g <- g+geom_step(linewidth=1.5)
-g + theme(text = element_text(size=20)) + update_geom_defaults("text", list(size=5.5))
-km1 <- prodlim(Hist(time,event)~X1,data = ds)
-ggprodlim(km1)
-
-ds$group <- factor(sample(1:5,replace=TRUE,size=27),labels=letters[1:5])
-km2 <- prodlim(Hist(time,event)~group,data = ds)
-ggprodlim(km2,conf_int=FALSE)
-
-# Aalen-Johansen and stratified Aalen-Johansen
-
-set.seed(8)
-d <- SimCompRisk(27)
-d$X_group <- factor(sample(1:5,replace=TRUE,size=27),labels=letters[1:5])
-aj <- prodlim(Hist(time,event)~1,data = d)
-ggprodlim(aj)
-ggprodlim(aj,cause=1)
-ggprodlim(aj,position_atrisk=c(0,5,10))+scale_x_continuous(breaks=c(0,5,10))
-
-ggprodlim(aj)+theme_minimal()+theme(plot.margin=margin(t=0,r=0,b=8,l=0,"line"))
-
-# changing colors
-g+ggplot2::scale_fill_manual(values = 1:2)+ggplot2::scale_color_manual(values=1:2)
-
-aj <- prodlim(Hist(time,event)~X1,data = d)
-ggprodlim(aj,cause = 1)
-d$X1 <- factor(d$X1,levels=c("1","0"),labels=c("1","0"))
-aj <- prodlim(Hist(time,event)~X1,data = d)
-
+A ggplot2-based alternative to \code{\link{plot.prodlim}} that returns a
+\code{ggplot} object, enabling ggplot theming, facetting, and composition.
 }
 \seealso{
-\code{\link{plot.prodlim}}
-}
-\author{
-Thomas A. Gerds <tag@biostat.ku.dk>
+\code{\link{plot.prodlim}}, \code{\link{as.data.table.prodlim}}
 }

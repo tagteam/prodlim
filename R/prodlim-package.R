@@ -3,9 +3,9 @@
 ## author: Thomas Alexander Gerds
 ## created: Apr 24 2015 (09:08) 
 ## Version: 
-## last-updated: Jun 24 2024 (11:58) 
+## last-updated: mar  6 2026 (08:49) 
 ##           By: Thomas Alexander Gerds
-##     Update #: 30
+##     Update #: 31
 #----------------------------------------------------------------------
 ## 
 ### Commentary: 
@@ -14,6 +14,9 @@
 #----------------------------------------------------------------------
 ## 
 ### Code:
+utils::globalVariables(c(
+  "xmin","xmax","ymin","ymax","cause",".gg_kind",".gg_groupid",".gg_colour",".gg_fill"
+))
 #' Kaplan-Meier and Aalen-Johansen method
 #'
 #' Fast and user friendly implementation

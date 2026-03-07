@@ -11,10 +11,10 @@ geom_prodlim(
   na.rm = FALSE,
   show.legend = NA,
   inherit.aes = TRUE,
-  type = c("surv", "risk"),
+  type = "risk",
   cause = NULL,
   legend = c("auto", "show", "hide"),
-  conf_int = FALSE,
+  conf_int = TRUE,
   conf_int_alpha = 0.2,
   percent = TRUE,
   timeconverter = NULL,
@@ -125,17 +125,20 @@ library(data.table)
 set.seed(89)
 dat <- sampleData(89)
 ## combined endpoint
-dat[,status:=event!=0]
+dat[,status:=1*(event!=0)]
 ## estimation within facets
-dat[, group:=factor(sample(letters[1:3], .N,replace=TRUE))]
-
-## Kaplan Meier  curves
-ggplot(dat, aes(x = time, event = status)) +
-  geom_prodlim(conf_int = TRUE)
+dat[, Letters:=factor(sample(letters[1:3], .N,replace=TRUE))]
+dat <- dat[,.(time,status,event,Letters,X1,X6)]
+## Kaplan-Meier curves by group (multiple curves + colour legend)
+ggplot(dat, aes(x = time, event = status, colour = Letters,fill = Letters)) +
+  geom_prodlim(conf_int = TRUE, type="surv")
 
 ggplot(dat, aes(x = time, event = status)) +
   geom_prodlim(conf_int = TRUE) +
-  facet_grid(1~ group)
+  facet_grid(1~ Letters)
+
+ggplot(dat, aes(x = time, event = status,color=Letters,fill=Letters)) +
+  geom_prodlim(conf_int = TRUE) 
 
 ## Aalen-Johansen curves cause 1
 ggplot(dat, aes(x = time, event = event)) +
@@ -143,15 +146,24 @@ ggplot(dat, aes(x = time, event = event)) +
 
 ggplot(dat, aes(x = time, event = event)) +
   geom_prodlim(conf_int = TRUE) +
-  facet_grid(1~ group)
+  facet_grid(1~ Letters)
 
-## Aalen-Johansen curves both causes
+## Aalen-Johansen curves for selected causes (vector)
 ggplot(dat, aes(x = time, event = event)) +
-  geom_prodlim(conf_int = TRUE)
+  geom_prodlim(conf_int = TRUE, cause = 1:2)
+## Aalen-Johansen: facet by cause, multiple groups in each panel
+ggplot(dat, aes(x = time, event = event, colour = Letters)) +
+  geom_prodlim(conf_int = TRUE, cause = 1:2) +
+  facet_grid(~cause)
 
 ggplot(dat, aes(x = time, event = event)) +
-  geom_prodlim(conf_int = TRUE) +
-  facet_grid(1~ group)
+  geom_prodlim(conf_int = TRUE,cause=1:2) +
+  facet_grid(1~ Letters)
+
+ggplot(dat, aes(x = time, event = event)) +
+  geom_prodlim(conf_int = TRUE,cause="stacked") +
+  facet_grid(1~ Letters)
+
 
 }
 \seealso{
