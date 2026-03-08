@@ -72,7 +72,21 @@ GeomProdlim <- ggplot2::ggproto(
     step_data <- data[data$component == "step", , drop = FALSE]
     ci_data   <- data[data$component == "ci",   , drop = FALSE]
 
-    grobs <- list()
+      multi_cause <- ("cause" %in% names(data)) &&
+          (data.table::uniqueN(data$cause[!is.na(data$cause)]) > 1L)
+
+      if (multi_cause) {
+
+          cause_levels <- unique(as.character(data$cause))
+          pal <- scales::hue_pal()(length(cause_levels))
+          names(pal) <- cause_levels
+          ## if (any(c("colour","color","fill")%in%names(step_data))){
+              ## warning("Any color/colour/fill aesthetics are ignored when multiple causes are in the same panel")
+          ## }
+          step_data$colour <- unname(pal[as.character(step_data$cause)])
+          ci_data$fill     <- unname(pal[as.character(ci_data$cause)])
+      }
+      grobs <- list()
 
       if (isTRUE(conf_int) && nrow(ci_data) > 0) {
           if (!("fill" %in% names(ci_data))) {
