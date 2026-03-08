@@ -3,9 +3,9 @@
 ## Author: Thomas Alexander Gerds
 ## Created: Mar  3 2025 (14:32) 
 ## Version: 
-## Last-Updated: mar  5 2026 (14:47) 
+## Last-Updated: mar  8 2026 (06:57) 
 ##           By: Thomas Alexander Gerds
-##     Update #: 132
+##     Update #: 133
 #----------------------------------------------------------------------
 ## 
 ### Commentary: 
@@ -169,19 +169,19 @@ ggprodlim <- function(x,
 
   has_cause <- ("cause" %in% names(w)) && (length(unique(w$cause)) > 1)
 
-  # ---- build a unified group id for selection/facetting/atrisk
-  # strata label (for legend and atrisk)
-  if (!is.null(covariates)) {
-    w[, .strata_label := do.call(paste, c(.SD, sep = ", ")), .SDcols = covariates]
-  } else {
-    w[, .strata_label := ""]
-  }
-  if (has_cause) {
-    w[, .cause_label := as.character(cause)]
-  } else {
-    w[, .cause_label := "1"]
-  }
-  w[, .curve_id := interaction(.strata_label, .cause_label, drop = TRUE, lex.order = TRUE)]
+    # ---- build a unified group id for selection/facetting/atrisk
+    # strata label (for legend and atrisk)
+    if (!is.null(covariates)) {
+        w[, .strata_label := do.call(paste, c(.SD, sep = ", ")), .SDcols = covariates]
+    } else {
+        w[, .strata_label := ""]
+    }
+    if (has_cause) {
+        w[, .cause_label := as.character(cause)]
+    } else {
+        w[, .cause_label := "1"]
+    }
+    w[, .curve_id := interaction(.strata_label, .cause_label, drop = TRUE, lex.order = TRUE)]
 
   # selection
   if (!is.null(select)) {
