@@ -73,6 +73,7 @@ geom_prodlim <- function(mapping = NULL, data = NULL,
                          times = NULL,
                          cens.code = "0",
                          ...) {
+    Event <- NULL
     modify_aes <- function(a, b) {
         if (is.null(a)) return(b)
         la <- as.list(a)

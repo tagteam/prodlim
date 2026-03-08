@@ -12,7 +12,7 @@ stat_prodlim_compute_panel <- function(data, scales,
                                        timeconverter = NULL,
                                        cens.code = "0",
                                        conf_int_alpha = 0.2) {
-
+    time <- absolute_risk <- x <- Event <- alpha_ci <- group <- component <- y <- NULL
     if (nrow(data) == 0L) return(data.frame())
 
     if (!"event" %in% names(data)) {

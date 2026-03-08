@@ -3,9 +3,9 @@
 ## Author: Thomas Alexander Gerds
 ## Created: Mar  3 2025 (14:32) 
 ## Version: 
-## Last-Updated: mar  8 2026 (06:57) 
+## Last-Updated: mar  8 2026 (17:51) 
 ##           By: Thomas Alexander Gerds
-##     Update #: 133
+##     Update #: 138
 #----------------------------------------------------------------------
 ## 
 ### Commentary: 
@@ -80,7 +80,7 @@ ggprodlim <- function(x,
                       ...) {
 
   # ---- imports & NSE guards
-  time <- absolute_risk <- surv <- lower <- upper <- cause <- n.risk <- n.cens <- NULL
+  time <- absolute_risk <- surv <- lower <- upper <- cause <- n.risk <- n.cens <- .t_next <- .label <- .cause_label <- .curve_id <- .strata_label <- .ymax <- .ymin <- NULL
   facet <- match.arg(facet)
 
   # ---- continuous predictor handling: allow if newdata supplied
@@ -207,7 +207,7 @@ ggprodlim <- function(x,
     y_breaks <- seq(ylim[1], ylim[2], length.out = 5)
   }
   if (missing(x_breaks)) {
-    x_breaks <- waiver()
+    x_breaks <- ggplot2::waiver()
   }
 
   # ---- base ggplot mapping
@@ -299,12 +299,12 @@ ggprodlim <- function(x,
     data.table::setorder(dt, .strata_label, time, .cause_label)
 
     # cumulative sum by time within strata
-    dt[, .ymin := data.table::shift(cumsum(absolute_risk), fill = 0), by = .( .strata_label, time )]
-    dt[, .ymax := cumsum(absolute_risk), by = .( .strata_label, time )]
+    dt[, .ymin := data.table::shift(cumsum(absolute_risk), fill = 0), by = data.table::data.table( .strata_label, time )]
+    dt[, .ymax := cumsum(absolute_risk), by = data.table::data.table( .strata_label, time )]
 
     # convert to rectangles over time intervals, per cause (stepwise stacked)
     data.table::setorder(dt, .strata_label, .cause_label, time)
-    dt[, .t_next := data.table::shift(time, type = "lead"), by = .( .strata_label, .cause_label )]
+    dt[, .t_next := data.table::shift(time, type = "lead"), by = data.table::data.table( .strata_label, .cause_label )]
     dt <- dt[!is.na(.t_next)]
     dt[, xmin := time]
     dt[, xmax := pmin(.t_next, xlim[2])]
@@ -360,7 +360,8 @@ ggprodlim <- function(x,
       atrisk_cols <- c(".curve_id", ".strata_label", ".cause_label", "time", "n.risk")
       if ("n.cens" %in% names(w)) atrisk_cols <- c(atrisk_cols, "n.cens")
 
-      atrisk <- unique(data.table::as.data.table(w)[, ..atrisk_cols])
+      atrisk <- unique(data.table::as.data.table(w)[, atrisk_cols,with = FALSE])
+      
       data.table::setorder(atrisk, .curve_id, time)
 
       atrisk_data <- lapply(split(atrisk, atrisk$.curve_id), function(dti) {
@@ -377,7 +378,7 @@ ggprodlim <- function(x,
       if ("n.risk" %in% names(w)) {
         atrisk_cols <- c(".curve_id", ".strata_label", ".cause_label", "time", "n.risk")
         if ("n.cens" %in% names(w)) atrisk_cols <- c(atrisk_cols, "n.cens")
-        atrisk <- unique(data.table::as.data.table(w)[, ..atrisk_cols])
+        atrisk <- unique(data.table::as.data.table(w)[, atrisk_cols,with = FALSE])
         data.table::setorder(atrisk, .curve_id, time)
         atrisk_data <- lapply(split(atrisk, atrisk$.curve_id), function(dti) {
           dti[atrisk_times, on = "time", roll = TRUE]

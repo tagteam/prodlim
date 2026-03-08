@@ -9,7 +9,8 @@ draw_key_prodlim <- function(data, params, size) {
 
   if (is.na(fill_val) && !is.na(col_val)) fill_val <- col_val
   if (is.na(fill_val)) fill_val <- "grey70"
-  is_stacked <- (params$cause == "stacked")
+  is_stacked <- (length(params$cause) == 1 && params$cause == "stacked")
+  print(is_stacked)
   if (is_stacked) {
     return(
       grid::rectGrob(
@@ -34,7 +35,7 @@ draw_key_prodlim <- function(data, params, size) {
       x0 = 0.1, x1 = 0.9, y0 = 0.5, y1 = 0.5,
       gp = grid::gpar(
         col = col_val,
-        lwd = (data$linewidth %||% data$size %||% 0.5) * .pt,
+        lwd = (data$linewidth %||% data$size %||% 0.5) * ggplot2::.pt,
         lty = data$linetype %||% 1
       )
     )
