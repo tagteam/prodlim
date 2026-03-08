@@ -27,7 +27,7 @@ geom_prodlim <- function(mapping = NULL, data = NULL,
                    colour = ggplot2::after_stat(curve_id),
                    fill   = ggplot2::after_stat(curve_id)
                )
-  )
+
   ggplot2::layer(
                stat = StatProdlim,
                geom = GeomProdlim,
