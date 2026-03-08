@@ -1,6 +1,5 @@
 stat_prodlim_setup_data <- function(data, params) {
     data <- data.table::as.data.table(data)
-    nuniq <- function(x) data.table::uniqueN(x[!is.na(x)])
     data
 }
 
@@ -29,19 +28,18 @@ stat_prodlim_compute_panel <- function(data, scales,
       "x", "y", "xmin", "xmax", "ymin", "ymax",
       "PANEL", "group", "event", "alpha", "size",
       "linewidth",
-      ## "linetype", "colour", "color", "fill",
-      "component", "Event"
+      "component", "Event", "stacked", "alpha_ci"
     )
 
     model_cols <- setdiff(names(data), ignore_formula)
-    
+
     ff <- stats::formula(
       paste0(
         "prodlim::Hist(x, event, cens.code = '", cens.code, "') ~ ",
         if (length(model_cols) == 0) "1" else paste(model_cols, collapse = "+")
       )
     )
-    
+
     fit <- prodlim::prodlim(formula = ff, data = data, type = type)
 
     summary_args <- list(
@@ -50,27 +48,26 @@ stat_prodlim_compute_panel <- function(data, scales,
       percent = percent
     )
 
+    stacked <- identical(cause, "stacked")
     multi_cause <- FALSE
     if (attr(fit$model.response, "model") == "competing.risks") {
-      if (length(cause) == 0) {
-        requested_causes <- attr(fit$model.response, "states")[[1]]
-      } else {
-        cause <- intersect(cause, attr(fit$model.response, "states"))
-        if (length(cause) == 0) {
-          stop(
-            paste0(
-              "Cannot find cause(s) ",
-              paste0(cause, collapse = ", "),
-              ". The values of data$event are ",
-              paste0(attr(fit$model.response, "states"), collapse = ", ")
-            )
-          )
+        if (stacked || length(cause) == 0) {
+            if (stacked){
+                requested_causes <- attr(fit$model.response, "states")
+            } else{
+                requested_causes <- attr(fit$model.response, "states")[[1]]
+            }
+        } else {
+            cause <- intersect(cause, attr(fit$model.response, "states"))
+            if (length(cause) == 0) {
+                stop(paste0("Cannot find cause(s) ", paste0(cause,collapse = ", "),". The values of data$event are ",paste0(attr(fit$model.response, "states"), collapse = ", ")))
+            }
+            requested_causes <- cause
         }
-        requested_causes <- cause
-      }
-      summary_args$cause <- requested_causes
+        summary_args$cause <- requested_causes
     } else {
-      requested_causes <- 1
+        requested_causes <- 1
+        stacked <- FALSE
     }
 
     if (length(times) > 0) summary_args$times <- times
@@ -109,18 +106,15 @@ stat_prodlim_compute_panel <- function(data, scales,
 
     y_name <- intersect(c("surv", "absolute_risk"), names(w))
 
-    if (isTRUE(multi_cause)) {
-        by_cols <- c(model_cols, "cause")
-    }else{
-        by_cols <- model_cols
-    }
-    data.table::setorderv(w, c(by_cols,"time"))
+    by_cols <- if (isTRUE(multi_cause)) c(model_cols, "cause") else model_cols
+    data.table::setorderv(w, c(by_cols, "time"))
+
     if (length(by_cols) == 0) {
         data.table::set(w, j = "Event", value = factor(rep("1", nrow(w))))
     } else {
-        if (by_cols[[1]] == "cause"){
-            data.table::set(w, j = "Event", value = factor(w[["cause"]]))
-        }else{
+        if (identical(by_cols[[1]], "cause")) {
+            data.table::set(w, j = "Event", value = factor(w[["cause"]], levels = requested_causes))
+        } else {
             curve_labels <- as.character(w[[by_cols[[1]]]])
             if (length(by_cols) > 1) {
                 for (j in 2:length(by_cols)) {
@@ -129,6 +123,27 @@ stat_prodlim_compute_panel <- function(data, scales,
             }
             data.table::set(w, j = "Event", value = factor(curve_labels))
         }
+    }
+
+    if (isTRUE(stacked) && isTRUE(multi_cause)) {
+        if (length(model_cols) == 0) {
+            stack_dt <- data.table::copy(w)
+            data.table::setorder(stack_dt, cause, time)
+            stack_dt[, xmax := data.table::shift(time, type = "lead"),by = cause]
+            data.table::setorder(stack_dt, time, cause)
+            stack_dt[, ymin := data.table::shift(cumsum(absolute_risk), fill=0), by=time]
+            stack_dt[, ymax := cumsum(absolute_risk), by=time]
+            data.table::setnames(stack_dt, "time", "xmin")
+        } else {
+            stop("Cannot split stacked plot.")
+        }
+        stack_dt <- stack_dt[!is.na(xmax)]
+        stack_dt[, x := NA_real_]
+        stack_dt[, y := NA_real_]
+        stack_dt[, component := "stack"]
+        stack_dt[, group := as.integer(Event)]
+        stack_dt[, alpha_ci := 1]
+        return(as.data.frame(stack_dt))
     }
     step_dt <- data.table::copy(w)
     data.table::setnames(step_dt, y_name, "y")
@@ -145,13 +160,11 @@ stat_prodlim_compute_panel <- function(data, scales,
       return(as.data.frame(step_dt))
     }
 
-    ## by_cols <- if (length(curve_group_cols) > 0) curve_group_cols else NULL
-                                
     ci_dt <- data.table::copy(w)
     if (length(model_cols) == 0) {
       ci_dt[, xmax := data.table::shift(time, type = "lead"), by = "cause"]
     } else {
-      ci_dt[, xmax := data.table::shift(time, type = "lead"), by = c(model_cols,"cause")]
+      ci_dt[, xmax := data.table::shift(time, type = "lead"), by = c(model_cols, "cause")]
     }
     ci_dt <- ci_dt[!is.na(xmax)]
     ci_dt[, xmin := time]
@@ -162,28 +175,29 @@ stat_prodlim_compute_panel <- function(data, scales,
     ci_dt[, component := "ci"]
     ci_dt[, group := as.integer(Event)]
     ci_dt[, alpha_ci := conf_int_alpha]
+
     out <- data.table::rbindlist(
       list(step_dt, ci_dt),
       use.names = TRUE,
       fill = TRUE
-      )
+    )
     as.data.frame(out)
-  }
+}
+
 StatProdlim <- ggplot2::ggproto(
-                            "StatProdlim",
-                            ggplot2::Stat,
-                            required_aes = c("x", "event"),
-                            ## default_aes = ggplot2::aes(prodlim_strata = after_stat(Event)),
-                            extra_params = c("na.rm",
-                                             "type",
-                                             "cause",
-                                             "conf_int",
-                                             "percent",
-                                             "times",
-                                             "timeconverter",
-                                             "cens.code",
-                                             "conf_int_alpha"
-                                             ),
-                            setup_data = stat_prodlim_setup_data,
-                            compute_panel = stat_prodlim_compute_panel,
+    "StatProdlim",
+    ggplot2::Stat,
+    required_aes = c("x", "event"),
+    extra_params = c("na.rm",
+                     "type",
+                     "cause",
+                     "conf_int",
+                     "percent",
+                     "times",
+                     "timeconverter",
+                     "cens.code",
+                     "conf_int_alpha"
+    ),
+    setup_data = stat_prodlim_setup_data,
+    compute_panel = stat_prodlim_compute_panel
 )

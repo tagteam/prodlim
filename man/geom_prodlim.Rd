@@ -2,7 +2,7 @@
 % Please edit documentation in R/geom_prodlim.R
 \name{geom_prodlim}
 \alias{geom_prodlim}
-\title{Kaplan-Meier and Aalen-Johansen curves inside ggplot2}
+\title{Product-limit geoms for survival and competing risks curves}
 \usage{
 geom_prodlim(
   mapping = NULL,
@@ -13,160 +13,88 @@ geom_prodlim(
   inherit.aes = TRUE,
   type = "risk",
   cause = NULL,
-  legend = c("auto", "show", "hide"),
   conf_int = TRUE,
   conf_int_alpha = 0.2,
   percent = TRUE,
   timeconverter = NULL,
   times = NULL,
+  cens.code = "0",
   ...
 )
 }
 \arguments{
-\item{mapping}{Set of aesthetic mappings created by
-\code{\link[ggplot2]{aes}}. Must include \code{x} (time) and
-\code{event}.}
+\item{mapping}{Set of aesthetic mappings created by [ggplot2::aes()].}
 
-\item{data}{A data frame containing the variables used in the plot.
-If \code{NULL}, the data are inherited from the plot.}
+\item{data}{Data frame.}
 
-\item{position}{Position adjustment passed to the underlying
-\code{ggplot2} layers.}
+\item{position}{Position adjustment.}
 
-\item{na.rm}{Logical. If \code{TRUE}, missing values are removed
-before estimation.}
+\item{na.rm}{If `FALSE`, missing values are removed with a warning.}
 
-\item{show.legend}{Logical. Should this layer be included in the
-legend?}
+\item{show.legend}{Logical. Should this layer be included in the legends?}
 
-\item{inherit.aes}{Logical. If \code{TRUE} (default), the mapping
-is combined with the default mapping at the top level of the plot.}
+\item{inherit.aes}{If `FALSE`, overrides the default aesthetics.}
 
-\item{type}{Character string specifying the type of estimator:
-\code{"surv"} for Kaplan-Meier survival probabilities or
-\code{"risk"} for cumulative incidence functions.}
+\item{type}{Passed to [prodlim::prodlim()], usually `"risk"` or `"surv"`.}
 
-\item{cause}{For competing risks models, specifies which cause
-to plot. If \code{NULL}, the first cause is used. If
-\code{"stacked"}, a stacked representation of all causes is drawn.}
+\item{cause}{Cause(s) for competing risks. Can be a vector of causes or the
+string `"stacked"`.}
 
-\item{legend}{Legend behaviour: \code{"auto"} hides the legend when only one curve is drawn
-(Kaplan-Meier or a single cause). Use \code{"show"} or \code{"hide"} to override.}
+\item{conf_int}{Logical. Draw confidence intervals.}
 
-\item{conf_int}{Logical. If \code{TRUE}, draw pointwise confidence
-intervals.}
+\item{conf_int_alpha}{Alpha level for confidence shadows.}
 
-\item{conf_int_alpha}{Transparency level for the confidence interval
-shading.}
+\item{percent}{Logical. Passed to [prodlim::summary.prodlim()].}
 
-\item{percent}{Logical. If \code{TRUE}, probabilities are displayed
-on the percentage scale.}
+\item{timeconverter}{Optional time conversion string.}
 
-\item{timeconverter}{Optional character string specifying a time
-scale transformation such as \code{"days2years"} or
-\code{"months2years"}.}
+\item{times}{Optional evaluation times passed to
+[prodlim::summary.prodlim()].}
 
-\item{times}{Optional vector of time points at which the estimator
-should be evaluated.}
+\item{cens.code}{Censoring code passed to [prodlim::Hist()].}
 
-\item{...}{Additional arguments passed to
-\code{\link{prodlim}} or \code{as.data.table.prodlim}.}
-}
-\value{
-A \code{ggplot2} layer (or list of layers if confidence
-  intervals are requested).
+\item{...}{Further arguments passed to [ggplot2::layer()].}
 }
 \description{
-Compute and draw Kaplan-Meier or Aalen-Johansen estimators directly
-within a \code{ggplot2} workflow. The estimator is calculated by
-calling \code{\link{prodlim}} on the data supplied to the layer.
+Draw Kaplan-Meier or Aalen-Johansen curves with optional confidence bands.
+For competing risks with multiple causes, the default display shows one curve
+per cause. When `cause = "stacked"`, causes are drawn as stacked filled
+rectangles instead of step curves with confidence shadows.
 }
 \details{
-The statistical transformation is performed separately for each
-\code{ggplot2} group and panel. Consequently, when used together
-with \code{\link[ggplot2]{facet_grid}} or
-\code{\link[ggplot2]{facet_wrap}}, the Kaplan-Meier or
-Aalen-Johansen estimator is computed automatically within each
-facet.
-
-The layer expects the event history to be supplied through the
-aesthetics \code{x} (time) and \code{event} (event indicator).
-Competing risks are detected automatically by
-\code{\link{prodlim}} if the event variable has more than two
-levels.
-
-By default the layer draws a step function representing the
-Kaplan-Meier survival curve or the cause-specific cumulative
-incidence function. Optionally, pointwise confidence intervals
-can be displayed as shaded rectangles following the stepwise
-structure of the estimator.
-
-
-The statistical transformation implemented by this layer fits a
-\code{\link{prodlim}} model of the form
-
-\deqn{Hist(time, event) ~ 1}
-
-to the data associated with each \code{ggplot2} group. The resulting
-Kaplan-Meier or Aalen-Johansen estimates are then converted to a
-step function suitable for plotting with \code{ggplot2}.
-
-Confidence intervals are displayed as rectangles spanning the
-interval between successive event times, mimicking the visual style
-used by \code{\link{plot.prodlim}}.
+When multiple causes are specified, `fill`/`colour` aesthetics are ignored
+and replaced by a cause-based mapping so that all causes are shown in a
+single legend. When `cause = "stacked"`, causes are stacked on top of each
+other and confidence shadows are not drawn.
 }
 \examples{
-library(prodlim)
-library(ggplot2)
 library(riskRegression)
 library(data.table)
+library(ggplot2)
+data(Melanoma)
+# Kaplan-Meier
+ggplot(data = Melanoma,aes(x = time, event = 1*(status != 0)))+geom_prodlim(type = "surv")
+# stratified Kaplan-Meier inherited aes
+ggplot(data = Melanoma,aes(x = time, event = 1*(status != 0),fill = sex,color = sex))+geom_prodlim(type = "surv")
+# stratified Kaplan-Meier geom aes
+ggplot(data = Melanoma,aes(x = time, event = 1*(status != 0)))+geom_prodlim(aes(fill = sex,color = sex),type = "surv")
+# facet
+ggplot(data = Melanoma,aes(x = time, event = 1*(status != 0)))+geom_prodlim(type = "surv")+facet_grid(~sex)
+# stratified and facet
+ggplot(data = Melanoma,aes(x = time, event = 1*(status != 0),fill = epicel,color = epicel))+geom_prodlim(type = "surv")+facet_grid(~sex)
 
-## simulate competing risks data
-set.seed(89)
-dat <- sampleData(89)
-## combined endpoint
-dat[,status:=1*(event!=0)]
-## estimation within facets
-dat[, Letters:=factor(sample(letters[1:3], .N,replace=TRUE))]
-dat <- dat[,.(time,status,event,Letters,X1,X6)]
-## Kaplan-Meier curves by group (multiple curves + colour legend)
-ggplot(dat, aes(x = time, event = status, colour = Letters,fill = Letters)) +
-  geom_prodlim(conf_int = TRUE, type="surv")
-
-ggplot(dat, aes(x = time, event = status)) +
-  geom_prodlim(conf_int = TRUE) +
-  facet_grid(1~ Letters)
-
-ggplot(dat, aes(x = time, event = status,color=Letters,fill=Letters)) +
-  geom_prodlim(conf_int = TRUE) 
-
-## Aalen-Johansen curves cause 1
-ggplot(dat, aes(x = time, event = event)) +
-  geom_prodlim(conf_int = TRUE)
-
-ggplot(dat, aes(x = time, event = event)) +
-  geom_prodlim(conf_int = TRUE) +
-  facet_grid(1~ Letters)
-
-## Aalen-Johansen curves for selected causes (vector)
-ggplot(dat, aes(x = time, event = event)) +
-  geom_prodlim(conf_int = TRUE, cause = 1:2)
-## Aalen-Johansen: facet by cause, multiple groups in each panel
-ggplot(dat, aes(x = time, event = event, colour = Letters)) +
-  geom_prodlim(conf_int = TRUE, cause = 1:2) +
-  facet_grid(~cause)
-
-ggplot(dat, aes(x = time, event = event)) +
-  geom_prodlim(conf_int = TRUE,cause=1:2) +
-  facet_grid(1~ Letters)
-
-ggplot(dat, aes(x = time, event = event)) +
-  geom_prodlim(conf_int = TRUE,cause="stacked") +
-  facet_grid(1~ Letters)
-
-
-}
-\seealso{
-\code{\link{prodlim}}, \code{\link{plot.prodlim}},
-\code{\link[ggplot2]{geom_step}}, \code{\link[ggplot2]{facet_grid}}
+# Aalen-Johansen
+ggplot(data = Melanoma,aes(x = time, event = status))+geom_prodlim(type = "surv",cause = 1:2)
+# stratified Aalen-Johansen inherited aes
+ggplot(data = Melanoma,aes(x = time, event = status,fill = sex,color = sex))+geom_prodlim(type = "surv")
+# stratified Aalen-Johansen geom aes
+ggplot(data = Melanoma,aes(x = time, event = status))+geom_prodlim(aes(fill = sex,color = sex),type = "surv")
+# facet
+ggplot(data = Melanoma,aes(x = time, event = status))+geom_prodlim(type = "surv")+facet_grid(~sex)
+# stratified and facet
+ggplot(data = Melanoma,aes(x = time, event = status,fill = epicel,color = epicel))+geom_prodlim(type = "surv")+facet_grid(~sex)
+# stacked
+ggplot(data = Melanoma,aes(x = time, event = status))+geom_prodlim(cause = "stacked")+facet_grid(~sex)
+# stacked with cens.code option
+ggplot(data = Melanoma,aes(x = time, event = event))+geom_prodlim(cens.code="censored",cause = "stacked")+facet_grid(~sex)
 }

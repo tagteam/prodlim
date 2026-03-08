@@ -9,6 +9,18 @@ draw_key_prodlim <- function(data, params, size) {
 
   if (is.na(fill_val) && !is.na(col_val)) fill_val <- col_val
   if (is.na(fill_val)) fill_val <- "grey70"
+  is_stacked <- (params$cause == "stacked")
+  if (is_stacked) {
+    return(
+      grid::rectGrob(
+        width = 1, height = 1,
+        gp = grid::gpar(
+          fill = scales::alpha(fill_val, 1),
+          col = NA
+        )
+      )
+    )
+  }
 
   grid::grobTree(
     grid::rectGrob(
@@ -29,14 +41,17 @@ draw_key_prodlim <- function(data, params, size) {
   )
 }
 
+
+
 GeomProdlim <- ggplot2::ggproto(
   "GeomProdlim",
   ggplot2::Geom,
   required_aes = character(0),
 
   handle_na = function(data, params) {
-    step <- data[data$component == "step", , drop = FALSE]
-    ci   <- data[data$component == "ci",   , drop = FALSE]
+    step  <- data[data$component == "step",  , drop = FALSE]
+    ci    <- data[data$component == "ci",    , drop = FALSE]
+    stack <- data[data$component == "stack", , drop = FALSE]
 
     if (nrow(step) > 0) {
       step <- step[stats::complete.cases(step[, c("x", "y")]), , drop = FALSE]
@@ -50,9 +65,17 @@ GeomProdlim <- ggplot2::ggproto(
       ]
     }
 
-    out <- rbind(step, ci)
-    out
+    if (nrow(stack) > 0) {
+      stack <- stack[
+        stats::complete.cases(stack[, c("xmin", "xmax", "ymin", "ymax")]),
+        ,
+        drop = FALSE
+      ]
+    }
+
+    rbind(step, ci, stack)
   },
+
   default_aes = ggplot2::aes(
     colour = "black",
     fill = NA,
@@ -69,44 +92,45 @@ GeomProdlim <- ggplot2::ggproto(
 
     `%||%` <- function(a, b) if (!is.null(a)) a else b
 
-    step_data <- data[data$component == "step", , drop = FALSE]
-    ci_data   <- data[data$component == "ci",   , drop = FALSE]
+    step_data  <- data[data$component == "step",  , drop = FALSE]
+    ci_data    <- data[data$component == "ci",    , drop = FALSE]
+    stack_data <- data[data$component == "stack", , drop = FALSE]
 
-      multi_cause <- ("cause" %in% names(data)) &&
-          (data.table::uniqueN(data$cause[!is.na(data$cause)]) > 1L)
-
-      if (multi_cause) {
-
-          cause_levels <- unique(as.character(data$cause))
-          pal <- scales::hue_pal()(length(cause_levels))
-          names(pal) <- cause_levels
-          ## if (any(c("colour","color","fill")%in%names(step_data))){
-              ## warning("Any color/colour/fill aesthetics are ignored when multiple causes are in the same panel")
-          ## }
-          step_data$colour <- unname(pal[as.character(step_data$cause)])
-          ci_data$fill     <- unname(pal[as.character(ci_data$cause)])
+    grobs <- list()
+      
+    if (nrow(stack_data) > 0) {
+      stack_data$colour <- NA
+      stack_data$linewidth <- 0
+      if (!("alpha" %in% names(stack_data)) || all(is.na(stack_data$alpha))) {
+        stack_data$alpha <- 1
       }
-      grobs <- list()
+      grobs[[length(grobs) + 1L]] <- ggplot2::GeomRect$draw_panel(
+        stack_data,
+        panel_params = panel_params,
+        coord = coord
+      )
+      return(do.call(grid::grobTree, grobs))
+    }
 
-      if (isTRUE(conf_int) && nrow(ci_data) > 0) {
-          if (!("fill" %in% names(ci_data))) {
-              ci_data$fill <- ci_data$colour %||% ci_data$color
-          } else {
-              missing_fill <- is.na(ci_data$fill)
-              if (any(missing_fill) && "colour" %in% names(ci_data)) {
-                  ci_data$fill[missing_fill] <- ci_data$colour[missing_fill]
-              }
-          }
-          # remove rectangle borders
-          ci_data$colour <- NA
-          ci_data$linewidth <- 0
-          
-          if (!("alpha" %in% names(ci_data)) || all(is.na(ci_data$alpha))) {
-              ci_data$alpha <- ci_data$alpha_ci %||% conf_int_alpha
-          } else {
-              ci_data$alpha[is.na(ci_data$alpha)] <- ci_data$alpha_ci[is.na(ci_data$alpha)]
-              ci_data$alpha[is.na(ci_data$alpha)] <- conf_int_alpha
-          }
+    if (isTRUE(conf_int) && nrow(ci_data) > 0) {
+      if (!("fill" %in% names(ci_data))) {
+        ci_data$fill <- ci_data$colour %||% ci_data$color
+      } else {
+        missing_fill <- is.na(ci_data$fill)
+        if (any(missing_fill) && "colour" %in% names(ci_data)) {
+          ci_data$fill[missing_fill] <- ci_data$colour[missing_fill]
+        }
+      }
+
+      ci_data$colour <- NA
+      ci_data$linewidth <- 0
+
+      if (!("alpha" %in% names(ci_data)) || all(is.na(ci_data$alpha))) {
+        ci_data$alpha <- ci_data$alpha_ci %||% conf_int_alpha
+      } else {
+        ci_data$alpha[is.na(ci_data$alpha)] <- ci_data$alpha_ci[is.na(ci_data$alpha)]
+        ci_data$alpha[is.na(ci_data$alpha)] <- conf_int_alpha
+      }
 
       grobs[[length(grobs) + 1L]] <- ggplot2::GeomRect$draw_panel(
         ci_data,
