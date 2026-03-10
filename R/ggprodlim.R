@@ -3,9 +3,9 @@
 ## Author: Thomas Alexander Gerds
 ## Created: Mar  3 2025 (14:32) 
 ## Version: 
-## Last-Updated: mar  8 2026 (17:51) 
+## Last-Updated: mar 10 2026 (12:43) 
 ##           By: Thomas Alexander Gerds
-##     Update #: 138
+##     Update #: 385
 #----------------------------------------------------------------------
 ## 
 ### Commentary: 
@@ -22,12 +22,9 @@
 #' @title ggplot2 support for prodlim objects
 #' @param x An object obtained with \code{\link{prodlim}}.
 #' @param type Either \code{"surv"} or \code{"risk"}. Defaults to \code{x$type}.
-#'   For competing risks, \code{"risk"} is appropriate.
 #' @param cause For competing risk models: a cause (passed to
 #'   \code{\link{as.data.table.prodlim}}), \code{"all"} for all causes, or
 #'   \code{"stacked"} for a stacked cumulative incidence plot.
-#' @param select Optional integer vector selecting which curves to keep, after
-#'   curves are identified by unique strata (and cause, if present).
 #' @param xlim,ylim Limits for the axes.
 #' @param x_breaks,y_breaks Breaks for axes.
 #' @param position_atrisk Numeric vector specifying x-positions where numbers at
@@ -35,18 +32,16 @@
 #' @param atrisk_title Title shown left of the at-risk table.
 #' @param atrisk_labels Optional replacement labels for strata/cause groups in
 #'   the at-risk table (in plotting order).
-#' @param atrisk_show_censored Logical. If TRUE and the data provides
-#'   \code{n.cens}, show it in parentheses next to \code{n.risk}.
-#' @param atrisk_min Integer. If >0, drop curve segments after n.risk < atrisk_min.
 #' @param conf_int Logical. If TRUE and \code{lower}/\code{upper} are available,
 #'   draw pointwise confidence intervals.
 #' @param conf_int_alpha Alpha for CI shading.
 #' @param percent Logical. If TRUE, y axis is shown in percent (0-100).
 #' @param timeconverter Optional character, see \code{\link{plot.prodlim}} for
 #'   supported values (e.g., "years2months").
-#' @param facet One of \code{"none"}, \code{"cause"}, \code{"strata"},
-#'   \code{"cause_x_strata"}. When multiple causes and multiple strata exist,
-#'   facetting avoids the "one graph only" limitation of the old implementation.
+#' @param color_var Covariate name must be included in \code{colnames(x$X))} and
+#' in competing risk models the word \code{"cause"}.
+#' @param facet_formula Formula for facet_wrap. May include covariate names \code{colnames(x$X)} and
+#' in competing risk models also the word \code{"cause"}.
 #' @param palette Optional vector of colors. If provided, applied via
 #'   \code{scale_color_manual}/\code{scale_fill_manual}. Default NULL (do not
 #'   impose a palette).
@@ -60,7 +55,6 @@
 ggprodlim <- function(x,
                       type = x$type,
                       cause,
-                      select = NULL,
                       xlim,
                       ylim,
                       y_breaks,
@@ -68,407 +62,438 @@ ggprodlim <- function(x,
                       position_atrisk,
                       atrisk_title = "Number at risk",
                       atrisk_labels = NULL,
-                      atrisk_show_censored = FALSE,
-                      atrisk_min = 0L,
                       conf_int = TRUE,
                       conf_int_alpha = 0.2,
                       percent = TRUE,
                       timeconverter,
-                      facet = c("none","cause","strata","cause_x_strata"),
+                      color_var,
+                      facet_formula,
                       palette = NULL,
                       return_data = FALSE,
                       ...) {
+    stopifnot(inherits(x,"prodlim"))
+    # ---- imports & NSE guards
+    time <- absolute_risk <- surv <- lower <- upper <- n.risk <- n.lost <- ggprodlim_next_time <- ggprodlim_atrisk_labels <- ggprodlim_curve_id <- ggprodlim_stacked_ymax <- ggprodlim_stacked_ymin <- NULL
 
-  # ---- imports & NSE guards
-  time <- absolute_risk <- surv <- lower <- upper <- cause <- n.risk <- n.cens <- .t_next <- .label <- .cause_label <- .curve_id <- .strata_label <- .ymax <- .ymin <- NULL
-  facet <- match.arg(facet)
-
-  # ---- continuous predictor handling: allow if newdata supplied
-  dots <- list(...)
-  has_newdata <- "newdata" %in% names(dots)
-
-  if (length(x$continuous.predictors) > 0 && !has_newdata) {
-    stop("ggprodlim: continuous predictors detected. Please supply 'newdata=' (as in plot.prodlim), or use plot.prodlim().")
-  }
-
-  # ---- determine time conversion factor (if any)
-  .time_factor <- 1
-  .time_label  <- NULL
-  if (!missing(timeconverter) && length(timeconverter) > 0 && !is.null(timeconverter)) {
-    conv <- c(
-      days2years   = 1/365.25,
-      months2years = 1/12,
-      days2months  = 1/30.4368499,
-      years2days   = 365.25,
-      years2months = 12,
-      months2days  = 30.4368499
-    )
-    if (!timeconverter %in% names(conv)) {
-      stop("ggprodlim: unknown timeconverter. Supported: ",
-           paste(names(conv), collapse = ", "))
+    # ---- continuous predictor handling: allow if newdata supplied
+    dots <- list(...)
+    if ("color_vars" %in% names(dots)){
+        stop("ggprodlim: 'color_vars' is not an argument. Change this to 'color_var'.")
     }
-    .time_factor <- unname(conv[timeconverter])
-    .time_label  <- timeconverter
-  }
-
-  # ---- cause handling
-  # If user wants "all" causes, we just don't pass 'cause' to as.data.table (so it uses defaults).
-  # If user wants "stacked", we need all causes.
-  stacked <- FALSE
-  if (!missing(cause) && length(cause) > 0) {
-    if (identical(cause, "stacked")) {
-      stacked <- TRUE
-      # do NOT pass cause to as.data.table, we need all
-    } else if (!identical(cause, "all")) {
-      dots$cause <- cause
+    has_newdata <- "newdata" %in% names(dots)
+    if (length(x$continuous.predictors) > 0 && !has_newdata) {
+        stop("ggprodlim: continuous predictors detected. Please supply 'newdata=' (as in plot.prodlim), or use plot.prodlim().")
     }
-  }
-
-  # ---- type handling
-  if (is.null(type) || length(type) == 0) type <- x$type
-  if (!type %in% c("surv","risk")) stop("ggprodlim: 'type' must be 'surv' or 'risk'.")
-
-  # ---- collect plot data
-  w <- data.table::as.data.table(x = x, surv = (type == "surv"), percent = percent, dots)
-
-  # normalize column names
-  if ("cuminc" %in% names(w) && !"absolute_risk" %in% names(w)) {
-    data.table::setnames(w, "cuminc", "absolute_risk")
-  }
-
-  # apply time conversion
-  if (.time_factor != 1) {
-    w[, time := time * .time_factor]
-    if (!missing(xlim)) xlim <- xlim * .time_factor
-    if (!missing(x_breaks)) x_breaks <- x_breaks * .time_factor
-    if (!missing(position_atrisk)) position_atrisk <- position_atrisk * .time_factor
-  }
-
-  # determine outcome column
-  outcome_type <- if ("absolute_risk" %in% names(w)) "absolute_risk" else "surv"
-  if (type == "risk" && outcome_type == "surv") {
-    # as.data.table may still provide surv; convert on the fly if possible
-    w[, absolute_risk := 1 - surv]
-    outcome_type <- "absolute_risk"
-  }
-
-  # ---- identify stratification columns
-  covariates <- x$discrete.predictors
-  if (length(covariates) > 0) {
-    covariates <- covariates[covariates %in% names(w)]
-    if (length(covariates) > 0) {
-      covariates <- covariates[sapply(covariates, function(cn) length(unique(w[[cn]])) > 1)]
+    if (has_newdata){
+        ggprodlim_newdata <- unique(data.table::as.data.table(dots$newdata))
+        dots$newdata <- NULL
+        covariates <- data.table::copy(colnames(ggprodlim_newdata))
+        has_covariates <- TRUE
+    }else{
+        covariates <- x$discrete.predictors
+        if (length(covariates)>0){
+            has_covariates <- TRUE
+            ggprodlim_newdata <- data.table::as.data.table(x$X)
+        }else{
+            has_covariates <- FALSE
+        }
     }
-  }
-  if (length(covariates) == 0) covariates <- NULL
-
-  # ensure covariates are factors for stable ordering/legend labels
-  if (!is.null(covariates)) {
-    w[, (covariates) := lapply(.SD, as.factor), .SDcols = covariates]
-  }
-
-  has_cause <- ("cause" %in% names(w)) && (length(unique(w$cause)) > 1)
-
-    # ---- build a unified group id for selection/facetting/atrisk
-    # strata label (for legend and atrisk)
-    if (!is.null(covariates)) {
-        w[, .strata_label := do.call(paste, c(.SD, sep = ", ")), .SDcols = covariates]
-    } else {
-        w[, .strata_label := ""]
+    if (!missing(color_var)){
+        if (length(color_var) != 1 || !(color_var %in% c(covariates,"cause"))) {
+            if (x$model == "competing.risks"){
+                stop(paste0("ggprodlim: 'color_var' can be the word 'cause' or must match exactly one of the names of the covariates in the fitted object x$X:\n",
+                            paste0(colnames(x$X),collapse = ", ")))
+            }else{
+                stop(paste0("ggprodlim: 'color_var' must match exactly one of the names covariates in the fitted object x$X:\n",
+                            paste0(colnames(x$X),collapse = ", ")))
+            }
+        }
+    }else{
+        # may change to 'cause' with multiple causes specified
+        color_var <- NULL
     }
-    if (has_cause) {
-        w[, .cause_label := as.character(cause)]
-    } else {
-        w[, .cause_label := "1"]
-    }
-    w[, .curve_id := interaction(.strata_label, .cause_label, drop = TRUE, lex.order = TRUE)]
-
-  # selection
-  if (!is.null(select)) {
-    u <- levels(w$.curve_id)
-    keep <- u[select]
-    keep <- keep[!is.na(keep)]
-    w <- w[.curve_id %in% keep]
-  }
-
-  # atrisk_min: truncate curves
-  if (!is.null(atrisk_min) && atrisk_min > 0 && "n.risk" %in% names(w)) {
-    w <- w[n.risk >= atrisk_min]
-  }
-
-  # ---- default axis limits/breaks
-  if (missing(ylim)) {
-    ylim <- if (percent) c(0, 100) else c(0, 1)
-  }
-  if (missing(xlim)) {
-    xlim <- c(0, max(w$time, na.rm = TRUE))
-  }
-  if (missing(y_breaks)) {
-    y_breaks <- seq(ylim[1], ylim[2], length.out = 5)
-  }
-  if (missing(x_breaks)) {
-    x_breaks <- ggplot2::waiver()
-  }
-
-  # ---- base ggplot mapping
-  # Color/fill mapping strategy:
-  # - If stacked: fill = cause, and no color.
-  # - Else: color by strata (if multiple), and optionally facet by cause.
-  #
-  # facet default:
-  # - if user requested explicitly, use it
-  # - else: if has_cause && covariates not NULL -> facet by cause
-  # - if has_cause && covariates NULL -> no facet, color by cause
-  # - else: no facet
-
-  if (facet == "none") {
-    if (has_cause && !is.null(covariates)) {
-      # sensible default for multi-cause + strata
-      facet_eff <- "cause"
-    } else {
-      facet_eff <- "none"
-    }
-  } else {
-    facet_eff <- facet
-  }
-
-  # aesthetics
-  if (stacked) {
-    aes_main <- ggplot2::aes(x = time, ymin = .ymin, ymax = .ymax, fill = .cause_label, group = .curve_id)
-  } else if (has_cause && is.null(covariates)) {
-    aes_main <- ggplot2::aes(x = time, y = !!rlang::sym(outcome_type), colour = .cause_label, fill = .cause_label, group = .curve_id)
-  } else if (!is.null(covariates)) {
-    aes_main <- ggplot2::aes(x = time, y = !!rlang::sym(outcome_type), colour = .strata_label, fill = .strata_label, group = .curve_id)
-  } else {
-    aes_main <- ggplot2::aes(x = time, y = !!rlang::sym(outcome_type), group = .curve_id)
-  }
-
-  g <- ggplot2::ggplot(data = w, mapping = aes_main)
-
-  # ---- confidence intervals (no pammtools): draw as rectangles over intervals
-  .add_ci_rect <- function(g, w, xlim, alpha) {
-    if (!("lower" %in% names(w) && "upper" %in% names(w))) return(g)
-
-    # prepare interval rectangles per curve
-    dt <- data.table::as.data.table(w)
-    data.table::setorder(dt, .curve_id, time)
-    dt[, .t_next := data.table::shift(time, type = "lead"), by = .curve_id]
-    dt <- dt[!is.na(.t_next)]
-    dt[, xmin := time]
-    dt[, xmax := pmin(.t_next, xlim[2])]
-    # clip to xlim
-    dt <- dt[xmax > xlim[1]]
-    dt[, xmin := pmax(xmin, xlim[1])]
-
-    # map CI in percent if needed
-    if (percent) {
-      dt[, ymin := lower]
-      dt[, ymax := upper]
-    } else {
-      dt[, ymin := lower]
-      dt[, ymax := upper]
+    if (!missing(facet_formula)){
+        facet_vars <- all.vars(facet_formula)
+        if (!all(facet_vars %in% c(covariates,"cause"))){
+            stop(paste0("ggprodlim: all variables in facet_formula must be one of the covariates in the fitted object:\n",
+                        paste0(colnames(x$X),collapse = ", ")))
+        }
+    }else{
+        facet_vars <- NULL
+        facet_formula <- NULL
     }
 
-    # choose fill aesthetic consistent with main plot
-    if (has_cause && is.null(covariates)) {
-      rect_aes <- ggplot2::aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, fill = .cause_label, group = .curve_id)
-    } else if (!is.null(covariates)) {
-      rect_aes <- ggplot2::aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, fill = .strata_label, group = .curve_id)
-    } else {
-      rect_aes <- ggplot2::aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, group = .curve_id)
+    # ---- cause handling
+    # If user wants "all" causes, we just don't pass 'cause' to as.data.table (so it uses defaults).
+    # If user wants "stacked", we need all causes.
+    stacked <- FALSE
+
+    if (!missing(cause) && length(cause) > 0) {
+        if (identical(cause, "stacked")){
+            stacked <- TRUE
+            dots$cause <- attr(x$model.response,"states")
+        } else {
+            if (identical(cause, "all")) {
+                dots$cause <- attr(x$model.response,"states")
+            }else{
+                stopifnot(all(cause %in% attr(x$model.response,"states")))
+                dots$cause <- cause
+            }
+        }
+    }
+    if (length(dots$cause) == 0){
+        requested_causes <- attr(x$model.response,"states")
+        cause <- requested_causes
+    }else{
+        requested_causes <- dots$cause
     }
 
-    g + ggplot2::geom_rect(data = dt, mapping = rect_aes,
-                           inherit.aes = FALSE, alpha = alpha, colour = NA, show.legend = FALSE)
-  }
-
-  if (isTRUE(conf_int)) {
-    g <- .add_ci_rect(g, w, xlim = xlim, alpha = conf_int_alpha)
-  }
-
-  # ---- main geometry
-  if (stacked) {
-    # compute stacked ymin/ymax per time & strata
-    if (!has_cause) {
-      stop("ggprodlim: cause='stacked' requires a competing risks fit (multiple causes).")
+    # ---- type handling
+    if (is.null(type) || length(type) == 0) type <- x$type
+    if (!type %in% c("surv","risk")) stop("ggprodlim: 'type' must be 'surv' or 'risk'.")
+    if (attr(x$model.response,"model") == "competing.risks"){
+        type <- "risk"
     }
-    if (!("absolute_risk" %in% names(w))) {
-      stop("ggprodlim: cause='stacked' requires 'absolute_risk' column in data.")
-    }
-    dt <- data.table::as.data.table(w)
-    data.table::setorder(dt, .strata_label, time, .cause_label)
+    # call summary.prodlim via as.data.table.prodlim
 
-    # cumulative sum by time within strata
-    dt[, .ymin := data.table::shift(cumsum(absolute_risk), fill = 0), by = data.table::data.table( .strata_label, time )]
-    dt[, .ymax := cumsum(absolute_risk), by = data.table::data.table( .strata_label, time )]
+    w <- do.call(data.table::as.data.table,c(list(x = x, surv = (type == "surv"), percent = percent),
+                                             dots))
 
-    # convert to rectangles over time intervals, per cause (stepwise stacked)
-    data.table::setorder(dt, .strata_label, .cause_label, time)
-    dt[, .t_next := data.table::shift(time, type = "lead"), by = data.table::data.table( .strata_label, .cause_label )]
-    dt <- dt[!is.na(.t_next)]
-    dt[, xmin := time]
-    dt[, xmax := pmin(.t_next, xlim[2])]
-    dt <- dt[xmax > xlim[1]]
-    dt[, xmin := pmax(xmin, xlim[1])]
-
-    g <- ggplot2::ggplot(data = dt,
-                         ggplot2::aes(xmin = xmin, xmax = xmax, ymin = .ymin, ymax = .ymax,
-                                     fill = .cause_label, group = interaction(.strata_label, .cause_label, drop = TRUE))) +
-      ggplot2::geom_rect(colour = NA)
-
-    # facet by strata if multiple strata
-    if (!is.null(covariates) && length(unique(dt$.strata_label)) > 1) {
-      g <- g + ggplot2::facet_wrap(~ .strata_label)
+    # normalize column names
+    if ("cuminc" %in% names(w) && !"absolute_risk" %in% names(w)) {
+        data.table::setnames(w, "cuminc", "absolute_risk")
     }
 
-  } else {
-    g <- g + ggplot2::geom_step()
-  }
-
-  # ---- facetting
-  if (!stacked) {
-    if (facet_eff == "cause" && has_cause) {
-      g <- g + ggplot2::facet_wrap(~ .cause_label)
-    } else if (facet_eff == "strata" && !is.null(covariates) && length(unique(w$.strata_label)) > 1) {
-      g <- g + ggplot2::facet_wrap(~ .strata_label)
-    } else if (facet_eff == "cause_x_strata" && has_cause && !is.null(covariates)) {
-      g <- g + ggplot2::facet_grid(.cause_label ~ .strata_label)
-    }
-  }
-
-  # ---- scales
-  if (isTRUE(percent)) {
-    g <- g + ggplot2::scale_y_continuous(limits = ylim, breaks = y_breaks, labels = function(z) paste0(z, "%"))
-  } else {
-    g <- g + ggplot2::scale_y_continuous(limits = ylim, breaks = y_breaks)
-  }
-  g <- g + ggplot2::scale_x_continuous(limits = xlim, breaks = x_breaks)
-
-  # ---- optional palette (do NOT force by default)
-  if (!is.null(palette)) {
-    g <- g + ggplot2::scale_color_manual(values = palette) +
-      ggplot2::scale_fill_manual(values = palette)
-  }
-
-  # ---- at-risk table
-  atrisk_data <- NULL
-  if (!missing(position_atrisk) && length(position_atrisk) >= 1) {
-    if (!("n.risk" %in% names(w))) {
-      warning("ggprodlim: no 'n.risk' column available; skipping at-risk table.")
-    } else {
-      atrisk_times <- data.table::data.table(time = position_atrisk)
-      atrisk_cols <- c(".curve_id", ".strata_label", ".cause_label", "time", "n.risk")
-      if ("n.cens" %in% names(w)) atrisk_cols <- c(atrisk_cols, "n.cens")
-
-      atrisk <- unique(data.table::as.data.table(w)[, atrisk_cols,with = FALSE])
-      
-      data.table::setorder(atrisk, .curve_id, time)
-
-      atrisk_data <- lapply(split(atrisk, atrisk$.curve_id), function(dti) {
-        dti[atrisk_times, on = "time", roll = TRUE]
-      })
-    }
-  } else if (missing(position_atrisk)) {
-    # default grid (keeps old behavior)
-    jump_times <- sort(unique(w$time))
-    if (length(jump_times) > 0) {
-      position_atrisk <- seq(min(jump_times), max(jump_times), length.out = 6)
-      position_atrisk <- unique(position_atrisk)
-      atrisk_times <- data.table::data.table(time = position_atrisk)
-      if ("n.risk" %in% names(w)) {
-        atrisk_cols <- c(".curve_id", ".strata_label", ".cause_label", "time", "n.risk")
-        if ("n.cens" %in% names(w)) atrisk_cols <- c(atrisk_cols, "n.cens")
-        atrisk <- unique(data.table::as.data.table(w)[, atrisk_cols,with = FALSE])
-        data.table::setorder(atrisk, .curve_id, time)
-        atrisk_data <- lapply(split(atrisk, atrisk$.curve_id), function(dti) {
-          dti[atrisk_times, on = "time", roll = TRUE]
-        })
-      }
-    }
-  }
-
-  # Add risk table texts
-  if (!is.null(atrisk_data) && length(atrisk_data) > 0) {
-
-    # Determine group ordering and labels
-    curve_ids <- names(atrisk_data)
-    if (is.null(curve_ids)) curve_ids <- levels(w$.curve_id)
-
-    # Build labels: default strata (+ cause if no facet by cause)
-    default_labels <- vapply(atrisk_data, function(dt) {
-      lab <- unique(dt$.strata_label)
-      if (length(lab) == 0) lab <- ""
-      if (has_cause && facet_eff == "none" && !is.null(unique(dt$.cause_label))) {
-        cl <- unique(dt$.cause_label)
-        paste0(lab, " / cause=", cl)
-      } else {
-        lab
-      }
-    }, character(1))
-
-    if (!is.null(atrisk_labels)) {
-      if (length(atrisk_labels) != length(default_labels)) {
-        warning("ggprodlim: atrisk_labels length does not match number of curves; ignoring atrisk_labels.")
-      } else {
-        default_labels <- atrisk_labels
-      }
+    # determine outcome column
+    outcome_type <- if ("absolute_risk" %in% names(w)) "absolute_risk" else "surv"
+    if (type == "risk" && outcome_type == "surv") {
+        # as.data.table may still provide surv; convert on the fly if possible
+        w[, absolute_risk := 1 - surv]
+        outcome_type <- "absolute_risk"
     }
 
-    # Compose n.risk (and censored) label per time point
-    for (i in seq_along(atrisk_data)) {
-      dt <- atrisk_data[[i]]
-      # text label column
-      if (atrisk_show_censored && "n.cens" %in% names(dt)) {
-        dt[, .label := paste0(n.risk, " (", n.cens, ")")]
-      } else {
-        dt[, .label := as.character(n.risk)]
-      }
-      vpos <- 3 + (i * 1.7)
-      g <- g + ggplot2::geom_text(
-        data = dt,
-        mapping = ggplot2::aes(x = time, y = I(ylim[1]), vjust = vpos, label = .label),
-        inherit.aes = FALSE,
-        show.legend = FALSE
-      )
-      # left label
-      g <- g + ggplot2::annotate(
-        "text",
-        x = xlim[1],
-        y = I(ylim[1]),
-        hjust = 0,
-        vjust = vpos,
-        label = default_labels[i]
-      )
+    # check for multiple causes
+    has_cause <- ("cause" %in% names(w)) && (length(unique(w$cause)) > 1)
+    multi_cause <- has_cause && (length(unique(w$cause))>1)
+
+    if (multi_cause){
+        if (!"cause"%in%facet_vars){
+            if (length(color_var)>0 && !identical(color_var,"cause")){
+                # force cause into facets
+                if (length(facet_formula)>0){
+                    facet_formula <- reformulate(
+                        c(attr(terms(facet_formula), "term.labels"), "cause"),
+                        response = if (length(facet_formula) == 3) facet_formula[[2]] else NULL
+                    )
+                }else{
+                    facet_formula <- formula(paste0("~cause"))
+                }
+                facet_vars <- all.vars(facet_formula)
+                ## stop("ggprodlim: when multiple causes are requested 'cause' must appear as color_var or in the facet_formula.")  
+                ## facet_vars <- c(facet_vars,"cause")
+            }else{
+                # if not specified as facet use color to distinguish cause 
+                color_var <- "cause"
+            }
+        }
+    }
+    if (has_covariates){
+        # make sure all fitted covariates appear either in color_var or in facet_vars
+        unmapped <- setdiff(names(x$X),c(color_var,facet_vars))
+        if (length(unmapped) > 0){
+            if (length(color_var) == 0) {
+                color_var <- unmapped[[1]]
+                if (length(unmapped)>1){
+                    stop("ggprodlim: object was fitted with covariates ",paste0(unmapped[[-1]],collapse = ", "),". These must occur either as color_var or in facet_formula.")
+                }
+            }else{
+                if (length(facet_formula)>0){
+                    facet_formula <- update.formula(facet_formula,paste(".~.+",paste(unmapped,collapse = "+")))
+                }else{
+                    facet_formula <- formula(paste0("~",paste(unmapped,collapse = "+")))
+                }
+                facet_vars <- all.vars(facet_formula)
+                ## stop("ggprodlim: object was fitted with covariates ",paste0(unmapped,collapse = ", "),". These must occur either as color_var or in facet_formula.")
+            }
+        }
+    }
+    # build a strata column for selection/facetting/atrisk
+    # make sure that all covariates are factors
+    if (has_covariates){
+        w[,(covariates) := lapply(.SD,as.factor),.SDcols = covariates]
+    }
+    if (multi_cause){
+        set(w,j = "cause",value = factor(w[["cause"]],levels = requested_causes))
+    }
+    if (length(color_var)>0){
+        # use newdata to detect the order of the strata
+        if (color_var == "cause"){
+            levels_color <- levels(w[["cause"]])
+        }else{
+            if (stacked) {
+                stop("ggprodlim: cannot specify color_var for 'stacked' plot.")
+            }
+            levels_color <- levels(ggprodlim_newdata[[color_var]])
+        }
+        data.table::setorderv(w,color_var)
+        n_colors <- length(levels_color)
+        set(w,j = "ggprodlim_curve_id",value = as.integer(w[[color_var]]))
+    }else{
+        levels_color <- "1"
+        n_colors <- 1
+        set(w,j = "ggprodlim_curve_id",value = rep(1,NROW(w)))
+    }
+    
+    # ---- default axis limits/breaks
+    if (missing(ylim)) {
+        ylim <- if (percent) c(0, 100) else c(0, 1)
+    }
+    if (missing(xlim)) {
+        xlim <- c(0, max(w$time, na.rm = TRUE))
+    }
+    if (missing(y_breaks)) {
+        y_breaks <- seq(ylim[1], ylim[2], length.out = 5)
+    }
+    if (missing(x_breaks)) {
+        x_breaks <- ggplot2::waiver()
     }
 
-    # title line
-    g <- g + ggplot2::annotate(
-      "text",
-      x = xlim[1],
-      y = I(ylim[1]),
-      hjust = 0,
-      vjust = 3,
-      label = atrisk_title
-    )
+    # aesthetics
+    if (stacked) {
+        aes_main <- ggplot2::aes(x = time,
+                                 ymin = ggprodlim_stacked_ymin,
+                                 ymax = ggprodlim_stacked_ymax,
+                                 fill = cause,
+                                 group = ggprodlim_curve_id)
+    }else{
+        if (length(color_var)>0) {
+            aes_main <- ggplot2::aes(x = time,
+                                     y = !!rlang::sym(outcome_type),
+                                     colour = !!rlang::sym(color_var),
+                                     fill = !!rlang::sym(color_var),
+                                     group = ggprodlim_curve_id)
+        }else{
+            aes_main <- ggplot2::aes(x = time,
+                                     y = !!rlang::sym(outcome_type),
+                                     group = ggprodlim_curve_id)
+        }
+    }
+    g <- ggplot2::ggplot(data = w, mapping = aes_main)
+    # ---- confidence intervals: draw as rectangles over intervals
+    ggprodlim_add_ci <- function(g, w, xlim, alpha) {
+        if (!("lower" %in% names(w) && "upper" %in% names(w))) return(g)
+        # prepare interval rectangles per curve
+        dt <- data.table::copy(w)
+        data.table::setkeyv(dt, c(facet_vars,color_var, "time"))
+        dt[, ggprodlim_next_time := data.table::shift(time, type = "lead"), by = setdiff(key(dt),"time")]
+        dt <- dt[!is.na(ggprodlim_next_time)]
+        dt[, xmin := time]
+        dt[, xmax := pmin(ggprodlim_next_time, xlim[2])]
+        # clip to xlim
+        dt <- dt[xmax > xlim[1]]
+        dt[, xmin := pmax(xmin, xlim[1])]
+        # map CI
+        dt[, ymin := lower]
+        dt[, ymax := upper]
+        # choose fill aesthetic consistent with main plot
+        if (length(color_var)>0) {
+            rect_aes <- ggplot2::aes(xmin = xmin,
+                                     xmax = xmax,
+                                     ymin = ymin,
+                                     ymax = ymax,
+                                     colour = !!rlang::sym(color_var),
+                                     fill = !!rlang::sym(color_var),
+                                     group = ggprodlim_curve_id)
+        }else{
+            rect_aes <- ggplot2::aes(xmin = xmin,
+                                     xmax = xmax,
+                                     ymin = ymin,
+                                     ymax = ymax,
+                                     group = ggprodlim_curve_id)
+        }
+        g + ggplot2::geom_rect(data = dt, mapping = rect_aes,
+                               inherit.aes = FALSE, alpha = alpha, colour = NA, show.legend = FALSE)
+    }
+    if (isTRUE(conf_int)) {
+        g <- ggprodlim_add_ci(g, w, xlim = xlim, alpha = conf_int_alpha)
+    }
+    # ---- main geometry
+    if (stacked) {
+        # compute stacked ymin/ymax per time & strata
+        if (!has_cause) {
+            stop("ggprodlim: cause='stacked' requires a competing risks fit (multiple causes).")
+        }
+        if (!("absolute_risk" %in% names(w))) {
+            stop("ggprodlim: cause='stacked' requires 'absolute_risk' column in data.")
+        }
+        dt <- data.table::copy(w)
+        data.table::setorderv(dt, c(facet_vars, "time","cause"))
+        # cumulative sum by time within strata
+        dt[, ggprodlim_stacked_ymin := data.table::shift(cumsum(absolute_risk), fill = 0), by = data.table::data.table( ggprodlim_color_strata, time )]
+        dt[, ggprodlim_stacked_ymax := cumsum(absolute_risk), by = data.table::data.table( ggprodlim_color_strata, time )]
+        # convert to rectangles over time intervals, per cause (stepwise stacked)
+        data.table::setorderv(dt, c(facet_vars, "cause","time"))
+        dt[, ggprodlim_next_time := data.table::shift(time, type = "lead"), by = c(facet_vars,"cause")]
+        dt <- dt[!is.na(ggprodlim_next_time)]
+        dt[, xmin := time]
+        dt[, xmax := pmin(ggprodlim_next_time, xlim[2])]
+        dt <- dt[xmax > xlim[1]]
+        dt[, xmin := pmax(xmin, xlim[1])]
+        g <- ggplot2::ggplot(data = dt, ggplot2::aes(xmin = xmin,
+                                                     xmax = xmax,
+                                                     ymin = ggprodlim_stacked_ymin,
+                                                     ymax = ggprodlim_stacked_ymax,
+                                                     fill = cause,
+                                                     group = ggprodlim_curve_id)) + ggplot2::geom_rect(colour = NA)
+        if (length(facet_formula)>0){
+            g <- g + ggplot2::facet_wrap(facet_formula)
+        } 
+    }
+    # ---- facetting
+    if (!stacked) {
+        g <- g + ggplot2::geom_step()
+        if (length(facet_formula)>0){
+            g <- g + ggplot2::facet_wrap(facet_formula)
+        }
+    }
 
-    # space for atrisk data
-    g <- g + ggplot2::coord_cartesian(ylim = ylim, xlim = xlim, clip = "off")
-    g <- g + ggplot2::theme(plot.margin = ggplot2::unit(c(1, 1, length(atrisk_data) * 1.7 + 5, 1), "lines"))
-  }
+    # ---- optional palette (do NOT force by default)
+    if (!is.null(palette)) {
+        g <- g + ggplot2::scale_color_manual(values = palette) +
+            ggplot2::scale_fill_manual(values = palette)
+    }
+    # ---- at-risk table
+    atrisk_data <- NULL
+    has_atrisk <- FALSE
+    if (missing(position_atrisk) || is.numeric(position_atrisk)) {
+        has_atrisk <- TRUE
+        if (missing(position_atrisk)){
+            jump_times <- sort(unique(w$time))
+            position_atrisk <- seq(min(jump_times),
+                                   max(jump_times),
+                                   (max(jump_times)-min(jump_times))/10)
+        }else{
+            position_atrisk <- unique(position_atrisk)
+        }
+        atrisk_cols <- intersect(c(facet_vars,color_var, "time", "n.risk","n.lost"),names(w))
+        # Numbers at-risk are the same for all causes! 
+        if (multi_cause){
+            first_cause <- w[1]$cause
+            atrisk_data <- w[cause == first_cause, atrisk_cols,with = FALSE]
+        }else{
+            atrisk_data <- w[, atrisk_cols,with = FALSE]
+        }
+        if (has_covariates){
+            # roll number at risk respecting the covariate strata but ignoring 'cause'
+            atrisk_strata_vars <- setdiff(c(facet_vars,color_var),"cause")
+            data.table::setorderv(atrisk_data,c(atrisk_strata_vars,"time"))
+            # turn into integer for rolling
+            atrisk_data[,(atrisk_strata_vars) := lapply(.SD,as.integer),.SDcols = atrisk_strata_vars]
+            atrisk_times <- unique(atrisk_data[, atrisk_strata_vars, with = FALSE])
+            atrisk_times <- atrisk_times[,data.table::data.table(time = position_atrisk),by = atrisk_strata_vars]
+            atrisk_data <- atrisk_data[atrisk_times, on = c(atrisk_strata_vars,"time"), roll = TRUE]
+            # now return to factor
+            for (asv in atrisk_strata_vars){
+                set(atrisk_data,j = asv,value = factor(atrisk_data[[asv]],levels = 1:length(levels(ggprodlim_newdata[[asv]])),labels = levels(ggprodlim_newdata[[asv]])))
+            }
+        }else{
+            # roll number at risk 
+            atrisk_times <- data.table::CJ(time = position_atrisk)
+            atrisk_data <- atrisk_data[atrisk_times, on = c("time"), roll = TRUE]
+        }
+    }
+    # repeat number at risk for each panel
+    if (multi_cause && !identical(color_var,"cause")){
+        atrisk_data <- data.table::rbindlist(
+                                       lapply(requested_causes, function(value) {
+                                           data.table::copy(atrisk_data)[, cause := factor(value,levels = requested_causes)]
+                                       })
+                                   )
+    }
+    # Add risk table texts
+    if (has_atrisk) {
+        # Determine group ordering and labels
+        # Build labels: default strata (+ cause if no facet by cause)
+        if (length(color_var)>1){
+            if (color_var == "cause"){
+                default_labels <- ""
+            }else{
+                default_labels <- levels(ggprodlim_newdata[[color_var]])
+            }
+        }
+        if (!is.null(atrisk_labels)) {
+            if (length(atrisk_labels) != length(default_labels)) {
+                warning("ggprodlim: atrisk_labels length does not match number of curves; ignoring atrisk_labels.")
+            } else {
+                default_labels <- atrisk_labels
+            }
+        }
+        if (length(atrisk_data)>0){
+            line_step <- 0.04 * diff(ylim)
+            atrisk_title_line <- 1
+            atrisk_line_start <- 2
+            y_anchor <- min(ylim) - 0.13 * diff(ylim)
+            y_title <- y_anchor - (atrisk_title_line - 1) * line_step
+            for (i in 1:n_colors){
+                if (n_colors>1){
+                    atrisk_strata <- atrisk_data[atrisk_data[[color_var]] == levels_color[[i]]]
+                }else{
+                    atrisk_strata <- atrisk_data
+                }
+                set(atrisk_strata,j = outcome_type,value = y_anchor - (atrisk_line_start + i - 2) * line_step)
 
-  # ---- labels
-  ylab <- if (outcome_type == "absolute_risk") "Absolute risk" else "Survival probability"
-  if (!is.null(.time_label)) {
-    g <- g + ggplot2::xlab(paste0("Time (", .time_label, ")"))
-  } else {
+                if (length(color_var) == 0 || identical(color_var,"cause")){
+                    atrisk_aes <- ggplot2::aes(x = time,
+                                               y = !!rlang::sym(outcome_type),
+                                               label = n.risk,
+                                               color = NULL,
+                                               fill = NULL)
+                }else{
+                    atrisk_aes <- ggplot2::aes(x = time,
+                                               y = !!rlang::sym(outcome_type),
+                                               label = n.risk,
+                                               color = !!rlang::sym(color_var),
+                                               fill = NULL)
+                }
+                g <- g+ggplot2::geom_text(data = atrisk_strata,
+                                          mapping = atrisk_aes,
+                                          show.legend = FALSE)
+            }
+            # title line
+            g <- g + ggplot2::annotate("text",
+                                       x = ylim[1],
+                                       y = y_title,
+                                       hjust = 1,
+                                       label = atrisk_title)
+        }
+        # space for atrisk data
+        g <- g + ggplot2::coord_cartesian(ylim = ylim, xlim = xlim, clip = "off")
+        g <- g + ggplot2::theme(plot.margin = ggplot2::unit(c(1, 1, n_colors * 2 + 5, 1), "lines"))
+        # ---- scales
+        if (isTRUE(percent)) {
+            g <- g + ggplot2::scale_y_continuous(breaks = y_breaks, labels = function(z) paste0(z, "%"))
+        } else {
+            g <- g + ggplot2::scale_y_continuous(breaks = y_breaks)
+        }
+        g <- g + ggplot2::scale_x_continuous(breaks = x_breaks)
+    }else{
+        # ---- scales
+        if (isTRUE(percent)) {
+            g <- g + ggplot2::scale_y_continuous(limits = ylim, breaks = y_breaks, labels = function(z) paste0(z, "%"))
+        } else {
+            g <- g + ggplot2::scale_y_continuous(limits = ylim, breaks = y_breaks)
+        }
+        g <- g + ggplot2::scale_x_continuous(limits = xlim, breaks = x_breaks)
+    }
+    # ---- labels
+    ylab <- if (outcome_type == "absolute_risk") "Absolute risk" else "Survival probability"
     g <- g + ggplot2::xlab("Time")
-  }
-  g <- g + ggplot2::ylab(ylab)
-
-  if (isTRUE(return_data)) {
-    return(list(plot = g, data = w, atrisk = atrisk_data))
-  }
-  g
+    g <- g + ggplot2::ylab(ylab)
+    # ---- legend title
+    if (isTRUE(return_data)) {
+        return(list(plot = g, data = w, atrisk = atrisk_data))
+    }
+    g
 }
 
 

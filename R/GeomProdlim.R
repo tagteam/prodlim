@@ -10,7 +10,6 @@ draw_key_prodlim <- function(data, params, size) {
   if (is.na(fill_val) && !is.na(col_val)) fill_val <- col_val
   if (is.na(fill_val)) fill_val <- "grey70"
   is_stacked <- (length(params$cause) == 1 && params$cause == "stacked")
-  print(is_stacked)
   if (is_stacked) {
     return(
       grid::rectGrob(

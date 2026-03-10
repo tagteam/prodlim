@@ -8,7 +8,6 @@ ggprodlim(
   x,
   type = x$type,
   cause,
-  select = NULL,
   xlim,
   ylim,
   y_breaks,
@@ -16,13 +15,12 @@ ggprodlim(
   position_atrisk,
   atrisk_title = "Number at risk",
   atrisk_labels = NULL,
-  atrisk_show_censored = FALSE,
-  atrisk_min = 0L,
   conf_int = TRUE,
   conf_int_alpha = 0.2,
   percent = TRUE,
   timeconverter,
-  facet = c("none", "cause", "strata", "cause_x_strata"),
+  color_var,
+  facet_formula,
   palette = NULL,
   return_data = FALSE,
   ...
@@ -31,15 +29,11 @@ ggprodlim(
 \arguments{
 \item{x}{An object obtained with \code{\link{prodlim}}.}
 
-\item{type}{Either \code{"surv"} or \code{"risk"}. Defaults to \code{x$type}.
-For competing risks, \code{"risk"} is appropriate.}
+\item{type}{Either \code{"surv"} or \code{"risk"}. Defaults to \code{x$type}.}
 
 \item{cause}{For competing risk models: a cause (passed to
 \code{\link{as.data.table.prodlim}}), \code{"all"} for all causes, or
 \code{"stacked"} for a stacked cumulative incidence plot.}
-
-\item{select}{Optional integer vector selecting which curves to keep, after
-curves are identified by unique strata (and cause, if present).}
 
 \item{xlim, ylim}{Limits for the axes.}
 
@@ -53,11 +47,6 @@ risk should be printed. If missing, a default grid is chosen.}
 \item{atrisk_labels}{Optional replacement labels for strata/cause groups in
 the at-risk table (in plotting order).}
 
-\item{atrisk_show_censored}{Logical. If TRUE and the data provides
-\code{n.cens}, show it in parentheses next to \code{n.risk}.}
-
-\item{atrisk_min}{Integer. If >0, drop curve segments after n.risk < atrisk_min.}
-
 \item{conf_int}{Logical. If TRUE and \code{lower}/\code{upper} are available,
 draw pointwise confidence intervals.}
 
@@ -68,9 +57,11 @@ draw pointwise confidence intervals.}
 \item{timeconverter}{Optional character, see \code{\link{plot.prodlim}} for
 supported values (e.g., "years2months").}
 
-\item{facet}{One of \code{"none"}, \code{"cause"}, \code{"strata"},
-\code{"cause_x_strata"}. When multiple causes and multiple strata exist,
-facetting avoids the "one graph only" limitation of the old implementation.}
+\item{color_var}{Covariate name must be included in \code{colnames(x$X))} and
+in competing risk models the word \code{"cause"}.}
+
+\item{facet_formula}{Formula for facet_wrap. May include covariate names \code{colnames(x$X)} and
+in competing risk models also the word \code{"cause"}.}
 
 \item{palette}{Optional vector of colors. If provided, applied via
 \code{scale_color_manual}/\code{scale_fill_manual}. Default NULL (do not
