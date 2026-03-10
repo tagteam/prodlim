@@ -35,30 +35,42 @@
 #' library(ggplot2)
 #' data(Melanoma)
 #' # Kaplan-Meier
-#' ggplot(data = Melanoma,aes(x = time, event = 1*(status != 0)))+geom_prodlim(type = "surv")
+#' ggplot(data = Melanoma,aes(x = time, event = 1*(status != 0)))+
+#'        geom_prodlim(type = "surv")
 #' # stratified Kaplan-Meier inherited aes
-#' ggplot(data = Melanoma,aes(x = time, event = 1*(status != 0),fill = sex,color = sex))+geom_prodlim(type = "surv")
+#' ggplot(data = Melanoma,aes(x = time, event = 1*(status != 0),fill = sex,color = sex))+
+#'        geom_prodlim(type = "surv")
 #' # stratified Kaplan-Meier geom aes
-#' ggplot(data = Melanoma,aes(x = time, event = 1*(status != 0)))+geom_prodlim(aes(fill = sex,color = sex),type = "surv")
+#' ggplot(data = Melanoma,aes(x = time, event = 1*(status != 0)))+
+#'        geom_prodlim(aes(fill = sex,color = sex),type = "surv")
 #' # facet
-#' ggplot(data = Melanoma,aes(x = time, event = 1*(status != 0)))+geom_prodlim(type = "surv")+facet_grid(~sex)
+#' ggplot(data = Melanoma,aes(x = time, event = 1*(status != 0)))+
+#'        geom_prodlim(type = "surv")+facet_grid(~sex)
 #' # stratified and facet
-#' ggplot(data = Melanoma,aes(x = time, event = 1*(status != 0),fill = epicel,color = epicel))+geom_prodlim(type = "surv")+facet_grid(~sex)
+#' ggplot(data = Melanoma,aes(x = time, event = 1*(status != 0),fill = epicel,color = epicel))+
+#'        geom_prodlim(type = "surv")+facet_grid(~sex)
 #'
 #' # Aalen-Johansen
-#' ggplot(data = Melanoma,aes(x = time, event = status))+geom_prodlim(type = "surv",cause = 1:2)
+#' ggplot(data = Melanoma,aes(x = time, event = status))+
+#'        geom_prodlim(type = "surv",cause = 1:2)
 #' # stratified Aalen-Johansen inherited aes
-#' ggplot(data = Melanoma,aes(x = time, event = status,fill = sex,color = sex))+geom_prodlim(type = "surv")
+#' ggplot(data = Melanoma,aes(x = time, event = status,fill = sex,color = sex))+
+#'        geom_prodlim(type = "surv")
 #' # stratified Aalen-Johansen geom aes
-#' ggplot(data = Melanoma,aes(x = time, event = status))+geom_prodlim(aes(fill = sex,color = sex),type = "surv")
+#' ggplot(data = Melanoma,aes(x = time, event = status))+
+#'        geom_prodlim(aes(fill = sex,color = sex),type = "surv")
 #' # facet
-#' ggplot(data = Melanoma,aes(x = time, event = status))+geom_prodlim(type = "surv")+facet_grid(~sex)
+#' ggplot(data = Melanoma,aes(x = time, event = status))+
+#'        geom_prodlim(type = "surv")+facet_grid(~sex)
 #' # stratified and facet
-#' ggplot(data = Melanoma,aes(x = time, event = status,fill = epicel,color = epicel))+geom_prodlim(type = "surv")+facet_grid(~sex)
+#' ggplot(data = Melanoma,aes(x = time, event = status,fill = epicel,color = epicel))+
+#'        geom_prodlim(type = "surv")+facet_grid(~sex)
 #' # stacked
-#' ggplot(data = Melanoma,aes(x = time, event = status))+geom_prodlim(cause = "stacked")+facet_grid(~sex)
+#' ggplot(data = Melanoma,aes(x = time, event = status))+
+#'        geom_prodlim(cause = "stacked")+facet_grid(~sex)
 #' # stacked with cens.code option
-#' ggplot(data = Melanoma,aes(x = time, event = event))+geom_prodlim(cens.code="censored",cause = "stacked")+facet_grid(~sex)
+#' ggplot(data = Melanoma,aes(x = time, event = event))+
+#'        geom_prodlim(cens.code="censored",cause = "stacked")+facet_grid(~sex)
 #' @export
 geom_prodlim <- function(mapping = NULL, data = NULL,
                          position = "identity", na.rm = FALSE,

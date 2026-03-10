@@ -82,7 +82,8 @@
 ##' md3$strata
 ##' md3$cluster
 ##' 
-##' f4 <- Surv(time,status)~const(age)+prop(factor(edema),power=2)+strata(sex,test=0)+prop(bili,power=1)+tp(albumin)
+##' f4 <- Surv(time,status)~const(age)+prop(factor(edema),power=2)+
+##'                         strata(sex,test=0)+prop(bili,power=1)+tp(albumin)
 ##' t4 <- terms(f4,specials=c("prop","timevar","strata","tp","const"))
 ##' st4 <- strip.terms(t4,
 ##'                    specials=c("prop","timevar"),

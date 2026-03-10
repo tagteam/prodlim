@@ -15,6 +15,11 @@ ggprodlim(
   position_atrisk,
   atrisk_title = "Number at risk",
   atrisk_labels = NULL,
+  atrisk_title_line = 0.14,
+  atrisk_title_step = 0.06,
+  atrisk_line_step = 0.04,
+  atrisk_bottom_margin = NULL,
+  facet_panel_spacing_y = NULL,
   conf_int = TRUE,
   conf_int_alpha = 0.2,
   percent = TRUE,
@@ -37,7 +42,7 @@ ggprodlim(
 
 \item{xlim, ylim}{Limits for the axes.}
 
-\item{x_breaks, y_breaks}{Breaks for axes.}
+\item{x_breaks, y_breaks}{Breaks for axes.#}
 
 \item{position_atrisk}{Numeric vector specifying x-positions where numbers at
 risk should be printed. If missing, a default grid is chosen.}
@@ -46,6 +51,24 @@ risk should be printed. If missing, a default grid is chosen.}
 
 \item{atrisk_labels}{Optional replacement labels for strata/cause groups in
 the at-risk table (in plotting order).}
+
+\item{atrisk_title_line}{Numeric. Position of the at-risk title below the
+plotting region, as an offset from \code{min(ylim)} in units of
+\code{diff(ylim)}.}
+
+\item{atrisk_title_step}{Numeric. Vertical distance from the title to the
+first at-risk row, in units of \code{diff(ylim)}.}
+
+\item{atrisk_line_step}{Numeric. Vertical spacing between at-risk rows, in
+units of \code{diff(ylim)}.}
+
+\item{atrisk_bottom_margin}{Numeric. Bottom plot margin in lines when the
+at-risk table is shown.}
+
+\item{facet_panel_spacing_y}{Optional numeric. Vertical spacing between facet
+rows in lines. If \code{NULL} and faceting is used together with an at-risk
+table, the default is \code{5 + n_colors}. The same value is used as the
+default bottom plot margin below the lowest facet row.}
 
 \item{conf_int}{Logical. If TRUE and \code{lower}/\code{upper} are available,
 draw pointwise confidence intervals.}
@@ -81,6 +104,33 @@ ggplot2 support for Kaplan-Meier and Aalen-Johansen estimators
 \details{
 A ggplot2-based alternative to \code{\link{plot.prodlim}} that returns a
 \code{ggplot} object, enabling ggplot theming, facetting, and composition.
+}
+\examples{
+data(Melanoma,package = "riskRegression")
+# marginal Kaplan-Maier
+km <- prodlim(Hist(time,status != 0)~1,data = Melanoma)
+ggprodlim(km)
+# marginal Aalen-Johansen
+aj <- prodlim(Hist(time,status)~1,data = Melanoma)
+ggprodlim(aj)
+ggprodlim(aj,facet_formula = ~cause)
+
+ajsex <- prodlim(Hist(time,status)~sex,data = Melanoma)
+ggprodlim(ajsex)
+ggprodlim(ajsex,facet_formula = ~cause)
+ggprodlim(ajsex,facet_formula = ~sex)
+ggprodlim(ajsex,color_var = "sex")
+ggprodlim(ajsex,color_var = "cause")
+
+# stacking the causes
+ggprodlim(ajsex,cause = "stacked")
+# stacked with two covariates 
+   ajepisex <- prodlim(Hist(time,status)~sex+epicel,data = Melanoma)
+   ggprodlim(ajepisex,
+             cause = "stacked",
+             facet_formula = sex~epicel,
+             atrisk_title_line = 0.2)
+
 }
 \seealso{
 \code{\link{plot.prodlim}}, \code{\link{as.data.table.prodlim}}
