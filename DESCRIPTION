@@ -1,6 +1,6 @@
 Package: prodlim
 Title: Product-Limit Estimation for Censored Event History Analysis
-Version: 2026.03.08
+Version: 2026.03.11
 Authors@R: person(given = c("Thomas", "A."),
                     family = "Gerds",
                     role = c("aut", "cre"),
