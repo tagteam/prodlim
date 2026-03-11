@@ -26,7 +26,7 @@
 ##' @param dropIntercept Passed as is to \code{\link{model.design}}
 ##' @param check.formula If TRUE check if formula is a Surv or Hist
 ##' thing.
-##' @param response If FALSE do not evaluate the left hand side of the formula and to not return the response (event.history).
+##' @param response If FALSE do not evaluate the left hand side of the formula and do not return the response (event.history).
 ##' @param na.action Decide what to do with missing values. 
 ##' @return A list which contains
 ##' - the event.history (see \code{\link{Hist}})

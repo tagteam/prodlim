@@ -3,3 +3,4 @@ examples/
 vignettes/*
 revdep
 old_tests/
+^\.github$
