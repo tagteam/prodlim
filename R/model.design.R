@@ -112,10 +112,11 @@ model.design <- function(terms,
         stop(gettextf("'terms' must be an object of class %s", 
                       dQuote("terms")), domain = NA)
     response <- attr(terms,"response")
-    if (response==1)
+    if (response==1){
         terms <- delete.response(terms)
+    }
     if (dropIntercept) attr(terms, "intercept") <- 1
-    design <- attr(terms,"factor")
+    design <- attr(terms,"factors")
     varnames <- rownames(design)
     termsOrder <- attr(terms,"order")
     stripped.position <- attr(terms,"stripped.specials")
@@ -147,7 +148,7 @@ model.design <- function(terms,
             ## print(design)
             ## print(NCOL(design))
             if (NCOL(design)>0 && NROW(design)>0){
-                ff <- apply(design[pos,,drop=FALSE],2,sum)
+                ff <- colSums(design[pos,,drop=FALSE])
             }
             else{
                 ## stopifnot(pos==1)

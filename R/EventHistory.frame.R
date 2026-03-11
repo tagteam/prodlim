@@ -162,12 +162,14 @@ EventHistory.frame <- function(formula,
                                na.action=options()$na.action){
     # {{{  check if formula is a proper formula
     formula.names <- try(all.names(formula),silent=TRUE)
-    if (response[[1]]){
+    if (isTRUE(response)){
         is_event_history <- ((any(match(c("survival::Surv","Surv","prodlim::Hist","Hist"),formula.names,nomatch=0)))
             || inherits(data[[formula.names[[2]]]],"Surv")
             || inherits(data[[formula.names[[2]]]],"Hist"))
+    }else{
+        is_event_history <- FALSE
     }
-    if (response && check.formula){
+    if (isTRUE(response) && isTRUE(check.formula)){
         if (!(formula.names[1]=="~")
             ||
             (match("$",formula.names,nomatch=0)+match("[",formula.names,nomatch=0)>0)){
@@ -181,7 +183,7 @@ EventHistory.frame <- function(formula,
     # }}}
     # {{{call model.frame
     ## data argument is used to resolve '.' see help(terms.formula)
-    if (response == TRUE){
+    if (isTRUE(response)){
         Terms <- terms(x=formula,specials=specials,data=data)
     }else{
         Terms <- delete.response(terms(x=formula,specials=specials,data=data))
@@ -204,7 +206,7 @@ EventHistory.frame <- function(formula,
     if (NROW(mm) == 0) stop("No (non-missing) observations")
     # }}}
 
-    if (response==TRUE && attr(Terms,"response")!=0){
+    if (isTRUE(response) && attr(Terms,"response")!=0){
         if (is_event_history){
             event.history <- model.response(model.frame(update(formula,".~1"),data=mm,na.action=na.action))
         }else{
